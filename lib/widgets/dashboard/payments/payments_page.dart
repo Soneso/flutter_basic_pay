@@ -73,7 +73,7 @@ class PaymentsPageBody extends StatefulWidget {
 
 class _PaymentsPageBodyState extends State<PaymentsPageBody> {
   bool waitForAccountFunding = false;
-  bool pathPayment = true;
+  bool pathPayment = false;
   @override
   Widget build(BuildContext context) {
     var dashboardState = Provider.of<DashboardState>(context);
