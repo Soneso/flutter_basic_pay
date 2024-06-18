@@ -6,7 +6,8 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_basic_pay/widgets/common/dialogs.dart';
-import 'package:stellar_wallet_flutter_sdk/stellar_wallet_flutter_sdk.dart' as wallet_sdk;
+import 'package:stellar_wallet_flutter_sdk/stellar_wallet_flutter_sdk.dart'
+    as wallet_sdk;
 import 'package:clipboard/clipboard.dart';
 
 import '../../auth/auth.dart';
@@ -46,7 +47,6 @@ class SignUpCard extends StatefulWidget {
 }
 
 class _SignUpCardState extends State<SignUpCard> {
-
   var _userKeyPair = wallet_sdk.SigningKeyPair.random();
   bool _showSecretKey = false;
 
@@ -117,7 +117,8 @@ class _SignUpCardState extends State<SignUpCard> {
                   children: [
                     Expanded(
                       flex: 7,
-                      child: AutoSizeText(_userKeyPair.address,
+                      child: AutoSizeText(
+                        _userKeyPair.address,
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ),
@@ -126,8 +127,7 @@ class _SignUpCardState extends State<SignUpCard> {
                         Icons.copy_outlined,
                         size: 20,
                       ),
-                      onPressed: () =>
-                          _copyToClipboard(_userKeyPair.address),
+                      onPressed: () => _copyToClipboard(_userKeyPair.address),
                     ),
                   ],
                 ),
@@ -166,8 +166,9 @@ class _SignUpCardState extends State<SignUpCard> {
                   Row(
                     children: [
                       Expanded(
-                          flex: 7, child: AutoSizeText(_userKeyPair.secretKey,
-                          style: Theme.of(context).textTheme.bodyMedium)),
+                          flex: 7,
+                          child: AutoSizeText(_userKeyPair.secretKey,
+                              style: Theme.of(context).textTheme.bodyMedium)),
                       IconButton(
                         icon: const Icon(
                           Icons.copy_outlined,
@@ -240,7 +241,7 @@ class _SignupFormState extends State<SignUpForm> {
           TextFormField(
             decoration: InputDecoration(
               hintText: 'Enter a 6 digit Pin Code',
-                hintStyle: Theme.of(context).textTheme.bodyLarge,
+              hintStyle: Theme.of(context).textTheme.bodyLarge,
             ),
             keyboardType: TextInputType.number,
             inputFormatters: <TextInputFormatter>[
@@ -270,7 +271,10 @@ class _SignupFormState extends State<SignUpForm> {
                   }
                 }
               },
-              child: const Text('SIGNUP', style: TextStyle(color: Colors.purple),),
+              child: const Text(
+                'SIGNUP',
+                style: TextStyle(color: Colors.purple),
+              ),
             ),
           ),
         ],

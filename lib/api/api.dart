@@ -74,11 +74,10 @@ class DashboardData {
     return true;
   }
 
-  /// Funds the account given by [accountId] on the Stellar Test Network by using Friendbot.
-  Future<bool> fundTestNetAccount(String accountId) async {
+  /// Funds the account given by [address] on the Stellar Test Network by using Friendbot.
+  Future<bool> fundTestNetAccount(String address) async {
     // fund account
-    var funded =
-        await _wallet.stellar().account().fundTestNetAccount(accountId);
+    var funded = await _wallet.stellar().account().fundTestNetAccount(address);
     if (!funded) {
       return false;
     }
@@ -95,13 +94,13 @@ class DashboardData {
     return assets;
   }
 
-  /// Loads the assets for a given account specified by [accountId] from the
+  /// Loads the assets for a given account specified by [address] from the
   /// Stellar Network by using the wallet sdk.
-  Future<List<AssetInfo>> loadAssetsForAddress(String accountId) async {
+  Future<List<AssetInfo>> loadAssetsForAddress(String address) async {
     var loadedAssets = List<AssetInfo>.empty(growable: true);
     try {
       var stellarAccountInfo =
-          await _wallet.stellar().account().getInfo(accountId);
+          await _wallet.stellar().account().getInfo(address);
       for (var balance in stellarAccountInfo.balances) {
         loadedAssets.add(AssetInfo(
           asset: wallet_sdk.StellarAssetId.fromAsset(balance.asset),
@@ -115,9 +114,9 @@ class DashboardData {
     return loadedAssets;
   }
 
-  /// Check if an account for the given [accountId] exists on the Stellar Network.
-  Future<bool> accountExists(String accountId) async {
-    return await _wallet.stellar().account().accountExists(accountId);
+  /// Check if an account for the given [address] exists on the Stellar Network.
+  Future<bool> accountExists(String address) async {
+    return await _wallet.stellar().account().accountExists(address);
   }
 
   /// Loads the list of the 5 most recent payments for the user by using the
@@ -194,7 +193,7 @@ class DashboardData {
     }
     for (var payment in recentPayments) {
       for (var contact in contacts) {
-        if (payment.address == contact.accountId) {
+        if (payment.address == contact.address) {
           payment.contactName = contact.name;
           break;
         }
@@ -272,12 +271,12 @@ class DashboardData {
   }
 
   /// Submits a payment to the Stellar Network by using the wallet sdk.
-  /// It requires the [destination] account id of the recipient, the [assetId]
+  /// It requires the [destinationAddress] of the recipient, the [assetId]
   /// representing the asset to be send, [amount], optional text [memo] and
   /// the signing [userKeyPair] needed to sign the transaction before submission.
   /// Returns true on success.
   Future<bool> sendPayment(
-      {required String destination,
+      {required String destinationAddress,
       required wallet_sdk.StellarAssetId assetId,
       required String amount,
       String? memo,
@@ -285,7 +284,7 @@ class DashboardData {
     // Build, sign and submit transaction to stellar.
     var stellar = _wallet.stellar();
     var txBuilder = await stellar.transaction(userKeyPair);
-    txBuilder = txBuilder.transfer(destination, assetId, amount);
+    txBuilder = txBuilder.transfer(destinationAddress, assetId, amount);
     if (memo != null) {
       txBuilder = txBuilder.setMemo(core_sdk.MemoText(memo));
     }
@@ -304,7 +303,7 @@ class DashboardData {
 
   /// Searches for a strict send payment path by using the wallet sdk.
   /// Requires the [sourceAsset] + [sourceAmount] and the [destinationAddress]
-  /// (account id) of the recipient.
+  /// of the recipient.
   Future<List<wallet_sdk.PaymentPath>> findStrictSendPaymentPath(
       {required wallet_sdk.StellarAssetId sourceAsset,
       required String sourceAmount,
@@ -327,7 +326,7 @@ class DashboardData {
 
   /// Sends a strict send path payment by using the wallet sdk.
   /// Requires the [sendAssetId] representing the asset to send,
-  /// strict [sendAmount] and the [destinationAddress] (account id) of the
+  /// strict [sendAmount] and the [destinationAddress] of the
   /// recipient. [destinationAssetId] representing the destination asset,
   /// the [destinationMinAmount] to be received and the payment path
   /// previously obtained by [findStrictSendPaymentPath]. Optional
@@ -371,7 +370,7 @@ class DashboardData {
 
   ///Sends a strict receive path payment by using the wallet sdk.
   /// Requires the [sendAssetId] representing the asset to send,
-  /// [sendMaxAmount] and the [destinationAddress] (account id) of the
+  /// [sendMaxAmount] and the [destinationAddress] of the
   /// recipient. [destinationAssetId] representing the destination asset,
   /// the strict [destinationAmount] to be received and the payment path
   /// previously obtained by [findStrictReceivePaymentPath]. Optional
@@ -471,6 +470,6 @@ class PaymentInfo {
   @override
   String toString() {
     return '${Util.removeTrailingZerosFormAmount(amount)} ${asset.id == 'native' ? 'XLM' : (asset as wallet_sdk.IssuedAssetId).code}'
-        '${direction == PaymentDirection.received ? ' received from' : ' sent to'} ${contactName ?? Util.shortAccountId(address)}';
+        '${direction == PaymentDirection.received ? ' received from' : ' sent to'} ${contactName ?? Util.shortAddress(address)}';
   }
 }

@@ -8,10 +8,12 @@ class Util {
     return amount.replaceAll(regex, '');
   }
 
-  static String shortAccountId(String accountId) {
-    if (accountId.length == 56) {
-      return '${accountId.substring(0, 4)}...${accountId.substring(accountId.length - 4, accountId.length)}';
+  /// Returns a shorter string representation of a given strellar address.
+  /// E.g. GAT5...OU4R instead of GAT5UQJMYZ37UNW2RKTV7VPLKO2CZJORV6B2PAL3JIXNA6KCMQZPOU4R.
+  static String shortAddress(String address) {
+    if (address.length == 56) {
+      return '${address.substring(0, 4)}...${address.substring(address.length - 4, address.length)}';
     }
-    return accountId;
+    return address;
   }
 }

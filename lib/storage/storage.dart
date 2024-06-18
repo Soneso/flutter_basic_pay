@@ -10,7 +10,6 @@ import 'package:stellar_wallet_flutter_sdk/stellar_wallet_flutter_sdk.dart'
     as wallet_sdk;
 import 'package:stellar_flutter_sdk/stellar_flutter_sdk.dart' as core_sdk;
 
-
 /// Used to store secret user data in the local storage.
 class SecureStorage {
   static const _userAddressKey = 'address';
@@ -24,9 +23,9 @@ class SecureStorage {
     const FlutterSecureStorage storage = FlutterSecureStorage();
     await storage.write(key: _userAddressKey, value: userKeyPair.address);
 
-    // encrypt the seed before saving it, so that only the user can decrypt it.
-    var encryptedSeed = AesHelper.encrypt(pin, userKeyPair.secretKey);
-    await storage.write(key: _userSecretKey, value: encryptedSeed);
+    // encrypt the secret key before saving it, so that only the user can decrypt it.
+    var encryptedSecretKey = AesHelper.encrypt(pin, userKeyPair.secretKey);
+    await storage.write(key: _userSecretKey, value: encryptedSecretKey);
   }
 
   /// Returns true if secure user data is stored in the storage.
@@ -108,19 +107,19 @@ class SecureStorage {
 
 class ContactInfo {
   String name;
-  String accountId;
+  String address;
 
-  ContactInfo(this.name, this.accountId);
+  ContactInfo(this.name, this.address);
 
   factory ContactInfo.fromJson(Map<String, dynamic> json) => ContactInfo(
         json['name'],
-        json['accountId'],
+        json['address'],
       );
 
   Map<String, dynamic> toJson() {
     return {
       'name': name,
-      'accountId': accountId,
+      'address': address,
     };
   }
 }

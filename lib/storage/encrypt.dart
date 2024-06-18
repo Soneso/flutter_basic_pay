@@ -16,8 +16,8 @@ class AesHelper {
 
   static Uint8List deriveKey(dynamic password,
       {String salt = '',
-        int iterationCount = iterationCount,
-        int derivedKeyLength = keySize}) {
+      int iterationCount = iterationCount,
+      int derivedKeyLength = keySize}) {
     if (password == null || password.isEmpty) {
       throw ArgumentError('password must not be empty');
     }
@@ -28,9 +28,8 @@ class AesHelper {
 
     Uint8List saltBytes = createUInt8ListFromString(salt);
     Pbkdf2Parameters params =
-    Pbkdf2Parameters(saltBytes, iterationCount, derivedKeyLength);
-    KeyDerivator keyDerivator =
-    PBKDF2KeyDerivator(HMac(SHA256Digest(), 64));
+        Pbkdf2Parameters(saltBytes, iterationCount, derivedKeyLength);
+    KeyDerivator keyDerivator = PBKDF2KeyDerivator(HMac(SHA256Digest(), 64));
     keyDerivator.init(params);
 
     return keyDerivator.process(password);

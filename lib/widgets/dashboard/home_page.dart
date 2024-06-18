@@ -1,3 +1,7 @@
+// Copyright 2024 The Flutter Basic Pay App Authors. All rights reserved.
+// Use of this source code is governed by a license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_basic_pay/api/api.dart';
@@ -10,12 +14,12 @@ import 'package:flutter_basic_pay/widgets/dashboard/overview/overview_page.dart'
 import 'package:flutter_basic_pay/widgets/dashboard/payments/payments_page.dart';
 import 'package:provider/provider.dart';
 
-
 class DashboardHomePage extends StatefulWidget {
   final Auth auth;
   final VoidCallback onSignOut;
 
-  const DashboardHomePage({required this.auth, required this.onSignOut, super.key});
+  const DashboardHomePage(
+      {required this.auth, required this.onSignOut, super.key});
 
   @override
   State<DashboardHomePage> createState() => _DashboardHomePageState();
@@ -52,7 +56,10 @@ class _DashboardHomePageState extends State<DashboardHomePage> {
             child: TextButton(
               style: TextButton.styleFrom(foregroundColor: Colors.white),
               onPressed: () => _handleSignOut(),
-              child: const Text('Sign Out', style: TextStyle(color: Colors.purple),),
+              child: const Text(
+                'Sign Out',
+                style: TextStyle(color: Colors.purple),
+              ),
             ),
           )
         ],
@@ -60,9 +67,11 @@ class _DashboardHomePageState extends State<DashboardHomePage> {
         destinations: const [
           AdaptiveScaffoldDestination(title: 'Overview', icon: Icons.home),
           AdaptiveScaffoldDestination(title: 'Payments', icon: Icons.payments),
-          AdaptiveScaffoldDestination(title: 'Assets', icon: Icons.currency_exchange),
+          AdaptiveScaffoldDestination(
+              title: 'Assets', icon: Icons.currency_exchange),
           AdaptiveScaffoldDestination(title: 'Contacts', icon: Icons.person),
-          AdaptiveScaffoldDestination(title: 'Transfers', icon: Icons.anchor_sharp),
+          AdaptiveScaffoldDestination(
+              title: 'Transfers', icon: Icons.anchor_sharp),
         ],
         body: _pageAtIndex(_pageIndex),
         onNavigationIndexChange: (newIndex) {
@@ -71,7 +80,7 @@ class _DashboardHomePageState extends State<DashboardHomePage> {
           });
         },
         floatingActionButton:
-        _hasFloatingActionButton ? _buildFab(context) : null,
+            _hasFloatingActionButton ? _buildFab(context) : null,
       ),
     );
   }

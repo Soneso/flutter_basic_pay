@@ -43,7 +43,6 @@ class SignInCard extends StatefulWidget {
 }
 
 class _SignInCardState extends State<SignInCard> {
-
   void _signIn(String pin) async {
     try {
       var user = await widget.auth.signIn(pin);
@@ -109,7 +108,6 @@ class _SignInCardState extends State<SignInCard> {
       ),
     );
   }
-
 }
 
 class SignInForm extends StatefulWidget {
@@ -170,7 +168,10 @@ class _SignInFormState extends State<SignInForm> {
                   widget.onPinEntered(myPinController.text);
                 }
               },
-              child: const Text('LOGIN', style: TextStyle(color: Colors.purple),),
+              child: const Text(
+                'LOGIN',
+                style: TextStyle(color: Colors.purple),
+              ),
             ),
           ),
         ],

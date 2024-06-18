@@ -1,3 +1,7 @@
+// Copyright 2024 The Flutter Basic Pay App Authors. All rights reserved.
+// Use of this source code is governed by a license that can be
+// found in the LICENSE file.
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +42,7 @@ enum PathPaymentsBodyState {
 
 class _PathPaymentsBodyContentState extends State<PathPaymentsBodyContent> {
   String? _selectedContact;
-  String? _recipientAccountId;
+  String? _recipientAddress;
   PathData? _pathData;
   PathPaymentsBodyState _state = PathPaymentsBodyState.initial;
   String? _submitError;
@@ -81,7 +85,7 @@ class _PathPaymentsBodyContentState extends State<PathPaymentsBodyContent> {
                 initialSelectedItem: _selectedContact,
               ),
               const SizedBox(height: 10),
-              if (_recipientAccountId != null)
+              if (_recipientAddress != null)
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
@@ -89,7 +93,7 @@ class _PathPaymentsBodyContentState extends State<PathPaymentsBodyContent> {
                       Expanded(
                         flex: 7,
                         child: AutoSizeText(
-                          _recipientAccountId!,
+                          _recipientAddress!,
                           style: Theme.of(context)
                               .textTheme
                               .apply(bodyColor: Colors.blue)
@@ -101,7 +105,7 @@ class _PathPaymentsBodyContentState extends State<PathPaymentsBodyContent> {
                           Icons.copy_outlined,
                           size: 20,
                         ),
-                        onPressed: () => _copyToClipboard(_recipientAccountId!),
+                        onPressed: () => _copyToClipboard(_recipientAddress!),
                       ),
                     ],
                   ),
@@ -112,10 +116,10 @@ class _PathPaymentsBodyContentState extends State<PathPaymentsBodyContent> {
               if (_state == PathPaymentsBodyState.contactAssetsLoaded ||
                   _state == PathPaymentsBodyState.pathSelected)
                 PathPaymentsSwitcher(
-                    destinationAddress: _recipientAccountId!,
+                    destinationAddress: _recipientAddress!,
                     destinationAssets: _destinationAssets,
                     onPathSelected: (pathData) => _handlePathSelected(pathData),
-                    key: ObjectKey(_recipientAccountId)),
+                    key: ObjectKey(_recipientAddress)),
               if (_submitError != null)
                 AutoSizeText(
                   _submitError!,
@@ -184,7 +188,7 @@ class _PathPaymentsBodyContentState extends State<PathPaymentsBodyContent> {
     setState(() {
       _submitError = null;
       _selectedContact = null;
-      _recipientAccountId = null;
+      _recipientAddress = null;
       _state = PathPaymentsBodyState.initial;
     });
   }
@@ -192,19 +196,19 @@ class _PathPaymentsBodyContentState extends State<PathPaymentsBodyContent> {
   Future<void> _handleContactSelected(
       String item, DashboardState dashboardState) async {
     String? newSelectedContact = item;
-    String? accountId;
+    String? address;
     if (item == _otherContact) {
-      accountId = await Dialogs.insertAccountIdDialog(
+      address = await Dialogs.insertAddressDialog(
           NavigationService.navigatorKey.currentContext!);
-      if (accountId == null) {
+      if (address == null) {
         newSelectedContact = null;
       }
     } else {
       var contact = _contacts.firstWhere((element) => element.name == item);
-      accountId = contact.accountId;
+      address = contact.address;
     }
 
-    if (accountId == null) {
+    if (address == null) {
       return;
     }
 
@@ -212,11 +216,11 @@ class _PathPaymentsBodyContentState extends State<PathPaymentsBodyContent> {
       _submitError = null;
       _selectedContact = newSelectedContact;
       _state = PathPaymentsBodyState.loadingContactAssets;
-      _recipientAccountId = accountId;
+      _recipientAddress = address;
     });
 
     var destinationAssets =
-        await dashboardState.data.loadAssetsForAddress(accountId);
+        await dashboardState.data.loadAssetsForAddress(address);
     if (destinationAssets.isEmpty) {
       setState(() {
         _submitError =
@@ -248,7 +252,7 @@ class _PathPaymentsBodyContentState extends State<PathPaymentsBodyContent> {
           ? await dashboardState.data.strictSendPayment(
               sendAssetId: pathData.path.sourceAsset,
               sendAmount: pathData.path.sourceAmount,
-              destinationAddress: _recipientAccountId!,
+              destinationAddress: _recipientAddress!,
               destinationAssetId: pathData.path.destinationAsset,
               destinationMinAmount: pathData.path.destinationAmount,
               path: pathData.path.path,
@@ -256,7 +260,7 @@ class _PathPaymentsBodyContentState extends State<PathPaymentsBodyContent> {
           : await dashboardState.data.strictReceivePayment(
               sendAssetId: pathData.path.sourceAsset,
               sendMaxAmount: pathData.path.sourceAmount,
-              destinationAddress: _recipientAccountId!,
+              destinationAddress: _recipientAddress!,
               destinationAssetId: pathData.path.destinationAsset,
               destinationAmount: pathData.path.destinationAmount,
               path: pathData.path.path,

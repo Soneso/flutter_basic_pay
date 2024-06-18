@@ -1,3 +1,7 @@
+// Copyright 2024 The Flutter Basic Pay App Authors. All rights reserved.
+// Use of this source code is governed by a license that can be
+// found in the LICENSE file.
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +40,7 @@ class _SimplePaymentsBodyContentState
   static const native = 'native';
   String _selectedAsset = xlmAsset;
   String? _selectedContact;
-  String? _recipientAccountId;
+  String? _recipientAddress;
   SimplePaymentsPageState _state = SimplePaymentsPageState.initial;
   String? _submitError;
   static const otherContact = 'Other';
@@ -103,7 +107,7 @@ class _SimplePaymentsBodyContentState
                 },
                 initialSelectedItem: _selectedContact,
               ),
-              if (_recipientAccountId != null)
+              if (_recipientAddress != null)
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
@@ -111,7 +115,7 @@ class _SimplePaymentsBodyContentState
                       Expanded(
                         flex: 7,
                         child: AutoSizeText(
-                          _recipientAccountId!,
+                          _recipientAddress!,
                           style: Theme.of(context)
                               .textTheme
                               .apply(bodyColor: Colors.blue)
@@ -123,7 +127,7 @@ class _SimplePaymentsBodyContentState
                           Icons.copy_outlined,
                           size: 20,
                         ),
-                        onPressed: () => _copyToClipboard(_recipientAccountId!),
+                        onPressed: () => _copyToClipboard(_recipientAddress!),
                       ),
                     ],
                   ),
@@ -204,7 +208,7 @@ class _SimplePaymentsBodyContentState
     setState(() {
       _submitError = null;
       _selectedContact = null;
-      _recipientAccountId = null;
+      _recipientAddress = null;
       _state = SimplePaymentsPageState.initial;
       _selectedAsset = selectedAsset;
     });
@@ -213,25 +217,25 @@ class _SimplePaymentsBodyContentState
   Future<void> _handleContactSelected(String item) async {
     var newState = SimplePaymentsPageState.contactSelected;
     String? newSelectedContact = item;
-    String? accountId;
+    String? address;
     if (item == otherContact) {
       newState = SimplePaymentsPageState.otherContactSelected;
-      accountId = await Dialogs.insertAccountIdDialog(
+      address = await Dialogs.insertAddressDialog(
           NavigationService.navigatorKey.currentContext!);
-      if (accountId == null) {
+      if (address == null) {
         newState = SimplePaymentsPageState.initial;
         newSelectedContact = null;
       }
     } else {
       var contact = contacts.firstWhere((element) => element.name == item);
-      accountId = contact.accountId;
+      address = contact.address;
     }
 
     setState(() {
       _submitError = null;
       _selectedContact = newSelectedContact;
       _state = newState;
-      _recipientAccountId = accountId;
+      _recipientAddress = address;
     });
   }
 
@@ -251,7 +255,7 @@ class _SimplePaymentsBodyContentState
           ? wallet_sdk.NativeAssetId()
           : (assets.firstWhere((a) => a.asset.id == _selectedAsset)).asset;
 
-      var destinationAddress = _recipientAccountId!;
+      var destinationAddress = _recipientAddress!;
 
       // if the destination account dose not exist on the testnet, let's fund it!
       // alternatively we can use the create account operation.
@@ -263,7 +267,7 @@ class _SimplePaymentsBodyContentState
 
       // send payment
       bool ok = await dashboardState.data.sendPayment(
-          destination: _recipientAccountId!,
+          destinationAddress: _recipientAddress!,
           assetId: asset,
           amount: data.amount!,
           memo: data.memo,

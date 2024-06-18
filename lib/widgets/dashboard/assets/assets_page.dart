@@ -1,3 +1,7 @@
+// Copyright 2024 The Flutter Basic Pay App Authors. All rights reserved.
+// Use of this source code is governed by a license that can be
+// found in the LICENSE file.
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_basic_pay/api/api.dart';
@@ -46,7 +50,6 @@ class AssetsPage extends StatelessWidget {
 }
 
 class AssetsPageBody extends StatefulWidget {
-
   const AssetsPageBody({
     super.key,
   });
@@ -103,8 +106,7 @@ class _AssetsPageBodyState extends State<AssetsPageBody> {
                         ),
                       ],
                     )
-                  : const AssetsPageBodyContent(
-                    )),
+                  : const AssetsPageBodyContent()),
         ),
       ],
     );
@@ -113,7 +115,6 @@ class _AssetsPageBodyState extends State<AssetsPageBody> {
 
 class AssetsPageBodyContent extends StatefulWidget {
   const AssetsPageBodyContent({super.key});
-
 
   @override
   State<AssetsPageBodyContent> createState() => _AssetsPageBodyContentState();
@@ -132,12 +133,13 @@ class _AssetsPageBodyContentState extends State<AssetsPageBodyContent> {
   Widget build(BuildContext context) {
     var dashboardState = Provider.of<DashboardState>(context);
     // prepare assets to select from
-    List<String> dropdownItems =
-    dashboardState.data.knownAssets.map((asset) => asset.id).toList(growable: true);
+    List<String> dropdownItems = dashboardState.data.knownAssets
+        .map((asset) => asset.id)
+        .toList(growable: true);
 
     // check if any of the assets are already trusted and if so, remove
     List<String> trustedAssets =
-    dashboardState.data.assets.map((asset) => asset.asset.id).toList();
+        dashboardState.data.assets.map((asset) => asset.asset.id).toList();
     dropdownItems.removeWhere((element) => trustedAssets.contains(element));
 
     // add custom item
@@ -197,12 +199,18 @@ class _AssetsPageBodyContentState extends State<AssetsPageBodyContent> {
                       if (_submitError != null)
                         Text(
                           _submitError!,
-                          style: Theme.of(context).textTheme.apply(bodyColor: Colors.red).bodyMedium,
+                          style: Theme.of(context)
+                              .textTheme
+                              .apply(bodyColor: Colors.red)
+                              .bodyMedium,
                         ),
                       if (_customAsset != null)
                         Text(
                           _customAsset!.id,
-                          style: Theme.of(context).textTheme.apply(bodyColor: Colors.blue).bodyMedium,
+                          style: Theme.of(context)
+                              .textTheme
+                              .apply(bodyColor: Colors.blue)
+                              .bodyMedium,
                         ),
                       if (_state != AssetsPageState.initial)
                         PinForm(
@@ -255,7 +263,9 @@ class _AssetsPageBodyContentState extends State<AssetsPageBodyContent> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ...dashboardState.data.assets.map(
-                      (asset) => AssetBalanceCard(asset, dashboardState.auth.userKeyPair,
+                      (asset) => AssetBalanceCard(
+                          asset,
+                          dashboardState.auth.userKeyPair,
                           dashboardState.data.removeAssetSupport,
                           key: ObjectKey(asset)),
                     )
@@ -275,7 +285,8 @@ class _AssetsPageBodyContentState extends State<AssetsPageBodyContent> {
     String? newSelectedAsset = item;
     if (item == addCustomAsset) {
       newState = AssetsPageState.customAssetSelected;
-      customAsset = await Dialogs.customAssetDialog(NavigationService.navigatorKey.currentContext!);
+      customAsset = await Dialogs.customAssetDialog(
+          NavigationService.navigatorKey.currentContext!);
       if (customAsset == null) {
         newState = AssetsPageState.initial;
         newSelectedAsset = null;
@@ -305,24 +316,26 @@ class _AssetsPageBodyContentState extends State<AssetsPageBodyContent> {
       if (_selectedAsset == addCustomAsset && _customAsset != null) {
         asset = _customAsset;
       } else {
-        asset = dashboardState.data.knownAssets.firstWhere((p) => p.id == _selectedAsset);
+        asset = dashboardState.data.knownAssets
+            .firstWhere((p) => p.id == _selectedAsset);
       }
 
       if (asset != null) {
         // check if the issuer account id exists on the stellar network
-        var issuerExists = await dashboardState.data.accountExists(asset.issuer);
+        var issuerExists =
+            await dashboardState.data.accountExists(asset.issuer);
         if (!issuerExists) {
           throw IssuerNotFound();
         }
         // add trustline
-        var added = await dashboardState.data.addAssetSupport(asset, userKeyPair);
+        var added =
+            await dashboardState.data.addAssetSupport(asset, userKeyPair);
         if (!added) {
           throw AssetNotAdded();
         }
       } else {
         throw InvalidAsset();
       }
-
     } catch (e) {
       var errorText = "error: could not add asset";
       if (e is RetrieveSeedException) {
@@ -350,5 +363,7 @@ class _AssetsPageBodyContentState extends State<AssetsPageBodyContent> {
 }
 
 class IssuerNotFound implements Exception {}
+
 class InvalidAsset implements Exception {}
+
 class AssetNotAdded implements Exception {}

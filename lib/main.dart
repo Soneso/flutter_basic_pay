@@ -1,3 +1,7 @@
+// Copyright 2024 The Flutter Basic Pay App Authors. All rights reserved.
+// Use of this source code is governed by a license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_basic_pay/auth/auth.dart';
 import 'package:flutter_basic_pay/auth/local_auth.dart';
@@ -12,7 +16,6 @@ void main() {
 }
 
 class BasicPayApp extends StatelessWidget {
-
   final Auth auth;
   const BasicPayApp(this.auth, {super.key});
 
@@ -43,17 +46,19 @@ class _SignInSwitcherState extends State<SignInSwitcher> {
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
-      switchInCurve: Curves.easeOut,
-      switchOutCurve: Curves.easeOut,
-      duration: const Duration(milliseconds: 200),
-      child: switch(_userState) {
-        UserState.unknown => SplashScreen(auth: widget.auth, onUserStateKnown: _handleUpdateUserState),
-        UserState.needsSignup => SignUpPage(auth: widget.auth, onSuccess: _handleSignIn),
-        UserState.signedOut => SignInPage(auth: widget.auth, onSuccess: _handleSignIn),
-        UserState.signedIn => DashboardHomePage(auth:widget.auth, onSignOut: _handleSignOut),
-      }
-
-    );
+        switchInCurve: Curves.easeOut,
+        switchOutCurve: Curves.easeOut,
+        duration: const Duration(milliseconds: 200),
+        child: switch (_userState) {
+          UserState.unknown => SplashScreen(
+              auth: widget.auth, onUserStateKnown: _handleUpdateUserState),
+          UserState.needsSignup =>
+            SignUpPage(auth: widget.auth, onSuccess: _handleSignIn),
+          UserState.signedOut =>
+            SignInPage(auth: widget.auth, onSuccess: _handleSignIn),
+          UserState.signedIn =>
+            DashboardHomePage(auth: widget.auth, onSignOut: _handleSignOut),
+        });
   }
 
   void _handleUpdateUserState(UserState newUserState) {

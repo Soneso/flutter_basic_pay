@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:stellar_wallet_flutter_sdk/stellar_wallet_flutter_sdk.dart'
-as wallet_sdk;
+    as wallet_sdk;
 
 /// An abstract class defining the needed methods to authenticate the user.
 /// It is used to signup, sign in and sign out the user by using their pincode.
@@ -13,7 +13,6 @@ as wallet_sdk;
 /// The implementation can be found in [LocalAuthService] that implements this
 /// abstract [Auth] class.
 abstract class Auth {
-
   /// returns true if the user is signed up.
   Future<bool> get isSignedUp;
 
@@ -40,12 +39,12 @@ abstract class Auth {
   Future signOut();
 }
 
-/// The [User] class holds the users address (account id) on the stellar network.
+/// The [User] class holds the users address on the stellar network.
 class User {
-  /// The users address (account id) on the Stellar network.
+  /// The users address on the Stellar network.
   String address;
 
-  /// Constructor. Takes the users Stellar network [address] (account id).
+  /// Constructor. Takes the users Stellar network [address].
   User(this.address);
 }
 

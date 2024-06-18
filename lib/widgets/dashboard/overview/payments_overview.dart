@@ -1,7 +1,10 @@
+// Copyright 2024 The Flutter Basic Pay App Authors. All rights reserved.
+// Use of this source code is governed by a license that can be
+// found in the LICENSE file.
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_basic_pay/api/api.dart';
-import 'package:flutter_basic_pay/util/util.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/home_page.dart';
 import 'package:provider/provider.dart';
 
@@ -64,7 +67,7 @@ class PaymentsBody extends StatelessWidget {
             spacing: 10,
             children: [
               ...payments.map(
-                    (asset) => PaymentCard(asset),
+                (asset) => PaymentCard(asset),
               )
             ],
           ),
@@ -86,7 +89,8 @@ class PaymentCard extends StatelessWidget {
           ? Colors.red[100]
           : Colors.green[200],
       child: Padding(
-        padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 2.0, bottom: 2.0),
+        padding:
+            const EdgeInsets.only(left: 8.0, right: 8.0, top: 2.0, bottom: 2.0),
         child: AutoSizeText(payment.toString(),
             style: Theme.of(context).textTheme.bodyMedium),
       ),

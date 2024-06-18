@@ -1,9 +1,13 @@
+// Copyright 2024 The Flutter Basic Pay App Authors. All rights reserved.
+// Use of this source code is governed by a license that can be
+// found in the LICENSE file.
+
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_basic_pay/storage/storage.dart';
 import 'package:stellar_wallet_flutter_sdk/stellar_wallet_flutter_sdk.dart'
-as wallet_sdk;
+    as wallet_sdk;
 
 enum DialogAction { ok, cancel }
 
@@ -151,14 +155,14 @@ class Dialogs {
                 style: Theme.of(context).textTheme.bodyMedium,
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter the asset issuer account id';
+                    return 'Please enter the asset issuer address';
                   } else if (value.length < 56) {
-                    return 'Asset issuer id must have 56 characters';
+                    return 'Asset issuer address must have 56 characters';
                   } else if (!value.startsWith('G')) {
-                    return 'Issuer account id must start with the letter G';
+                    return 'Issuer address must start with the letter G';
                   } else if (!wallet_sdk.AccountService.validateAddress(
                       value)) {
-                    return 'Invalid issuer account id';
+                    return 'Invalid issuer address';
                   }
                   return null;
                 },
@@ -186,17 +190,16 @@ class Dialogs {
     wallet_sdk.IssuedAssetId? asset;
     if (action != null && action == DialogAction.ok) {
       var assetCode = codeController.text;
-      var issuerId = issuerController.text;
-      asset = wallet_sdk.IssuedAssetId(code: assetCode, issuer: issuerId);
+      var address = issuerController.text;
+      asset = wallet_sdk.IssuedAssetId(code: assetCode, issuer: address);
     }
     return asset;
   }
 
-  static Future<ContactInfo?> addContactDialog(
-      BuildContext context) async {
+  static Future<ContactInfo?> addContactDialog(BuildContext context) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     final nameController = TextEditingController();
-    final accountIdController = TextEditingController();
+    final addressController = TextEditingController();
     final action = await AwesomeDialog(
       context: context,
       dialogType: DialogType.noHeader,
@@ -221,7 +224,7 @@ class Dialogs {
                 height: 10,
               ),
               Text(
-                'Please enter the contact name and address (account id).',
+                'Please enter the contact name and Stellar address.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(
@@ -242,7 +245,7 @@ class Dialogs {
               ),
               TextFormField(
                 decoration: const InputDecoration(
-                  hintText: 'Contact account id',
+                  hintText: 'Contact Stellar address',
                 ),
                 textCapitalization: TextCapitalization.characters,
                 inputFormatters: <TextInputFormatter>[
@@ -252,18 +255,18 @@ class Dialogs {
                 style: Theme.of(context).textTheme.bodyMedium,
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter the contact account id';
+                    return 'Please enter the contact address';
                   } else if (value.length < 56) {
-                    return 'Contact account id must have 56 characters';
+                    return 'Contact address must have 56 characters';
                   } else if (!value.startsWith('G')) {
-                    return 'Contact account id must start with the letter G';
+                    return 'Contact address must start with the letter G';
                   } else if (!wallet_sdk.AccountService.validateAddress(
                       value)) {
-                    return 'Invalid contact account id';
+                    return 'Invalid contact address';
                   }
                   return null;
                 },
-                controller: accountIdController,
+                controller: addressController,
               ),
               const SizedBox(
                 height: 10,
@@ -287,16 +290,15 @@ class Dialogs {
     ContactInfo? contact;
     if (action != null && action == DialogAction.ok) {
       var name = nameController.text;
-      var accountId = accountIdController.text;
-      contact = ContactInfo(name, accountId);
+      var address = addressController.text;
+      contact = ContactInfo(name, address);
     }
     return contact;
   }
 
-  static Future<String?> insertAccountIdDialog(
-      BuildContext context) async {
+  static Future<String?> insertAddressDialog(BuildContext context) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    final accountIdController = TextEditingController();
+    final addressController = TextEditingController();
     final action = await AwesomeDialog(
       context: context,
       dialogType: DialogType.noHeader,
@@ -305,7 +307,7 @@ class Dialogs {
         Radius.circular(2),
       ),
       animType: AnimType.rightSlide,
-      desc: 'Record an account id',
+      desc: 'Record a Stellar address',
       showCloseIcon: false,
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -314,14 +316,14 @@ class Dialogs {
           child: Column(
             children: <Widget>[
               Text(
-                'Account ID',
+                'Address',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(
                 height: 10,
               ),
               Text(
-                'Please enter the account ID (address)',
+                'Please enter the address',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(
@@ -339,18 +341,18 @@ class Dialogs {
                 style: Theme.of(context).textTheme.bodyMedium,
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter the account id';
+                    return 'Please enter the address';
                   } else if (value.length < 56) {
-                    return 'Account id must have 56 characters';
+                    return 'Address must have 56 characters';
                   } else if (!value.startsWith('G')) {
-                    return 'Account id must start with the letter G';
+                    return 'Address must start with the letter G';
                   } else if (!wallet_sdk.AccountService.validateAddress(
                       value)) {
-                    return 'Invalid account id';
+                    return 'Invalid address';
                   }
                   return null;
                 },
-                controller: accountIdController,
+                controller: addressController,
               ),
               const SizedBox(
                 height: 10,
@@ -373,7 +375,7 @@ class Dialogs {
     ).show();
 
     if (action != null && action == DialogAction.ok) {
-      return accountIdController.text;
+      return addressController.text;
     }
     return null;
   }

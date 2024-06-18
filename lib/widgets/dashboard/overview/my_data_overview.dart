@@ -1,3 +1,7 @@
+// Copyright 2024 The Flutter Basic Pay App Authors. All rights reserved.
+// Use of this source code is governed by a license that can be
+// found in the LICENSE file.
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +18,7 @@ class MyDataOverview extends StatefulWidget {
   State<MyDataOverview> createState() => _MyDataOverviewState();
 }
 
-enum _ViewState {data, pinForm}
+enum _ViewState { data, pinForm }
 
 class _MyDataOverviewState extends State<MyDataOverview> {
   bool _showSecretKey = false;
@@ -46,32 +50,33 @@ class _MyDataOverviewState extends State<MyDataOverview> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (_state == _ViewState.data)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Account ID: ",
-                          style: Theme.of(context).textTheme.bodySmall),
-                      _getCopyRow(dashboardState.data.user.address),
-                      if (_secretKey != null)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Secret key: ",
-                                style: Theme.of(context).textTheme.bodySmall),
-                            _getCopyRow(_secretKey!),
-                          ],
-                        ),
-                    ],
-                  ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Address: ",
+                            style: Theme.of(context).textTheme.bodySmall),
+                        _getCopyRow(dashboardState.data.user.address),
+                        if (_secretKey != null)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Secret key: ",
+                                  style: Theme.of(context).textTheme.bodySmall),
+                              _getCopyRow(_secretKey!),
+                            ],
+                          ),
+                      ],
+                    ),
                   if (_state == _ViewState.pinForm)
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if(_error != null)
-                          AutoSizeText(_error!, style: Theme.of(context)
-                              .textTheme
-                              .apply(bodyColor: Colors.red)
-                              .bodyMedium),
+                        if (_error != null)
+                          AutoSizeText(_error!,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .apply(bodyColor: Colors.red)
+                                  .bodyMedium),
                         PinForm(
                           onPinSet: (String pin) async {
                             await _handlePinSet(pin, dashboardState);
@@ -123,8 +128,7 @@ class _MyDataOverviewState extends State<MyDataOverview> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Text('Show secret key?',
-            style: Theme.of(context).textTheme.bodySmall),
+        Text('Show secret key?', style: Theme.of(context).textTheme.bodySmall),
         Switch(
           value: _showSecretKey,
           onChanged: (bool? value) {
@@ -142,6 +146,7 @@ class _MyDataOverviewState extends State<MyDataOverview> {
       ],
     );
   }
+
   Row _getCopyRow(String text) {
     return Row(
       children: [
@@ -160,12 +165,12 @@ class _MyDataOverviewState extends State<MyDataOverview> {
             Icons.copy_outlined,
             size: 20,
           ),
-          onPressed: () =>
-              _copyToClipboard(text),
+          onPressed: () => _copyToClipboard(text),
         ),
       ],
     );
   }
+
   void _copyToClipboard(String text) async {
     await FlutterClipboard.copy(text);
     _showCopied();

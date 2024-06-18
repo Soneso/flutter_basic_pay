@@ -1,5 +1,8 @@
-import 'dart:convert';
+// Copyright 2024 The Flutter Basic Pay App Authors. All rights reserved.
+// Use of this source code is governed by a license that can be
+// found in the LICENSE file.
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_basic_pay/util/util.dart';
@@ -45,33 +48,33 @@ class _PaymentDataAndPinFormState extends State<PaymentDataAndPinForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          if(widget.requestAmount)
-          TextFormField(
-            decoration: InputDecoration(
-              hintText:
-                  'Enter amount (max. ${Util.removeTrailingZerosFormAmount(widget.maxAmount.toString())})',
-              hintStyle: Theme.of(context).textTheme.bodyMedium,
+          if (widget.requestAmount)
+            TextFormField(
+              decoration: InputDecoration(
+                hintText:
+                    'Enter amount (max. ${Util.removeTrailingZerosFormAmount(widget.maxAmount.toString())})',
+                hintStyle: Theme.of(context).textTheme.bodyMedium,
+              ),
+              keyboardType: TextInputType.number,
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.allow(RegExp(r'(^\d*\.?\d*)')),
+              ],
+              validator: (String? value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter an amount';
+                }
+                double? amount = double.tryParse(value);
+                if (amount == null) {
+                  return 'Invalid amount';
+                }
+                var maxAmount = widget.maxAmount;
+                if (maxAmount != null && amount > maxAmount) {
+                  return 'Amount must be lower or equal ${Util.removeTrailingZerosFormAmount(maxAmount.toString())}';
+                }
+                return null;
+              },
+              controller: amountTextController,
             ),
-            keyboardType: TextInputType.number,
-            inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.allow(RegExp(r'(^\d*\.?\d*)')),
-            ],
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter an amount';
-              }
-              double? amount = double.tryParse(value);
-              if (amount == null) {
-                return 'Invalid amount';
-              }
-              var maxAmount = widget.maxAmount;
-              if (maxAmount != null && amount > maxAmount) {
-                return 'Amount must be lower or equal ${Util.removeTrailingZerosFormAmount(maxAmount.toString())}';
-              }
-              return null;
-            },
-            controller: amountTextController,
-          ),
           TextFormField(
             decoration: InputDecoration(
               hintText: 'Enter text memo (optional)',
@@ -121,7 +124,9 @@ class _PaymentDataAndPinFormState extends State<PaymentDataAndPinForm> {
                     // Validate will return true if the form is valid, or false if
                     // the form is invalid.
                     if (_formKey.currentState!.validate()) {
-                      String? amount = widget.requestAmount ? amountTextController.text : null;
+                      String? amount = widget.requestAmount
+                          ? amountTextController.text
+                          : null;
                       String pin = pinTextController.text;
                       String? memo = memoTextController.text == ''
                           ? null

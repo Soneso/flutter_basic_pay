@@ -43,10 +43,11 @@ class _ContactListItem extends ListTile {
   _ContactListItem(ContactInfo contact)
       : super(
             title: Text(contact.name),
-            subtitle: Text(contact.accountId),
+            subtitle: Text(contact.address),
             key: ObjectKey(contact),
             trailing: IconButton(
-                onPressed: () async => await FlutterClipboard.copy(contact.accountId),
+                onPressed: () async =>
+                    await FlutterClipboard.copy(contact.address),
                 icon: const Icon(Icons.copy)));
 }
 

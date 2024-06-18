@@ -1,3 +1,7 @@
+// Copyright 2024 The Flutter Basic Pay App Authors. All rights reserved.
+// Use of this source code is governed by a license that can be
+// found in the LICENSE file.
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_basic_pay/api/api.dart';
@@ -12,8 +16,9 @@ class AssetBalanceCard extends StatefulWidget {
   final Future<wallet_sdk.SigningKeyPair> Function(String) getUserKeyPair;
   final Future<bool> Function(
       wallet_sdk.IssuedAssetId, wallet_sdk.SigningKeyPair) removeAssetSupport;
-  const AssetBalanceCard(this.asset, this.getUserKeyPair,
-      this.removeAssetSupport, {super.key});
+  const AssetBalanceCard(
+      this.asset, this.getUserKeyPair, this.removeAssetSupport,
+      {super.key});
 
   @override
   State<AssetBalanceCard> createState() => _AssetBalanceCardState();
@@ -51,7 +56,8 @@ class _AssetBalanceCardState extends State<AssetBalanceCard> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Flexible(
-          child: AutoSizeText("XML Balance: ${Util.removeTrailingZerosFormAmount(widget.asset.balance)}",
+          child: AutoSizeText(
+              "XML Balance: ${Util.removeTrailingZerosFormAmount(widget.asset.balance)}",
               style: Theme.of(context).textTheme.bodyMedium),
         ),
       ],
@@ -88,8 +94,7 @@ class _AssetBalanceCardState extends State<AssetBalanceCard> {
             _submitError!,
             style: const TextStyle(color: Colors.red),
           ),
-        if (_state == CardState.sending)
-          _getRemovingAssetProgressWidget(),
+        if (_state == CardState.sending) _getRemovingAssetProgressWidget(),
         if (_state == CardState.enterPin)
           PinForm(
             onPinSet: (String pin) async {
@@ -113,7 +118,10 @@ class _AssetBalanceCardState extends State<AssetBalanceCard> {
         const SizedBox(width: 10),
         Text(
           'Removing asset ...',
-          style: Theme.of(context).textTheme.apply(bodyColor: Colors.pink).bodyMedium,
+          style: Theme.of(context)
+              .textTheme
+              .apply(bodyColor: Colors.pink)
+              .bodyMedium,
         ),
       ],
     );
@@ -140,8 +148,7 @@ class _AssetBalanceCardState extends State<AssetBalanceCard> {
       var userKeyPair = await widget.getUserKeyPair(pin);
 
       bool ok = await widget.removeAssetSupport(
-          widget.asset.asset as wallet_sdk.IssuedAssetId,
-          userKeyPair);
+          widget.asset.asset as wallet_sdk.IssuedAssetId, userKeyPair);
       if (!ok) {
         throw Exception("failed to submit");
       }
