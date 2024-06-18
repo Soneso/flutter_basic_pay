@@ -23,7 +23,7 @@ class PaymentsPage extends StatelessWidget {
         }
         return StreamBuilder<List<AssetInfo>>(
           initialData: futureSnapshot.data,
-          stream: dashboardState.data.subscribeForAccountInfo(),
+          stream: dashboardState.data.subscribeForAssetsInfo(),
           builder: (context, assetsSnapshot) {
             if (assetsSnapshot.data == null) {
               return const Center(
@@ -96,7 +96,7 @@ class _PaymentsPageBodyState extends State<PaymentsPageBody> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                            "Your account does not exist on the stellar test network and needs to be funded!",
+                            "Your account does not exist on the Stellar Test Network and needs to be funded!",
                             style: Theme.of(context).textTheme.bodyMedium),
                         const SizedBox(height: 10),
                         ElevatedButton(

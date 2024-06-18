@@ -1,4 +1,6 @@
-import 'package:flutter_basic_pay/api/api.dart';
+// Copyright 2024 The Flutter Basic Pay App Authors. All rights reserved.
+// Use of this source code is governed by a license that can be
+// found in the LICENSE file.
 
 class Util {
   static String removeTrailingZerosFormAmount(String amount) {

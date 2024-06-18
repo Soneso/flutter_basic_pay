@@ -21,7 +21,7 @@ class PaymentsOverview extends StatelessWidget {
         }
         return StreamBuilder<List<PaymentInfo>>(
           initialData: futureSnapshot.data,
-          stream: dashboardState.data.subscribeForPayments(),
+          stream: dashboardState.data.subscribeForRecentPayments(),
           builder: (context, snapshot) {
             if (snapshot.data == null) {
               return const Center(

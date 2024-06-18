@@ -22,7 +22,7 @@ class BalancesOverview extends StatelessWidget {
         }
         return StreamBuilder<List<AssetInfo>>(
           initialData: futureSnapshot.data,
-          stream: dashboardState.data.subscribeForAccountInfo(),
+          stream: dashboardState.data.subscribeForAssetsInfo(),
           builder: (context, snapshot) {
             if (snapshot.data == null) {
               return const Center(
@@ -78,7 +78,7 @@ class _BalancesOverviewBodyState extends State<BalancesOverviewBody> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                            "Your account does not exist on the stellar network and needs to be funded!",
+                            "Your account does not exist on the Stellar Test Network and needs to be funded!",
                             style: Theme.of(context).textTheme.bodyMedium),
                         const SizedBox(height: 10),
                         ElevatedButton(

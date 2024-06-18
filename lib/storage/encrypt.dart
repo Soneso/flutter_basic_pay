@@ -1,3 +1,7 @@
+// Copyright 2024 The Flutter Basic Pay App Authors. All rights reserved.
+// Use of this source code is governed by a license that can be
+// found in the LICENSE file.
+
 import 'dart:convert';
 import 'dart:typed_data';
 import "package:pointycastle/export.dart";

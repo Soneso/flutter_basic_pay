@@ -258,7 +258,7 @@ class _SimplePaymentsBodyContentState
       var destinationExists =
           await dashboardState.data.accountExists(destinationAddress);
       if (!destinationExists) {
-        await dashboardState.data.fundTestnetAccount(destinationAddress);
+        await dashboardState.data.fundTestNetAccount(destinationAddress);
       }
 
       // send payment
