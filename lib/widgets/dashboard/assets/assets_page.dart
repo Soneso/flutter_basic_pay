@@ -4,8 +4,8 @@
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_basic_pay/api/api.dart';
-import 'package:flutter_basic_pay/auth/auth.dart';
+import 'package:flutter_basic_pay/services/data.dart';
+import 'package:flutter_basic_pay/services/storage.dart';
 import 'package:flutter_basic_pay/widgets/common/dialogs.dart';
 import 'package:flutter_basic_pay/widgets/common/dropdowns.dart';
 import 'package:flutter_basic_pay/widgets/common/navigation_service.dart';
@@ -308,8 +308,6 @@ class _AssetsPageBodyContentState extends State<AssetsPageBodyContent> {
       _state = AssetsPageState.sending;
     });
     try {
-      // load secret seed and check if pin is valid.
-      var userKeyPair = await dashboardState.auth.userKeyPair(pin);
 
       // compose the asset
       wallet_sdk.IssuedAssetId? asset;
@@ -317,7 +315,7 @@ class _AssetsPageBodyContentState extends State<AssetsPageBodyContent> {
         asset = _customAsset;
       } else {
         asset = dashboardState.data.knownAssets
-            .firstWhere((p) => p.id == _selectedAsset);
+            .firstWhere((item) => item.id == _selectedAsset);
       }
 
       if (asset != null) {
@@ -327,6 +325,10 @@ class _AssetsPageBodyContentState extends State<AssetsPageBodyContent> {
         if (!issuerExists) {
           throw IssuerNotFound();
         }
+
+        // load secret seed and check if pin is valid.
+        var userKeyPair = await dashboardState.auth.userKeyPair(pin);
+
         // add trustline
         var added =
             await dashboardState.data.addAssetSupport(asset, userKeyPair);
@@ -338,7 +340,7 @@ class _AssetsPageBodyContentState extends State<AssetsPageBodyContent> {
       }
     } catch (e) {
       var errorText = "error: could not add asset";
-      if (e is RetrieveSeedException) {
+      if (e is InvalidPin) {
         errorText = "error: invalid pin";
       } else if (e is InvalidAsset) {
         errorText = "error: invalid asset";

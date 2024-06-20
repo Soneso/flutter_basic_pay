@@ -5,7 +5,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_basic_pay/util/util.dart';
+import 'package:flutter_basic_pay/widgets/common/util.dart';
 
 class PaymentDataAndPinForm extends StatefulWidget {
   final ValueChanged<PaymentDataAndPin> onDataSet;

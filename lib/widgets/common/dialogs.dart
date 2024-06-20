@@ -5,7 +5,7 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_basic_pay/storage/storage.dart';
+import 'package:flutter_basic_pay/services/storage.dart';
 import 'package:stellar_wallet_flutter_sdk/stellar_wallet_flutter_sdk.dart'
     as wallet_sdk;
 

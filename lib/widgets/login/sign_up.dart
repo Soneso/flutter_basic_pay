@@ -5,16 +5,16 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_basic_pay/services/auth.dart';
 import 'package:flutter_basic_pay/widgets/common/dialogs.dart';
 import 'package:stellar_wallet_flutter_sdk/stellar_wallet_flutter_sdk.dart'
     as wallet_sdk;
 import 'package:clipboard/clipboard.dart';
 
-import '../../auth/auth.dart';
 
 class SignUpPage extends StatelessWidget {
-  final Auth auth;
-  final ValueChanged<User> onSuccess;
+  final AuthService auth;
+  final ValueChanged<String> onSuccess;
 
   const SignUpPage({
     required this.auth,
@@ -33,8 +33,8 @@ class SignUpPage extends StatelessWidget {
 }
 
 class SignUpCard extends StatefulWidget {
-  final Auth auth;
-  final ValueChanged<User> onSuccess;
+  final AuthService auth;
+  final ValueChanged<String> onSuccess;
 
   const SignUpCard({
     required this.auth,

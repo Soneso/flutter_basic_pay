@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_basic_pay/auth/auth.dart';
+import 'package:flutter_basic_pay/services/auth.dart';
 import 'dart:async';
 
 import 'package:flutter_basic_pay/main.dart';
 
 class SplashScreen extends StatefulWidget {
-  final Auth auth;
+  final AuthService auth;
   final ValueChanged<UserState> onUserStateKnown;
 
   const SplashScreen(
@@ -31,9 +31,9 @@ class _SplashScreenState extends State<SplashScreen> {
       const Duration(seconds: 2),
       () async {
         var userState = UserState.unknown;
-        var isSignedUp = await widget.auth.isSignedUp;
+        var isSignedUp = await widget.auth.userIsSignedUp;
         if (isSignedUp) {
-          var isSignedIn = widget.auth.signedInUser != null;
+          var isSignedIn = widget.auth.signedInUserAddress != null;
           userState = isSignedIn ? UserState.signedIn : UserState.signedOut;
         } else {
           userState = UserState.needsSignup;

@@ -4,9 +4,9 @@
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_basic_pay/api/api.dart';
-import 'package:flutter_basic_pay/auth/auth.dart';
-import 'package:flutter_basic_pay/util/util.dart';
+import 'package:flutter_basic_pay/services/data.dart';
+import 'package:flutter_basic_pay/services/storage.dart';
+import 'package:flutter_basic_pay/widgets/common/util.dart';
 import 'package:flutter_basic_pay/widgets/common/pin_form.dart';
 import 'package:stellar_wallet_flutter_sdk/stellar_wallet_flutter_sdk.dart'
     as wallet_sdk;
@@ -154,7 +154,7 @@ class _AssetBalanceCardState extends State<AssetBalanceCard> {
       }
     } catch (e) {
       var errorText = "error: could not remove asset";
-      if (e is RetrieveSeedException) {
+      if (e is InvalidPin) {
         errorText = "error: invalid pin";
       }
       setState(() {

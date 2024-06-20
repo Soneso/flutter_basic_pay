@@ -4,8 +4,8 @@
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_basic_pay/api/api.dart';
-import 'package:flutter_basic_pay/storage/storage.dart';
+import 'package:flutter_basic_pay/services/data.dart';
+import 'package:flutter_basic_pay/services/storage.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/home_page.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/payments/path_payments_body.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/payments/simple_payments_body.dart';

@@ -5,9 +5,8 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_basic_pay/api/api.dart';
-import 'package:flutter_basic_pay/auth/auth.dart';
-import 'package:flutter_basic_pay/storage/storage.dart';
+import 'package:flutter_basic_pay/services/data.dart';
+import 'package:flutter_basic_pay/services/storage.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/payments/payment_data_and_pin_form.dart';
 import 'package:flutter_basic_pay/widgets/common/dialogs.dart';
 import 'package:flutter_basic_pay/widgets/common/dropdowns.dart';
@@ -283,7 +282,7 @@ class _SimplePaymentsBodyContentState
       }
     } catch (e) {
       var errorText = "error: could not send payment";
-      if (e is RetrieveSeedException) {
+      if (e is InvalidPin) {
         errorText = "error: invalid pin";
       }
       setState(() {

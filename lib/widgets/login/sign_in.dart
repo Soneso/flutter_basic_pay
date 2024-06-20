@@ -5,12 +5,13 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_basic_pay/services/auth.dart';
+import 'package:flutter_basic_pay/services/storage.dart';
 
-import '../../auth/auth.dart';
 
 class SignInPage extends StatelessWidget {
-  final Auth auth;
-  final ValueChanged<User> onSuccess;
+  final AuthService auth;
+  final ValueChanged<String> onSuccess;
 
   const SignInPage({
     required this.auth,
@@ -29,8 +30,8 @@ class SignInPage extends StatelessWidget {
 }
 
 class SignInCard extends StatefulWidget {
-  final Auth auth;
-  final ValueChanged<User> onSuccess;
+  final AuthService auth;
+  final ValueChanged<String> onSuccess;
 
   const SignInCard({
     required this.auth,
@@ -47,8 +48,10 @@ class _SignInCardState extends State<SignInCard> {
     try {
       var user = await widget.auth.signIn(pin);
       widget.onSuccess(user);
-    } on SignInException {
-      _showError();
+    } on UserNotFound {
+      _showError('User is not registered');
+    } on InvalidPin {
+      _showError('Invalid pin');
     }
   }
 
@@ -100,10 +103,10 @@ class _SignInCardState extends State<SignInCard> {
     );
   }
 
-  void _showError() {
+  void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Unable to login.'),
+      SnackBar(
+        content: Text(message),
         backgroundColor: Colors.red,
       ),
     );

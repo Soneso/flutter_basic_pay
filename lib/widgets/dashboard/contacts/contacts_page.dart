@@ -1,7 +1,7 @@
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_basic_pay/api/api.dart';
-import 'package:flutter_basic_pay/storage/storage.dart';
+import 'package:flutter_basic_pay/services/data.dart';
+import 'package:flutter_basic_pay/services/storage.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/home_page.dart';
 import 'package:provider/provider.dart';
 

@@ -5,7 +5,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_basic_pay/auth/auth.dart';
+import 'package:flutter_basic_pay/services/storage.dart';
 import 'package:flutter_basic_pay/widgets/common/navigation_service.dart';
 import 'package:flutter_basic_pay/widgets/common/pin_form.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/home_page.dart';
@@ -55,7 +55,7 @@ class _MyDataOverviewState extends State<MyDataOverview> {
                       children: [
                         Text("Address: ",
                             style: Theme.of(context).textTheme.bodySmall),
-                        _getCopyRow(dashboardState.data.user.address),
+                        _getCopyRow(dashboardState.data.userAddress),
                         if (_secretKey != null)
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,7 +106,7 @@ class _MyDataOverviewState extends State<MyDataOverview> {
       });
     } catch (e) {
       var errorText = "error: could not retrieve secret key";
-      if (e is RetrieveSeedException) {
+      if (e is InvalidPin) {
         errorText = "error: invalid pin";
       }
       setState(() {

@@ -3,17 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:flutter_basic_pay/auth/auth.dart';
-import 'package:flutter_basic_pay/storage/storage.dart';
-import 'package:flutter_basic_pay/util/util.dart';
+import 'package:flutter_basic_pay/services/storage.dart';
+import 'package:flutter_basic_pay/widgets/common/util.dart';
 import 'package:stellar_wallet_flutter_sdk/stellar_wallet_flutter_sdk.dart'
     as wallet_sdk;
 import 'package:stellar_flutter_sdk/stellar_flutter_sdk.dart' as core_sdk;
 
 /// Manipulates app data,
 class DashboardData {
-  /// The logged in user.
-  User user;
+  /// The logged in user's stellar address.
+  String userAddress;
 
   /// [wallet_sdk.Wallet] used to communicate with the Stellar Test Network.
   final wallet_sdk.Wallet _wallet = wallet_sdk.Wallet.testNet;
@@ -49,7 +48,7 @@ class DashboardData {
       StreamController<List<ContactInfo>>.broadcast();
 
   /// Constructor. Creates a new (empty) object for the given user.
-  DashboardData(this.user) {
+  DashboardData(this.userAddress) {
     // add known stellar test anchor assets which are great for testing
     knownAssets.add(wallet_sdk.IssuedAssetId(
         code: 'SRT',
@@ -62,7 +61,7 @@ class DashboardData {
   /// Funds the user account on the Stellar Test Network by using Friendbot.
   Future<bool> fundUserAccount() async {
     // fund account
-    var funded = await fundTestNetAccount(user.address);
+    var funded = await fundTestNetAccount(userAddress);
     if (!funded) {
       return false;
     }
@@ -89,7 +88,7 @@ class DashboardData {
 
   /// Loads the users assets from the Stellar Network by using the wallet sdk.
   Future<List<AssetInfo>> loadAssets() async {
-    assets = await loadAssetsForAddress(user.address);
+    assets = await loadAssetsForAddress(userAddress);
     _emitAssetsInfo();
     return assets;
   }
@@ -108,7 +107,7 @@ class DashboardData {
         ));
       }
     } on wallet_sdk.ValidationException {
-      // account dose not exist
+      // account does not exist
       loadedAssets = List<AssetInfo>.empty(growable: true);
     }
     return loadedAssets;
@@ -124,7 +123,7 @@ class DashboardData {
   Future<List<PaymentInfo>> loadRecentPayments() async {
     recentPayments = List<PaymentInfo>.empty(growable: true);
 
-    var accountExists = await this.accountExists(user.address);
+    var accountExists = await this.accountExists(userAddress);
     if (!accountExists) {
       return recentPayments;
     }
@@ -133,7 +132,7 @@ class DashboardData {
 
     // loads the recent payments (max 5)
     var paymentsPage = await server.payments
-        .forAccount(user.address)
+        .forAccount(userAddress)
         .order(core_sdk.RequestBuilderOrder.DESC)
         .limit(5)
         .execute();
@@ -145,7 +144,7 @@ class DashboardData {
 
     for (var payment in paymentsPage.records!) {
       if (payment is core_sdk.PaymentOperationResponse) {
-        var direction = payment.to!.accountId == user.address
+        var direction = payment.to!.accountId == userAddress
             ? PaymentDirection.received
             : PaymentDirection.sent;
         recentPayments.add(PaymentInfo(
@@ -163,7 +162,7 @@ class DashboardData {
             address: payment.funder!));
       } else if (payment
           is core_sdk.PathPaymentStrictReceiveOperationResponse) {
-        var direction = payment.to == user.address
+        var direction = payment.to == userAddress
             ? PaymentDirection.received
             : PaymentDirection.sent;
         recentPayments.add(PaymentInfo(
@@ -174,7 +173,7 @@ class DashboardData {
                 ? payment.from!
                 : payment.to!));
       } else if (payment is core_sdk.PathPaymentStrictSendOperationResponse) {
-        var direction = payment.to == user.address
+        var direction = payment.to == userAddress
             ? PaymentDirection.received
             : PaymentDirection.sent;
         recentPayments.add(PaymentInfo(
@@ -321,7 +320,7 @@ class DashboardData {
       required String destinationAmount}) async {
     var stellar = _wallet.stellar();
     return await stellar.findStrictReceivePathForSourceAddress(
-        destinationAsset, destinationAmount, user.address);
+        destinationAsset, destinationAmount, userAddress);
   }
 
   /// Sends a strict send path payment by using the wallet sdk.

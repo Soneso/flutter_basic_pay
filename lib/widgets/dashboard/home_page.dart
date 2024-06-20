@@ -4,8 +4,8 @@
 
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_basic_pay/api/api.dart';
-import 'package:flutter_basic_pay/auth/auth.dart';
+import 'package:flutter_basic_pay/services/data.dart';
+import 'package:flutter_basic_pay/services/auth.dart';
 import 'package:flutter_basic_pay/widgets/common/adaptive_scaffold.dart';
 import 'package:flutter_basic_pay/widgets/common/dialogs.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/assets/assets_page.dart';
@@ -15,7 +15,7 @@ import 'package:flutter_basic_pay/widgets/dashboard/payments/payments_page.dart'
 import 'package:provider/provider.dart';
 
 class DashboardHomePage extends StatefulWidget {
-  final Auth auth;
+  final AuthService auth;
   final VoidCallback onSignOut;
 
   const DashboardHomePage(
@@ -26,11 +26,11 @@ class DashboardHomePage extends StatefulWidget {
 }
 
 class DashboardState {
-  final Auth auth;
+  final AuthService auth;
   late DashboardData data;
 
   DashboardState(this.auth) {
-    data = DashboardData(auth.signedInUser!);
+    data = DashboardData(auth.signedInUserAddress!);
   }
 }
 

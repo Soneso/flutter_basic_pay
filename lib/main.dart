@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_basic_pay/auth/auth.dart';
-import 'package:flutter_basic_pay/auth/local_auth.dart';
+import 'package:flutter_basic_pay/services/auth.dart';
 import 'package:flutter_basic_pay/widgets/common/navigation_service.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/home_page.dart';
 import 'package:flutter_basic_pay/widgets/login/sign_in.dart';
@@ -12,11 +11,11 @@ import 'package:flutter_basic_pay/widgets/login/sign_up.dart';
 import 'package:flutter_basic_pay/widgets/login/splash_screen.dart';
 
 void main() {
-  runApp(BasicPayApp(LocalAuthService()));
+  runApp(BasicPayApp(AuthService()));
 }
 
 class BasicPayApp extends StatelessWidget {
-  final Auth auth;
+  final AuthService auth;
   const BasicPayApp(this.auth, {super.key});
 
   @override
@@ -30,7 +29,7 @@ class BasicPayApp extends StatelessWidget {
 }
 
 class SignInSwitcher extends StatefulWidget {
-  final Auth auth;
+  final AuthService auth;
 
   const SignInSwitcher(this.auth, {super.key});
 
@@ -67,7 +66,7 @@ class _SignInSwitcherState extends State<SignInSwitcher> {
     });
   }
 
-  void _handleSignIn(User user) {
+  void _handleSignIn(String userAddress) {
     setState(() {
       _userState = UserState.signedIn;
     });
