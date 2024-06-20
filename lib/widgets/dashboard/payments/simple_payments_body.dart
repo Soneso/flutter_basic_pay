@@ -6,6 +6,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_basic_pay/services/data.dart';
+import 'package:flutter_basic_pay/services/stellar.dart';
 import 'package:flutter_basic_pay/services/storage.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/payments/payment_data_and_pin_form.dart';
 import 'package:flutter_basic_pay/widgets/common/dialogs.dart';
@@ -259,9 +260,9 @@ class _SimplePaymentsBodyContentState
       // if the destination account dose not exist on the testnet, let's fund it!
       // alternatively we can use the create account operation.
       var destinationExists =
-          await dashboardState.data.accountExists(destinationAddress);
+          await StellarService.accountExists(destinationAddress);
       if (!destinationExists) {
-        await dashboardState.data.fundTestNetAccount(destinationAddress);
+        await StellarService.fundTestNetAccount(destinationAddress);
       }
 
       // send payment

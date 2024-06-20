@@ -7,6 +7,7 @@ import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_basic_pay/services/data.dart';
+import 'package:flutter_basic_pay/services/stellar.dart';
 import 'package:flutter_basic_pay/services/storage.dart';
 import 'package:flutter_basic_pay/widgets/common/util.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/payments/payment_data_and_pin_form.dart';
@@ -219,7 +220,7 @@ class _PathPaymentsBodyContentState extends State<PathPaymentsBodyContent> {
     });
 
     var destinationAssets =
-        await dashboardState.data.loadAssetsForAddress(address);
+        await StellarService.loadAssetsForAddress(address);
     if (destinationAssets.isEmpty) {
       setState(() {
         _submitError =
@@ -558,12 +559,13 @@ class _PathPaymentSectionState extends State<PathPaymentSection> {
 
     var paths = List<wallet_sdk.PaymentPath>.empty(growable: true);
     if (widget.type == PathPaymentType.strictSend) {
-      paths = await dashboardState.data.findStrictSendPaymentPath(
+      paths = await StellarService.findStrictSendPaymentPath(
           sourceAsset: asset,
           sourceAmount: amount,
           destinationAddress: widget.destinationAddress);
     } else {
-      paths = await dashboardState.data.findStrictReceivePaymentPath(
+      paths = await StellarService.findStrictReceivePaymentPath(
+          sourceAddress: dashboardState.data.userAddress,
           destinationAsset: asset, destinationAmount: amount);
     }
     if (paths.isEmpty) {

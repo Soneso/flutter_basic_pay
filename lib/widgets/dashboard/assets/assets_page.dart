@@ -5,6 +5,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_basic_pay/services/data.dart';
+import 'package:flutter_basic_pay/services/stellar.dart';
 import 'package:flutter_basic_pay/services/storage.dart';
 import 'package:flutter_basic_pay/widgets/common/dialogs.dart';
 import 'package:flutter_basic_pay/widgets/common/dropdowns.dart';
@@ -321,7 +322,7 @@ class _AssetsPageBodyContentState extends State<AssetsPageBodyContent> {
       if (asset != null) {
         // check if the issuer account id exists on the stellar network
         var issuerExists =
-            await dashboardState.data.accountExists(asset.issuer);
+            await StellarService.accountExists(asset.issuer);
         if (!issuerExists) {
           throw IssuerNotFound();
         }

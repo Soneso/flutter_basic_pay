@@ -3,19 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'package:flutter_basic_pay/services/stellar.dart';
 import 'package:flutter_basic_pay/services/storage.dart';
-import 'package:flutter_basic_pay/widgets/common/util.dart';
 import 'package:stellar_wallet_flutter_sdk/stellar_wallet_flutter_sdk.dart'
     as wallet_sdk;
-import 'package:stellar_flutter_sdk/stellar_flutter_sdk.dart' as core_sdk;
 
-/// Manipulates app data,
+/// Manipulates app data.
 class DashboardData {
   /// The logged in user's stellar address.
   String userAddress;
-
-  /// [wallet_sdk.Wallet] used to communicate with the Stellar Test Network.
-  final wallet_sdk.Wallet _wallet = wallet_sdk.Wallet.testNet;
 
   /// The assets currently hold by the user.
   List<AssetInfo> assets = List<AssetInfo>.empty(growable: true);
@@ -61,10 +57,13 @@ class DashboardData {
   /// Funds the user account on the Stellar Test Network by using Friendbot.
   Future<bool> fundUserAccount() async {
     // fund account
-    var funded = await fundTestNetAccount(userAddress);
+    var funded = await StellarService.fundTestNetAccount(userAddress);
     if (!funded) {
       return false;
     }
+
+    // Wait for the ledger to close.
+    await Future.delayed(const Duration(seconds: 5));
 
     // reload assets so that our data is updated.
     await loadAssets();
@@ -73,118 +72,17 @@ class DashboardData {
     return true;
   }
 
-  /// Funds the account given by [address] on the Stellar Test Network by using Friendbot.
-  Future<bool> fundTestNetAccount(String address) async {
-    // fund account
-    var funded = await _wallet.stellar().account().fundTestNetAccount(address);
-    if (!funded) {
-      return false;
-    }
-
-    // wait for the ledger to close
-    await Future.delayed(const Duration(seconds: 5));
-    return true;
-  }
-
   /// Loads the users assets from the Stellar Network by using the wallet sdk.
   Future<List<AssetInfo>> loadAssets() async {
-    assets = await loadAssetsForAddress(userAddress);
+    assets = await StellarService.loadAssetsForAddress(userAddress);
     _emitAssetsInfo();
     return assets;
-  }
-
-  /// Loads the assets for a given account specified by [address] from the
-  /// Stellar Network by using the wallet sdk.
-  Future<List<AssetInfo>> loadAssetsForAddress(String address) async {
-    var loadedAssets = List<AssetInfo>.empty(growable: true);
-    try {
-      var stellarAccountInfo =
-          await _wallet.stellar().account().getInfo(address);
-      for (var balance in stellarAccountInfo.balances) {
-        loadedAssets.add(AssetInfo(
-          asset: wallet_sdk.StellarAssetId.fromAsset(balance.asset),
-          balance: balance.balance,
-        ));
-      }
-    } on wallet_sdk.ValidationException {
-      // account does not exist
-      loadedAssets = List<AssetInfo>.empty(growable: true);
-    }
-    return loadedAssets;
-  }
-
-  /// Check if an account for the given [address] exists on the Stellar Network.
-  Future<bool> accountExists(String address) async {
-    return await _wallet.stellar().account().accountExists(address);
   }
 
   /// Loads the list of the 5 most recent payments for the user by using the
   /// flutter core sdk.
   Future<List<PaymentInfo>> loadRecentPayments() async {
-    recentPayments = List<PaymentInfo>.empty(growable: true);
-
-    var accountExists = await this.accountExists(userAddress);
-    if (!accountExists) {
-      return recentPayments;
-    }
-    // fetch payments from stellar
-    var server = _wallet.stellar().server;
-
-    // loads the recent payments (max 5)
-    var paymentsPage = await server.payments
-        .forAccount(userAddress)
-        .order(core_sdk.RequestBuilderOrder.DESC)
-        .limit(5)
-        .execute();
-
-    if (paymentsPage.records == null) {
-      _emitRecentPaymentsInfo();
-      return recentPayments;
-    }
-
-    for (var payment in paymentsPage.records!) {
-      if (payment is core_sdk.PaymentOperationResponse) {
-        var direction = payment.to!.accountId == userAddress
-            ? PaymentDirection.received
-            : PaymentDirection.sent;
-        recentPayments.add(PaymentInfo(
-            asset: wallet_sdk.StellarAssetId.fromAsset(payment.asset),
-            amount: payment.amount!,
-            direction: direction,
-            address: direction == PaymentDirection.received
-                ? payment.from!.accountId
-                : payment.to!.accountId));
-      } else if (payment is core_sdk.CreateAccountOperationResponse) {
-        recentPayments.add(PaymentInfo(
-            asset: wallet_sdk.NativeAssetId(),
-            amount: payment.startingBalance!,
-            direction: PaymentDirection.received,
-            address: payment.funder!));
-      } else if (payment
-          is core_sdk.PathPaymentStrictReceiveOperationResponse) {
-        var direction = payment.to == userAddress
-            ? PaymentDirection.received
-            : PaymentDirection.sent;
-        recentPayments.add(PaymentInfo(
-            asset: wallet_sdk.StellarAssetId.fromAsset(payment.asset),
-            amount: payment.amount!,
-            direction: direction,
-            address: direction == PaymentDirection.received
-                ? payment.from!
-                : payment.to!));
-      } else if (payment is core_sdk.PathPaymentStrictSendOperationResponse) {
-        var direction = payment.to == userAddress
-            ? PaymentDirection.received
-            : PaymentDirection.sent;
-        recentPayments.add(PaymentInfo(
-            asset: wallet_sdk.StellarAssetId.fromAsset(payment.asset),
-            amount: payment.amount!,
-            direction: direction,
-            address: direction == PaymentDirection.received
-                ? payment.from!
-                : payment.to!));
-      }
-    }
+    recentPayments = await StellarService.loadRecentPayments(userAddress);
 
     // lets see if we can assign some payments to friends
     if (contacts.isEmpty) {
@@ -230,14 +128,9 @@ class DashboardData {
   /// Returns true on success.
   Future<bool> addAssetSupport(wallet_sdk.IssuedAssetId asset,
       wallet_sdk.SigningKeyPair userKeyPair) async {
-    // build sign and submit transaction to stellar.
-    var stellar = _wallet.stellar();
-    var txBuilder = await stellar.transaction(userKeyPair);
-    var tx = txBuilder.addAssetSupport(asset).build();
-    stellar.sign(tx, userKeyPair);
-    bool success = await stellar.submitTransaction(tx);
+    var success = await StellarService.addAssetSupport(asset, userKeyPair);
 
-    // wait for the ledger to close
+    // Wait for the ledger to close.
     await Future.delayed(const Duration(seconds: 5));
 
     // reload assets so that our data is updated.
@@ -253,14 +146,9 @@ class DashboardData {
   /// Returns true on success.
   Future<bool> removeAssetSupport(wallet_sdk.IssuedAssetId asset,
       wallet_sdk.SigningKeyPair userKeyPair) async {
-    // build sign and submit transaction to stellar.
-    var stellar = _wallet.stellar();
-    var txBuilder = await stellar.transaction(userKeyPair);
-    var tx = txBuilder.removeAssetSupport(asset).build();
-    stellar.sign(tx, userKeyPair);
-    bool success = await stellar.submitTransaction(tx);
+    var success = await StellarService.removeAssetSupport(asset, userKeyPair);
 
-    // wait for the ledger to close
+    // Wait for the ledger to close.
     await Future.delayed(const Duration(seconds: 5));
 
     // reload assets so that our data is updated.
@@ -280,16 +168,11 @@ class DashboardData {
       required String amount,
       String? memo,
       required wallet_sdk.SigningKeyPair userKeyPair}) async {
-    // Build, sign and submit transaction to stellar.
-    var stellar = _wallet.stellar();
-    var txBuilder = await stellar.transaction(userKeyPair);
-    txBuilder = txBuilder.transfer(destinationAddress, assetId, amount);
-    if (memo != null) {
-      txBuilder = txBuilder.setMemo(core_sdk.MemoText(memo));
-    }
-    var tx = txBuilder.build();
-    stellar.sign(tx, userKeyPair);
-    bool success = await stellar.submitTransaction(tx);
+    var success = StellarService.sendPayment(
+        destinationAddress: destinationAddress,
+        assetId: assetId,
+        amount: amount,
+        userKeyPair: userKeyPair);
 
     // Wait for the ledger to close.
     await Future.delayed(const Duration(seconds: 5));
@@ -298,29 +181,6 @@ class DashboardData {
     await loadAssets();
 
     return success;
-  }
-
-  /// Searches for a strict send payment path by using the wallet sdk.
-  /// Requires the [sourceAsset] + [sourceAmount] and the [destinationAddress]
-  /// of the recipient.
-  Future<List<wallet_sdk.PaymentPath>> findStrictSendPaymentPath(
-      {required wallet_sdk.StellarAssetId sourceAsset,
-      required String sourceAmount,
-      required String destinationAddress}) async {
-    var stellar = _wallet.stellar();
-    return await stellar.findStrictSendPathForDestinationAddress(
-        sourceAsset, sourceAmount, destinationAddress);
-  }
-
-  /// Searches for a strict receive payment path by using the wallet sdk.
-  /// Requires the [destinationAsset] and [destinationAmount].
-  /// It will search for all source assets hold by the user.
-  Future<List<wallet_sdk.PaymentPath>> findStrictReceivePaymentPath(
-      {required wallet_sdk.StellarAssetId destinationAsset,
-      required String destinationAmount}) async {
-    var stellar = _wallet.stellar();
-    return await stellar.findStrictReceivePathForSourceAddress(
-        destinationAsset, destinationAmount, userAddress);
   }
 
   /// Sends a strict send path payment by using the wallet sdk.
@@ -341,22 +201,14 @@ class DashboardData {
       required List<wallet_sdk.StellarAssetId> path,
       String? memo,
       required wallet_sdk.SigningKeyPair userKeyPair}) async {
-    // Build, sign and submit transaction to stellar.
-    var stellar = _wallet.stellar();
-    var txBuilder = await stellar.transaction(userKeyPair);
-    txBuilder = txBuilder.strictSend(
+    bool success = await StellarService.strictSendPayment(
         sendAssetId: sendAssetId,
         sendAmount: sendAmount,
         destinationAddress: destinationAddress,
         destinationAssetId: destinationAssetId,
         destinationMinAmount: destinationMinAmount,
-        path: path);
-    if (memo != null) {
-      txBuilder = txBuilder.setMemo(core_sdk.MemoText(memo));
-    }
-    var tx = txBuilder.build();
-    stellar.sign(tx, userKeyPair);
-    bool success = await stellar.submitTransaction(tx);
+        path: path,
+        userKeyPair: userKeyPair);
 
     // Wait for the ledger to close
     await Future.delayed(const Duration(seconds: 5));
@@ -385,22 +237,14 @@ class DashboardData {
       required List<wallet_sdk.StellarAssetId> path,
       String? memo,
       required wallet_sdk.SigningKeyPair userKeyPair}) async {
-    // Build, sign and submit transaction to stellar.
-    var stellar = _wallet.stellar();
-    var txBuilder = await stellar.transaction(userKeyPair);
-    txBuilder = txBuilder.strictReceive(
+    bool success = await StellarService.strictReceivePayment(
         sendAssetId: sendAssetId,
         sendMaxAmount: sendMaxAmount,
         destinationAddress: destinationAddress,
         destinationAssetId: destinationAssetId,
         destinationAmount: destinationAmount,
-        path: path);
-    if (memo != null) {
-      txBuilder = txBuilder.setMemo(core_sdk.MemoText(memo));
-    }
-    var tx = txBuilder.build();
-    stellar.sign(tx, userKeyPair);
-    bool success = await stellar.submitTransaction(tx);
+        path: path,
+        userKeyPair: userKeyPair);
 
     // Wait for the ledger to close.
     await Future.delayed(const Duration(seconds: 5));
@@ -440,35 +284,5 @@ class DashboardData {
   /// E.g. contact added or removed.
   void _emitContactsInfo() {
     _contactsStreamController.add(contacts);
-  }
-}
-
-class AssetInfo {
-  wallet_sdk.StellarAssetId asset;
-  String balance;
-
-  AssetInfo({required this.asset, required this.balance});
-}
-
-enum PaymentDirection { sent, received }
-
-class PaymentInfo {
-  wallet_sdk.StellarAssetId asset;
-  String amount;
-  PaymentDirection direction;
-  String address;
-  String? contactName;
-
-  PaymentInfo(
-      {required this.asset,
-      required this.amount,
-      required this.direction,
-      required this.address,
-      this.contactName});
-
-  @override
-  String toString() {
-    return '${Util.removeTrailingZerosFormAmount(amount)} ${asset.id == 'native' ? 'XLM' : (asset as wallet_sdk.IssuedAssetId).code}'
-        '${direction == PaymentDirection.received ? ' received from' : ' sent to'} ${contactName ?? Util.shortAddress(address)}';
   }
 }
