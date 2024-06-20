@@ -266,7 +266,7 @@ class _AssetsPageBodyContentState extends State<AssetsPageBodyContent> {
                     ...dashboardState.data.assets.map(
                       (asset) => AssetBalanceCard(
                           asset,
-                          dashboardState.auth.userKeyPair,
+                          dashboardState.authService.userKeyPair,
                           dashboardState.data.removeAssetSupport,
                           key: ObjectKey(asset)),
                     )
@@ -328,7 +328,7 @@ class _AssetsPageBodyContentState extends State<AssetsPageBodyContent> {
         }
 
         // load secret seed and check if pin is valid.
-        var userKeyPair = await dashboardState.auth.userKeyPair(pin);
+        var userKeyPair = await dashboardState.authService.userKeyPair(pin);
 
         // add trustline
         var added =

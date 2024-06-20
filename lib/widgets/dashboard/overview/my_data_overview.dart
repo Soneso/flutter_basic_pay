@@ -98,7 +98,7 @@ class _MyDataOverviewState extends State<MyDataOverview> {
   Future<void> _handlePinSet(String pin, DashboardState dashboardState) async {
     try {
       // load secret seed and check if pin is valid.
-      var userKeyPair = await dashboardState.auth.userKeyPair(pin);
+      var userKeyPair = await dashboardState.authService.userKeyPair(pin);
       setState(() {
         _error = null;
         _secretKey = userKeyPair.secretKey;

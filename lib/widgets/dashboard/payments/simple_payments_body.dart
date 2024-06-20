@@ -248,7 +248,7 @@ class _SimplePaymentsBodyContentState
     });
     try {
       // load secret seed and check if pin is valid.
-      var userKeyPair = await dashboardState.auth.userKeyPair(data.pin);
+      var userKeyPair = await dashboardState.authService.userKeyPair(data.pin);
 
       // compose the asset
       var asset = _selectedAsset == xlmAsset

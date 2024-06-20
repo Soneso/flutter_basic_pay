@@ -72,7 +72,7 @@ class DashboardData {
     return true;
   }
 
-  /// Loads the users assets from the Stellar Network by using the wallet sdk.
+  /// Loads the users assets from the Stellar Network
   Future<List<AssetInfo>> loadAssets() async {
     assets = await StellarService.loadAssetsForAddress(userAddress);
     _emitAssetsInfo();

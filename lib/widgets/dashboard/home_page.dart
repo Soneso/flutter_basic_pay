@@ -15,22 +15,22 @@ import 'package:flutter_basic_pay/widgets/dashboard/payments/payments_page.dart'
 import 'package:provider/provider.dart';
 
 class DashboardHomePage extends StatefulWidget {
-  final AuthService auth;
+  final AuthService authService;
   final VoidCallback onSignOutRequest;
 
   const DashboardHomePage(
-      {required this.auth, required this.onSignOutRequest, super.key});
+      {required this.authService, required this.onSignOutRequest, super.key});
 
   @override
   State<DashboardHomePage> createState() => _DashboardHomePageState();
 }
 
 class DashboardState {
-  final AuthService auth;
+  final AuthService authService;
   late DashboardData data;
 
-  DashboardState(this.auth) {
-    data = DashboardData(auth.signedInUserAddress!);
+  DashboardState(this.authService) {
+    data = DashboardData(authService.signedInUserAddress!);
   }
 }
 
@@ -41,7 +41,7 @@ class _DashboardHomePageState extends State<DashboardHomePage> {
   @override
   void initState() {
     super.initState();
-    _dashboardState = DashboardState(widget.auth);
+    _dashboardState = DashboardState(widget.authService);
   }
 
   @override

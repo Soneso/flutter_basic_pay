@@ -60,7 +60,7 @@ class _SignInSwitcherState extends State<SignInSwitcher> {
               authService: authService,
               onSuccess: () => _updateUserState(UserState.signedIn)),
           UserState.signedIn =>
-            DashboardHomePage(auth: authService, onSignOutRequest: _signOut),
+            DashboardHomePage(authService: authService, onSignOutRequest: _signOut),
         });
   }
 

@@ -245,7 +245,7 @@ class _PathPaymentsBodyContentState extends State<PathPaymentsBodyContent> {
     });
     try {
       // load secret seed and check if pin is valid.
-      var userKeyPair = await dashboardState.auth.userKeyPair(data.pin);
+      var userKeyPair = await dashboardState.authService.userKeyPair(data.pin);
 
       var pathData = _pathData!;
       final ok = pathData.type == PathPaymentType.strictSend
