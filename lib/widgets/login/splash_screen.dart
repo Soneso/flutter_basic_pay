@@ -9,11 +9,11 @@ import 'dart:async';
 import 'package:flutter_basic_pay/main.dart';
 
 class SplashScreen extends StatefulWidget {
-  final AuthService auth;
-  final ValueChanged<UserState> onUserStateKnown;
+  final AuthService authService;
+  final ValueChanged<UserState> onKnownUserState;
 
   const SplashScreen(
-      {required this.auth, required this.onUserStateKnown, super.key});
+      {required this.authService, required this.onKnownUserState, super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -30,15 +30,14 @@ class _SplashScreenState extends State<SplashScreen> {
     Future.delayed(
       const Duration(seconds: 2),
       () async {
+        var authService = widget.authService;
         var userState = UserState.unknown;
-        var isSignedUp = await widget.auth.userIsSignedUp;
-        if (isSignedUp) {
-          var isSignedIn = widget.auth.signedInUserAddress != null;
-          userState = isSignedIn ? UserState.signedIn : UserState.signedOut;
+        if (await authService.userIsSignedUp) {
+          userState = authService.userIsSignedIn ? UserState.signedIn : UserState.signedOut;
         } else {
           userState = UserState.needsSignup;
         }
-        widget.onUserStateKnown(userState);
+        widget.onKnownUserState(userState);
       },
     );
   }

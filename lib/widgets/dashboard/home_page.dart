@@ -16,10 +16,10 @@ import 'package:provider/provider.dart';
 
 class DashboardHomePage extends StatefulWidget {
   final AuthService auth;
-  final VoidCallback onSignOut;
+  final VoidCallback onSignOutRequest;
 
   const DashboardHomePage(
-      {required this.auth, required this.onSignOut, super.key});
+      {required this.auth, required this.onSignOutRequest, super.key});
 
   @override
   State<DashboardHomePage> createState() => _DashboardHomePageState();
@@ -130,7 +130,7 @@ class _DashboardHomePageState extends State<DashboardHomePage> {
       return;
     }
 
-    widget.onSignOut();
+    widget.onSignOutRequest();
   }
 
   static Widget _pageAtIndex(int index) {

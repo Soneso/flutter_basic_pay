@@ -6,32 +6,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_basic_pay/services/auth.dart';
 import 'package:flutter_basic_pay/widgets/common/navigation_service.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/home_page.dart';
-import 'package:flutter_basic_pay/widgets/login/sign_in.dart';
-import 'package:flutter_basic_pay/widgets/login/sign_up.dart';
+import 'package:flutter_basic_pay/widgets/login/sign_in_page.dart';
+import 'package:flutter_basic_pay/widgets/login/sign_up_page.dart';
 import 'package:flutter_basic_pay/widgets/login/splash_screen.dart';
 
 void main() {
-  runApp(BasicPayApp(AuthService()));
+  runApp(FlutterBasicPayApp());
 }
 
-class BasicPayApp extends StatelessWidget {
-  final AuthService auth;
-  const BasicPayApp(this.auth, {super.key});
+class FlutterBasicPayApp extends StatelessWidget {
+  final AuthService authService = AuthService();
+  FlutterBasicPayApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.light(),
       navigatorKey: NavigationService.navigatorKey,
-      home: SignInSwitcher(auth),
+      home: SignInSwitcher(authService),
     );
   }
 }
 
 class SignInSwitcher extends StatefulWidget {
-  final AuthService auth;
+  final AuthService authService;
 
-  const SignInSwitcher(this.auth, {super.key});
+  const SignInSwitcher(this.authService, {super.key});
 
   @override
   State<SignInSwitcher> createState() => _SignInSwitcherState();
@@ -44,36 +44,34 @@ class _SignInSwitcherState extends State<SignInSwitcher> {
 
   @override
   Widget build(BuildContext context) {
+    var authService = widget.authService;
+
     return AnimatedSwitcher(
         switchInCurve: Curves.easeOut,
         switchOutCurve: Curves.easeOut,
         duration: const Duration(milliseconds: 200),
         child: switch (_userState) {
           UserState.unknown => SplashScreen(
-              auth: widget.auth, onUserStateKnown: _handleUpdateUserState),
-          UserState.needsSignup =>
-            SignUpPage(auth: widget.auth, onSuccess: _handleSignIn),
-          UserState.signedOut =>
-            SignInPage(auth: widget.auth, onSuccess: _handleSignIn),
+              authService: authService, onKnownUserState: _updateUserState),
+          UserState.needsSignup => SignUpPage(
+              authService: authService,
+              onSuccess: () => _updateUserState(UserState.signedIn)),
+          UserState.signedOut => SignInPage(
+              authService: authService,
+              onSuccess: () => _updateUserState(UserState.signedIn)),
           UserState.signedIn =>
-            DashboardHomePage(auth: widget.auth, onSignOut: _handleSignOut),
+            DashboardHomePage(auth: authService, onSignOutRequest: _signOut),
         });
   }
 
-  void _handleUpdateUserState(UserState newUserState) {
+  void _updateUserState(UserState newUserState) {
     setState(() {
       _userState = newUserState;
     });
   }
 
-  void _handleSignIn(String userAddress) {
-    setState(() {
-      _userState = UserState.signedIn;
-    });
-  }
-
-  Future<void> _handleSignOut() async {
-    await widget.auth.signOut();
+  void _signOut() async {
+    widget.authService.signOut();
     setState(() {
       _userState = UserState.signedOut;
     });

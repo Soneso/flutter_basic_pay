@@ -13,11 +13,11 @@ import 'package:clipboard/clipboard.dart';
 
 
 class SignUpPage extends StatelessWidget {
-  final AuthService auth;
-  final ValueChanged<String> onSuccess;
+  final AuthService authService;
+  final VoidCallback onSuccess;
 
   const SignUpPage({
-    required this.auth,
+    required this.authService,
     required this.onSuccess,
     super.key,
   });
@@ -26,18 +26,18 @@ class SignUpPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: SignUpCard(auth: auth, onSuccess: onSuccess),
+        child: SignUpCard(authService: authService, onSuccess: onSuccess),
       ),
     );
   }
 }
 
 class SignUpCard extends StatefulWidget {
-  final AuthService auth;
-  final ValueChanged<String> onSuccess;
+  final AuthService authService;
+  final VoidCallback onSuccess;
 
   const SignUpCard({
-    required this.auth,
+    required this.authService,
     required this.onSuccess,
     super.key,
   });
@@ -52,8 +52,8 @@ class _SignUpCardState extends State<SignUpCard> {
 
   void _signUp(String pin) async {
     try {
-      var user = await widget.auth.signUp(_userKeyPair, pin);
-      widget.onSuccess(user);
+      await widget.authService.signUp(_userKeyPair, pin);
+      widget.onSuccess();
     } on SignUpException {
       _showError();
     }

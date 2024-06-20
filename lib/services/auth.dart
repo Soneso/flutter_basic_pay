@@ -57,7 +57,7 @@ class AuthService {
   }
 
   /// Signs out the user.
-  Future signOut() async {
+  void signOut() {
     signedInUserAddress = null;
   }
 }

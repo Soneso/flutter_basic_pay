@@ -10,11 +10,11 @@ import 'package:flutter_basic_pay/services/storage.dart';
 
 
 class SignInPage extends StatelessWidget {
-  final AuthService auth;
-  final ValueChanged<String> onSuccess;
+  final AuthService authService;
+  final VoidCallback onSuccess;
 
   const SignInPage({
-    required this.auth,
+    required this.authService,
     required this.onSuccess,
     super.key,
   });
@@ -23,18 +23,18 @@ class SignInPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: SignInCard(auth: auth, onSuccess: onSuccess),
+        child: SignInCard(authService: authService, onSuccess: onSuccess),
       ),
     );
   }
 }
 
 class SignInCard extends StatefulWidget {
-  final AuthService auth;
-  final ValueChanged<String> onSuccess;
+  final AuthService authService;
+  final VoidCallback onSuccess;
 
   const SignInCard({
-    required this.auth,
+    required this.authService,
     required this.onSuccess,
     super.key,
   });
@@ -46,8 +46,8 @@ class SignInCard extends StatefulWidget {
 class _SignInCardState extends State<SignInCard> {
   void _signIn(String pin) async {
     try {
-      var user = await widget.auth.signIn(pin);
-      widget.onSuccess(user);
+      await widget.authService.signIn(pin);
+      widget.onSuccess();
     } on UserNotFound {
       _showError('User is not registered');
     } on InvalidPin {
