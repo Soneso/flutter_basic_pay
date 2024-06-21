@@ -86,4 +86,4 @@ static Future<List<AssetInfo>> loadAssetsForAddress(String address) async {
 
 ## Next
 
-Continue with [Dashboard data](dashboard_data.md).
+Continue with [Account creation](account_creation.md)

@@ -4,7 +4,7 @@ A payment operation sends an amount in a specific asset (XLM or non-XLM) to a de
 
 In our Flutter Basic Pay application, the user will navigate to the Payments page where can either select a user from their contacts or input the public key of a destination address with a specified asset they’d like to send along with the amount of the asset and an optional text memo.
 
-![simple payment](/img/payment/simple_payment.png)
+![simple payment](./img/payment/simple_payment.png)
 
 After the user enters the required data, they press the `Submit` button. If the destination account exists and is properly funded with XLM, this will trigger a payment transaction.
 
@@ -174,7 +174,7 @@ Otherwise the normal payment widget is displayed.
 Let's first have a look to the normal payments widget which is called [`SimplePaymentsPageBodyContent`](https://github.com/Soneso/flutter_basic_pay/blob/main/lib/widgets/dashboard/payments/simple_payments_body.dart).
 
 
-![simple payment initial](/img/payment/simple_payment_initial.png)
+![simple payment initial](./img/payment/simple_payment_initial.png)
 
 
 The `Asset to send` dropdown is filled with the assets received from `DashboardData`. All assets that have a balance of zero are excluded.
@@ -184,7 +184,7 @@ the app let`s the user insert the Stellar address of the recipient.
 As soon as the recipient is selected, the UI displays the form fields to let the user provide the amount, optional memo and pin code. The pin code is needed to obtain the user`s 
 signing keypair from the `AuthService` so that the transaction can be signed before submitting it to the Stellar Network.
 
-![simple payment](/img/payment/simple_payment.png)
+![simple payment](./img/payment/simple_payment.png)
 
 The form fields are implemented in the [`PaymentDataAndPinForm`](https://github.com/Soneso/flutter_basic_pay/blob/main/lib/widgets/dashboard/payments/payment_data_and_pin_form.dart) widget. 
 
@@ -324,7 +324,7 @@ var recipientAssets = await StellarService.loadAssetsForAddress(destinationAddre
 
 If the recipient cannot receive the asset, we display an error message:
 
-![simple payment recipient asset error](/img/payment/simple_payment_recipient_asset_error.png)
+![simple payment recipient asset error](./img/payment/simple_payment_recipient_asset_error.png)
 
 Otherwise, we go ahead and send the payment with the help of our `DashboardData` instance:
 
@@ -393,7 +393,7 @@ All Stellar transactions require a small fee to make it to the ledger. Read more
 
 Once the payment has been sent, we will show the user a success message. On the overview page, the `Recent Payments` card has been updated and we can see it there:
 
-![recent payments updated](/img/payment/recent_payments_updated.png)
+![recent payments updated](./img/payment/recent_payments_updated.png)
 
 ## Next
 

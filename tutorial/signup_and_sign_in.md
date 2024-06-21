@@ -108,7 +108,7 @@ To start, we'll have our user create an account. Accounts are the central data s
 
 In Flutter Basic Pay, the [SignUpPage](https://github.com/Soneso/flutter_basic_pay/blob/main/lib/widgets/login/sign_up_page.dart) widget will display a randomized public and secret keypair that the user can select with the option to choose a new set if preferred.
 
-![sign up public and secret keys](/img/signup-keys.png)
+![sign up public and secret keys](./img/signup-keys.png)
 
 To generate a random user keypair, we use the wallet sdk:
 
@@ -155,7 +155,7 @@ After signup, the user get's redirected to the dashboard home page by the `SignI
 
 ## Sign in page
 
-![sign in page](/img/sign_in_page.png)
+![sign in page](./img/sign_in_page.png)
 
 If the user is already registered, the [`SignInPage`](https://github.com/Soneso/flutter_basic_pay/blob/main/lib/widgets/login/sign_in_page.dart) is displayed at app start. To sign in, the user must enter his pin code. The pin code is then verified and the user is signed in by using the [authentication service](authentication.md).
 

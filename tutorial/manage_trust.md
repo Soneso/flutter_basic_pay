@@ -6,33 +6,33 @@ For an account to hold and trade assets other than XLM, it must establish a [tru
 
 First, we’ll have the user create a trustline for an asset by navigating to the Assets page. 
 
-![assets page](/img/manage_trust/assets_page.png)
+![assets page](./img/manage_trust/assets_page.png)
 
 Then select an asset from the dropdown. The dropdown includes two predefined assets. 
 This are assets provided by the Stellar Test Anchor. Additionally, one can select "Add custom asset" to insert the asset data.
 
 
-![assets dropdown](/img/manage_trust/assets_dropdown.png)
+![assets dropdown](./img/manage_trust/assets_dropdown.png)
 
 For now, let's select the predefined asset `SRT`. As soon as selected, the page shows the pincode input field:
 
-![pin input](/img/manage_trust/pin_input.png)
+![pin input](./img/manage_trust/pin_input.png)
 
 The user must enter their pincode, so that we can request and decrypt their secred key from the secure storage.
 We will need it to sign the transaction. After entering the pincode and pressing the `Submit` button, the app builds the transaction and sends it to the Stellar Network.
 
-![adding asset](/img/manage_trust/adding_asset.png)
+![adding asset](./img/manage_trust/adding_asset.png)
 
 As soon as the trustline has been established, the asset appears in list of existing balances:
 
-![srt added](/img/manage_trust/srt_added.png)
+![srt added](./img/manage_trust/srt_added.png)
 
 The user's account now trusts the `SRT` asset, can hold it and trade it. We can also see that the `XLM` balance has been reduced. This is because 
 all Stellar transactions require a small fee to make it to the ledger. Read more in the Stellar docs [Fees section](https://developers.stellar.org/docs/learn/fundamentals/fees-resource-limits-metering).
 
 If we switch back to the overview page, we can also see that the Asset Balances now include the new trusted asset:
 
-![overview srt added](/img/manage_trust/overview_srt_added.png)
+![overview srt added](./img/manage_trust/overview_srt_added.png)
 
 ### Code implementation
 
@@ -210,12 +210,12 @@ At the end, we add also the `Add custom asset` dropdown item.
 
 Our dropdown is ready:
 
-![assets dropdown](/img/manage_trust/assets_dropdown.png)
+![assets dropdown](./img/manage_trust/assets_dropdown.png)
 
 If the user selects an asset from the dropdown, the [`PinForm`](https://github.com/Soneso/flutter_basic_pay/blob/main/lib/widgets/common/pin_form.dart)
 is displayed, so that we can ask the user to enter their pincode:
 
-![pin input](/img/manage_trust/pin_input.png)
+![pin input](./img/manage_trust/pin_input.png)
 
 The `PinForm` widget validates the input format and if valid, it calls the `onPinSet` callback with the inserted pin:
 
@@ -364,7 +364,7 @@ After submitting, in `DashboardData` we wait a couple of seconds for the ledger 
 As soon as our `StreamBuilder` from the `AssetsPage` widget receives the new list of trusted assets it can rebuild the UI and display the new asset in the
 List of existing balances:
 
-![srt added](/img/manage_trust/srt_added.png)
+![srt added](./img/manage_trust/srt_added.png)
 
 
 ## Adding a custom asset
@@ -373,7 +373,7 @@ We can use [Stellar Lab](https://laboratory.stellar.org/#?network=test) to creat
 
 Navigate to [Stellar Lab](https://laboratory.stellar.org/#?network=test) in your browser:
 
-![laboratory create issuer](/img/manage_trust/laboratory_create_issuer.png)
+![laboratory create issuer](./img/manage_trust/laboratory_create_issuer.png)
 
 1. Select the `test` Network
 2. Select the `Create Account` tab
@@ -394,27 +394,27 @@ and the `secret key` (also called `secret seed`) is:
 Now that we have an issuer account for testing, let's add a trustline to a custom asset issued by this account using our app. To do so,
 we select `Add custom asset` from the assets dropdown on the assets page:
 
-![select custom asset](/img/manage_trust/select_custom_asset.png)
+![select custom asset](./img/manage_trust/select_custom_asset.png)
 
 As soon as selected, the `Custom Asset` dialog appears. Here we have to insert the asset code and the issuer account id. Issued assets are defined by the asset code (the asset’s identifying code), that can have max. 12 characters and the asset issuer id. Please read more about assets in the [Stellar Docs Assets](https://developers.stellar.org/docs/learn/fundamentals/stellar-data-structures/assets) section.
 
 As we are the issuers of the asset, we can call it however we want. Let's name it `GOLD`. `GOLD` is our asset code. The issuer account id is the public key that we generated before. Let's insert them into the `Custom Asset` dialog form:
 
-![custom asset dialog](/img/manage_trust/custom_asset_dialog.png)
+![custom asset dialog](./img/manage_trust/custom_asset_dialog.png)
 
 As soon as we press `Ok` our widget will display the asset in the format `asset_code:issuer_account_id` also called `canonical form`.
 
-![custom asset display](/img/manage_trust/custom_asset_display.png)
+![custom asset display](./img/manage_trust/custom_asset_display.png)
 
 Now we can enter the pincode to add the trustline. After submitting the transaction to the Stellar Test Network, the asset appears in our list of existing balances:
 
-![custom asset added](/img/manage_trust/custom_asset_added.png)
+![custom asset added](./img/manage_trust/custom_asset_added.png)
 
 The implementaion is the same as above and the source code can be found in [assets_page.dart](https://github.com/Soneso/flutter_basic_pay/blob/main/lib/widgets/dashboard/assets/assets_page.dart).
 
 Next, let send some `GOLD` from the issuer account to our user's account. To do so we use the [Stellar Laoboratory](https://laboratory.stellar.org/#?network=test) again.
 
-![laboratory send GOLD 1](/img/manage_trust/laboratory_send_gold_1.png)
+![laboratory send GOLD 1](./img/manage_trust/laboratory_send_gold_1.png)
 
 
 1. Select the `test` Network
@@ -424,12 +424,12 @@ Next, let send some `GOLD` from the issuer account to our user's account. To do 
 
 Scroll down:
 
-![laboratory send GOLD 2](/img/manage_trust/laboratory_send_gold_2.png)
+![laboratory send GOLD 2](./img/manage_trust/laboratory_send_gold_2.png)
 
 5. Select `Payment` as an operation type.
 6. Insert the user account id as a destination for the payment. You can find it in the overview tab of the app on the `My Data` card:
 
-![my data card](/img/manage_trust/my_data_card.png)
+![my data card](./img/manage_trust/my_data_card.png)
 
 7. Select `Alphanumeric 4` asset.
 8. Insert the asset code (`GOLD`) and our issuer account id (`GA4W4USE4ZXA5TN2AS6C2CLFYWIWGMV6HTSWRW2S7T5RTTMVDEX5UBEY`) to identify the asset.
@@ -438,7 +438,7 @@ Scroll down:
 
 Next page:
 
-![laboratory send GOLD 3](/img/manage_trust/laboratory_send_gold_3.png)
+![laboratory send GOLD 3](./img/manage_trust/laboratory_send_gold_3.png)
 
 11. Insert the issuer account secret key into sign the transaction. (ours is `SDEWYN3KNWJTTQMW5ALFDOL37VXWV3DHV64MT6H44KCM5XOBIZS35NDW`)
 12. Press the `Submit in Transaction Submitter` button to submit the signed transaction to the Stellar Test Network.
@@ -447,7 +447,7 @@ Next page:
 After the transaction has been submitted, we should have received the `GOLD` asset. Currently the app does not refresh automatically, so we must switch tabs to see the update. For example, switch to the `Assets` tab and then back to the `Overview`:
 
 
-![Overview GOLD balance](/img/manage_trust/overview_gold_balance.png)
+![Overview GOLD balance](./img/manage_trust/overview_gold_balance.png)
 
 
 ## Removing an asset
@@ -455,19 +455,19 @@ After the transaction has been submitted, we should have received the `GOLD` ass
 Trustlines can only be removed if the user holds a zero balance of the corresponding asset. For example, we hold 0 `SRT` which means that we can remove that trustline but we hold 300 `GOLD`and therefore we cannot remove the `GOLD` trustline.
 
 
-![Remove SRT trash icon](/img/manage_trust/remove_srt_trash.png)
+![Remove SRT trash icon](./img/manage_trust/remove_srt_trash.png)
 
 To remove the trustline, the user presses the `Trash` icon button. As soon as pressed, the [`PinForm`](https://github.com/Soneso/flutter_basic_pay/blob/main/lib/widgets/common/pin_form.dart) is displayed, so that the user can insert their pincode needed to decrypt their secret key that we need to sign the transaction.
 
-![Remove SRT pin](/img/manage_trust/remove_srt_pin.png)
+![Remove SRT pin](./img/manage_trust/remove_srt_pin.png)
 
 After entering the pincode, the app decrypts the secret key, builds, signs and submits the transaction to the Stellar Network.
 
-![removing asset](/img/manage_trust/removing_asset.png)
+![removing asset](./img/manage_trust/removing_asset.png)
 
 On success, the trustline has been removed and the UI has been updated:
 
-![asset removed](/img/manage_trust/asset_removed.png)
+![asset removed](./img/manage_trust/asset_removed.png)
 
 
 ### Code implementation
