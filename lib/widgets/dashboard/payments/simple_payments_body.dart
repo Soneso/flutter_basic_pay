@@ -5,7 +5,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_basic_pay/services/data.dart';
 import 'package:flutter_basic_pay/services/stellar.dart';
 import 'package:flutter_basic_pay/services/storage.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/payments/payment_data_and_pin_form.dart';
@@ -241,7 +240,7 @@ class _SimplePaymentsBodyContentState
 
   Future<void> _handleAmountAndPinSet(
       PaymentDataAndPin data, DashboardState dashboardState) async {
-    var nextState = _state;
+    var initialState = _state;
     setState(() {
       _submitError = null;
       _state = SimplePaymentsPageState.sending;
@@ -257,7 +256,7 @@ class _SimplePaymentsBodyContentState
 
       var destinationAddress = _recipientAddress!;
 
-      // if the destination account dose not exist on the testnet, let's fund it!
+      // if the destination account does not exist on the testnet, let's fund it!
       // alternatively we can use the create account operation.
       var destinationExists =
           await StellarService.accountExists(destinationAddress);
@@ -265,9 +264,23 @@ class _SimplePaymentsBodyContentState
         await StellarService.fundTestNetAccount(destinationAddress);
       }
 
+      // find out if the recipient can receive the asset that
+      // the user wants to send
+      if (asset is wallet_sdk.IssuedAssetId) {
+        var recipientAssets =
+            await StellarService.loadAssetsForAddress(destinationAddress);
+        if (!recipientAssets.any((item) => item.asset.id == asset.id)) {
+          setState(() {
+            _submitError = 'Recipient can not receive ${asset.id}';
+            _state = initialState;
+          });
+          return;
+        }
+      }
+
       // send payment
       bool ok = await dashboardState.data.sendPayment(
-          destinationAddress: _recipientAddress!,
+          destinationAddress: destinationAddress,
           assetId: asset,
           amount: data.amount!,
           memo: data.memo,
@@ -288,7 +301,7 @@ class _SimplePaymentsBodyContentState
       }
       setState(() {
         _submitError = errorText;
-        _state = nextState;
+        _state = initialState;
       });
     }
   }
