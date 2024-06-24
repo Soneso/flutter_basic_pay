@@ -6,7 +6,6 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_basic_pay/services/data.dart';
 import 'package:flutter_basic_pay/services/stellar.dart';
 import 'package:flutter_basic_pay/services/storage.dart';
 import 'package:flutter_basic_pay/widgets/common/util.dart';
@@ -358,6 +357,7 @@ class _PathPaymentsSwitcherState extends State<PathPaymentsSwitcher> {
                         destinationAssets: widget.destinationAssets,
                         onPathSelected: (pathData) =>
                             _handlePathSelected(pathData),
+                        key: const Key('strict send'),
                       )
                     : PathPaymentSection(
                         type: PathPaymentType.strictReceive,
@@ -365,6 +365,7 @@ class _PathPaymentsSwitcherState extends State<PathPaymentsSwitcher> {
                         destinationAssets: widget.destinationAssets,
                         onPathSelected: (pathData) =>
                             _handlePathSelected(pathData),
+                        key: const Key('strict receive'),
                       ),
               ],
             ),
