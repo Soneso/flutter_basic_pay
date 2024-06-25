@@ -147,8 +147,8 @@ class StellarService {
   /// Requires the [sendAssetId] representing the asset to send,
   /// strict [sendAmount] and the [destinationAddress] of the
   /// recipient. [destinationAssetId] representing the destination asset,
-  /// the [destinationMinAmount] to be received and the payment path
-  /// previously obtained by [findStrictSendPaymentPath]. Optional
+  /// the [destinationMinAmount] to be received and the assets [path] from the
+  /// payment path previously obtained by [findStrictSendPaymentPath]. Optional
   /// text [memo] and and the signing [userKeyPair] needed to sign
   /// the transaction before submission.
   /// Returns true on success.
@@ -183,9 +183,9 @@ class StellarService {
   /// Requires the [sendAssetId] representing the asset to send,
   /// [sendMaxAmount] and the [destinationAddress] of the
   /// recipient. [destinationAssetId] representing the destination asset,
-  /// the strict [destinationAmount] to be received and the payment path
-  /// previously obtained by [findStrictReceivePaymentPath]. Optional
-  /// text [memo] and and the signing [userKeyPair] needed to sign
+  /// the strict [destinationAmount] to be received and the assets [path]
+  /// from the payment path previously obtained by [findStrictSendPaymentPath].
+  /// Optional text [memo] and and the signing [userKeyPair] needed to sign
   /// the transaction before submission.
   /// Returns true on success.
   static Future<bool> strictReceivePayment(

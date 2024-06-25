@@ -187,8 +187,8 @@ class DashboardData {
   /// Requires the [sendAssetId] representing the asset to send,
   /// strict [sendAmount] and the [destinationAddress] of the
   /// recipient. [destinationAssetId] representing the destination asset,
-  /// the [destinationMinAmount] to be received and the payment path
-  /// previously obtained by [findStrictSendPaymentPath]. Optional
+  /// the [destinationMinAmount] to be received and the assets [path] from the
+  /// payment path previously obtained by [findStrictSendPaymentPath]. Optional
   /// text [memo] and and the signing [userKeyPair] needed to sign
   /// the transaction before submission.
   /// Returns true on success.
@@ -213,8 +213,9 @@ class DashboardData {
     // Wait for the ledger to close
     await Future.delayed(const Duration(seconds: 5));
 
-    // Reload assets so that our data is updated.
+    // Reload assets and recent payments, so that our data is updated.
     await loadAssets();
+    await loadRecentPayments();
 
     return success;
   }
@@ -223,8 +224,8 @@ class DashboardData {
   /// Requires the [sendAssetId] representing the asset to send,
   /// [sendMaxAmount] and the [destinationAddress] of the
   /// recipient. [destinationAssetId] representing the destination asset,
-  /// the strict [destinationAmount] to be received and the payment path
-  /// previously obtained by [findStrictReceivePaymentPath]. Optional
+  /// the strict [destinationAmount] to be received and the assets [path] from the
+  /// payment path previously obtained by [findStrictSendPaymentPath]. Optional
   /// text [memo] and and the signing [userKeyPair] needed to sign
   /// the transaction before submission.
   /// Returns true on success.
@@ -249,8 +250,9 @@ class DashboardData {
     // Wait for the ledger to close.
     await Future.delayed(const Duration(seconds: 5));
 
-    // Reload assets so that our data is updated.
+    // Reload assets and recent payments, so that our data is updated.
     await loadAssets();
+    await loadRecentPayments();
 
     return success;
   }
