@@ -79,8 +79,8 @@ class DashboardData {
     return assets;
   }
 
-  /// Loads the list of the 5 most recent payments for the user by using the
-  /// flutter core sdk.
+  /// Loads the list of the 5 most recent payments for the user.
+  /// After loading, it emits an event, so that the UI can be updated.
   Future<List<PaymentInfo>> loadRecentPayments() async {
     recentPayments = await StellarService.loadRecentPayments(userAddress);
 

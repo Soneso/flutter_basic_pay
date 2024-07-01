@@ -395,6 +395,94 @@ Once the payment has been sent, we will show the user a success message. On the 
 
 ![recent payments updated](./img/payment/recent_payments_updated.png)
 
+To display the most recent payments we use the wallet_sdk in `StellarService` :
+
+```dart
+/// Loads the list of the 5 most recent payments for given [address].
+static Future<List<PaymentInfo>> loadRecentPayments(String address) async {
+
+    var stellarPayments = await _wallet.stellar().account().loadRecentPayments(address, limit:5);
+    if (stellarPayments.isEmpty) {
+      return [];
+    }
+
+    List<PaymentInfo> recentPayments = List<PaymentInfo>.empty(growable: true);
+
+    for (var payment in stellarPayments) {
+      if (payment is core_sdk.PaymentOperationResponse) {
+        var direction = payment.to == address
+            ? PaymentDirection.received
+            : PaymentDirection.sent;
+        recentPayments.add(PaymentInfo(
+            asset: wallet_sdk.StellarAssetId.fromAsset(payment.asset),
+            amount: payment.amount,
+            direction: direction,
+            address: direction == PaymentDirection.received
+                ? payment.from
+                : payment.to));
+      } else if (payment is core_sdk.CreateAccountOperationResponse) {
+        recentPayments.add(PaymentInfo(
+            asset: wallet_sdk.NativeAssetId(),
+            amount: payment.startingBalance,
+            direction: PaymentDirection.received,
+            address: payment.funder));
+      } else if (payment
+          is core_sdk.PathPaymentStrictReceiveOperationResponse) {
+        var direction = payment.to == address
+            ? PaymentDirection.received
+            : PaymentDirection.sent;
+        recentPayments.add(PaymentInfo(
+            asset: wallet_sdk.StellarAssetId.fromAsset(payment.asset),
+            amount: payment.amount,
+            direction: direction,
+            address: direction == PaymentDirection.received
+                ? payment.from
+                : payment.to));
+      } else if (payment is core_sdk.PathPaymentStrictSendOperationResponse) {
+        var direction = payment.to == address
+            ? PaymentDirection.received
+            : PaymentDirection.sent;
+        recentPayments.add(PaymentInfo(
+            asset: wallet_sdk.StellarAssetId.fromAsset(payment.asset),
+            amount: payment.amount,
+            direction: direction,
+            address: direction == PaymentDirection.received
+                ? payment.from
+                : payment.to));
+      }
+    }
+    return recentPayments;
+}
+```
+
+We receive the list of recent payments from the wallet sdk via the method `loadRecentPayments`. It returns a list of operations that represent payments. Depending on the type of payment, we extract the data needed and store it in a list of PaymentInfo objects, which we then display in the UI.
+
+```dart
+/// Loads the list of the 5 most recent payments for the user.
+/// After loading, it emits an event, so that the UI can be updated.
+Future<List<PaymentInfo>> loadRecentPayments() async {
+    recentPayments = await StellarService.loadRecentPayments(userAddress);
+
+    // lets see if we can assign some payments to friends
+    if (contacts.isEmpty) {
+        contacts = await SecureStorage.getContacts();
+    }
+    for (var payment in recentPayments) {
+        for (var contact in contacts) {
+        if (payment.address == contact.address) {
+            payment.contactName = contact.name;
+            break;
+        }
+        }
+    }
+
+    _emitRecentPaymentsInfo();
+    return recentPayments;
+}
+```
+
+The data is then displayed by the [`PaymentsOverview`](https://github.com/Soneso/flutter_basic_pay/tree/main/lib/widgets/dashboard/overview) widget.
+
 ## Next
 
 Continue with [Path payment](path_payment.md).
