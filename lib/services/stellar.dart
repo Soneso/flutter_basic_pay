@@ -217,44 +217,32 @@ class StellarService {
 
   /// Loads the list of the 5 most recent payments for given [address].
   static Future<List<PaymentInfo>> loadRecentPayments(String address) async {
+
+    var stellarPayments = await _wallet.stellar().account().loadRecentPayments(address, limit:5);
+    if (stellarPayments.isEmpty) {
+      return [];
+    }
+
     List<PaymentInfo> recentPayments = List<PaymentInfo>.empty(growable: true);
 
-    var accountExists = await StellarService.accountExists(address);
-    if (!accountExists) {
-      return recentPayments;
-    }
-    // fetch payments from stellar
-    var server = _wallet.stellar().server;
-
-    // loads the recent payments (max 5)
-    var paymentsPage = await server.payments
-        .forAccount(address)
-        .order(core_sdk.RequestBuilderOrder.DESC)
-        .limit(5)
-        .execute();
-
-    if (paymentsPage.records == null) {
-      return recentPayments;
-    }
-
-    for (var payment in paymentsPage.records!) {
+    for (var payment in stellarPayments) {
       if (payment is core_sdk.PaymentOperationResponse) {
-        var direction = payment.to!.accountId == address
+        var direction = payment.to == address
             ? PaymentDirection.received
             : PaymentDirection.sent;
         recentPayments.add(PaymentInfo(
             asset: wallet_sdk.StellarAssetId.fromAsset(payment.asset),
-            amount: payment.amount!,
+            amount: payment.amount,
             direction: direction,
             address: direction == PaymentDirection.received
-                ? payment.from!.accountId
-                : payment.to!.accountId));
+                ? payment.from
+                : payment.to));
       } else if (payment is core_sdk.CreateAccountOperationResponse) {
         recentPayments.add(PaymentInfo(
             asset: wallet_sdk.NativeAssetId(),
-            amount: payment.startingBalance!,
+            amount: payment.startingBalance,
             direction: PaymentDirection.received,
-            address: payment.funder!));
+            address: payment.funder));
       } else if (payment
           is core_sdk.PathPaymentStrictReceiveOperationResponse) {
         var direction = payment.to == address
@@ -262,22 +250,22 @@ class StellarService {
             : PaymentDirection.sent;
         recentPayments.add(PaymentInfo(
             asset: wallet_sdk.StellarAssetId.fromAsset(payment.asset),
-            amount: payment.amount!,
+            amount: payment.amount,
             direction: direction,
             address: direction == PaymentDirection.received
-                ? payment.from!
-                : payment.to!));
+                ? payment.from
+                : payment.to));
       } else if (payment is core_sdk.PathPaymentStrictSendOperationResponse) {
         var direction = payment.to == address
             ? PaymentDirection.received
             : PaymentDirection.sent;
         recentPayments.add(PaymentInfo(
             asset: wallet_sdk.StellarAssetId.fromAsset(payment.asset),
-            amount: payment.amount!,
+            amount: payment.amount,
             direction: direction,
             address: direction == PaymentDirection.received
-                ? payment.from!
-                : payment.to!));
+                ? payment.from
+                : payment.to));
       }
     }
     return recentPayments;

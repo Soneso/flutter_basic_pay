@@ -79,7 +79,7 @@ They sell `SILVER` for `COPPER` at a price of 10 units of `COPPER` for 1 unit of
 Now we have following test data:
 
 1. User account trusts `GOLD` and has a balanace of 300 `GOLD`.
-2. Recipient account: `James` created and added to the contacts. `James` trusts and therefore can receive `SILVER`
+2. Recipient account: `James` created and added to the contacts. `James` trusts and therefore can receive `SILVER`.
 3. First trader account trusts `GOLD` and `COPPER` and sells `COPPER` for `GOLD` at a price of 0.01 units of `GOLD` for 1 unit of `COPPER`.
 4. Second trader account trusts `COPPER` and `SILVER` and sells `SILVER` for `COPPER` at a price of 10 units of `COPPER` for 1 unit of `SILVER`.
 
