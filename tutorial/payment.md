@@ -469,10 +469,10 @@ Future<List<PaymentInfo>> loadRecentPayments() async {
     }
     for (var payment in recentPayments) {
         for (var contact in contacts) {
-        if (payment.address == contact.address) {
-            payment.contactName = contact.name;
-            break;
-        }
+            if (payment.address == contact.address) {
+                payment.contactName = contact.name;
+                break;
+            }
         }
     }
 

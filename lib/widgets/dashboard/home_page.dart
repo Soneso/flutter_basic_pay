@@ -10,6 +10,7 @@ import 'package:flutter_basic_pay/widgets/common/adaptive_scaffold.dart';
 import 'package:flutter_basic_pay/widgets/common/dialogs.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/assets/assets_page.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/contacts/contacts_page.dart';
+import 'package:flutter_basic_pay/widgets/dashboard/kyc/kyc_page.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/overview/overview_page.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/payments/payments_page.dart';
 import 'package:provider/provider.dart';
@@ -61,7 +62,7 @@ class _DashboardHomePageState extends State<DashboardHomePage> {
                 style: TextStyle(color: Colors.purple),
               ),
             ),
-          )
+          ),
         ],
         currentIndex: _pageIndex,
         destinations: const [
@@ -72,6 +73,8 @@ class _DashboardHomePageState extends State<DashboardHomePage> {
           AdaptiveScaffoldDestination(title: 'Contacts', icon: Icons.person),
           AdaptiveScaffoldDestination(
               title: 'Transfers', icon: Icons.anchor_sharp),
+          AdaptiveScaffoldDestination(
+              title: 'KYC', icon: Icons.policy_outlined),
         ],
         body: _pageAtIndex(_pageIndex),
         onNavigationIndexChange: (newIndex) {
@@ -86,8 +89,8 @@ class _DashboardHomePageState extends State<DashboardHomePage> {
   }
 
   bool get _hasFloatingActionButton {
-    if (_pageIndex != 3) return false;
-    return true;
+    if (_pageIndex == 3) return true;
+    return false;
   }
 
   FloatingActionButton _buildFab(BuildContext context) {
@@ -98,9 +101,11 @@ class _DashboardHomePageState extends State<DashboardHomePage> {
   }
 
   void _handleFabPressed(BuildContext context) async {
-    var contactInfo = await Dialogs.addContactDialog(context);
-    if (contactInfo != null) {
-      _dashboardState.data.addContact(contactInfo);
+    if (_pageIndex == 3) {
+      var contactInfo = await Dialogs.addContactDialog(context);
+      if (contactInfo != null) {
+        _dashboardState.data.addContact(contactInfo);
+      }
     }
   }
 
@@ -143,6 +148,8 @@ class _DashboardHomePageState extends State<DashboardHomePage> {
         return const AssetsPage();
       case 3:
         return const ContactsPage();
+      case 5:
+        return const KYCInformationPage();
       default:
         return const Center(child: Text('not yet implemented'));
     }

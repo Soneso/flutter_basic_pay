@@ -43,6 +43,13 @@ class DashboardData {
   final StreamController<List<ContactInfo>> _contactsStreamController =
       StreamController<List<ContactInfo>>.broadcast();
 
+  /// KYC Information that the user stored
+  Map<String,String> kycData = <String, String>{};
+
+  /// Stream controller that broadcasts updates of the user's kyc data.
+  final StreamController<Map<String,String>> _kycDataStreamController =
+  StreamController<Map<String,String>>.broadcast();
+
   /// Constructor. Creates a new (empty) object for the given user.
   DashboardData(this.userAddress) {
     // add known stellar test anchor assets which are great for testing
@@ -120,6 +127,21 @@ class DashboardData {
     contacts = await SecureStorage.removeContact(name);
     _emitContactsInfo();
     return contacts;
+  }
+
+  /// Loads the user's kyc data from secure storage.
+  Future<Map<String,String>> loadKycData() async {
+    kycData = await SecureStorage.getKycData();
+    _emitKycDataInfo();
+    return kycData;
+  }
+
+  /// Adds a new contact.
+  Future<Map<String, String>> updateKycDataEntry(
+      String key, String value) async {
+    kycData = await SecureStorage.updateKycDataEntry(key, value);
+    _emitKycDataInfo();
+    return kycData;
   }
 
   /// Adds a trust line by using the wallet sdk, so that the user can hold the
@@ -286,5 +308,14 @@ class DashboardData {
   /// E.g. contact added or removed.
   void _emitContactsInfo() {
     _contactsStreamController.add(contacts);
+  }
+
+  /// Subscribe for updates on the user's kyc data.
+  Stream<Map<String,String>> subscribeForKycData() =>
+      _kycDataStreamController.stream;
+
+  /// Emit updates on the user's kyc data
+  void _emitKycDataInfo() {
+    _kycDataStreamController.add(kycData);
   }
 }

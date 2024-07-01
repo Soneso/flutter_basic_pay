@@ -8,20 +8,24 @@ import "package:pointycastle/export.dart";
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:stellar_wallet_flutter_sdk/stellar_wallet_flutter_sdk.dart'
     as wallet_sdk;
+import 'package:stellar_flutter_sdk/stellar_flutter_sdk.dart' as core_sdk;
 
 /// Used to store secret user data in the local storage.
 class SecureStorage {
   static const _userSecretStorageKey = 'secret';
   static const _contactsStorageKey = 'contacts';
+  static const _kycDataStorageKey = 'kyc_data';
 
   /// Stores the signing [userSigningKeyPair] to secure storage. Uses the [pin] to
   /// cryptographically encode the secret seed before storing it, so that
   /// it can only be retrieved by the user that knows the pin.
-  static storeUserKeyPair(wallet_sdk.SigningKeyPair userSigningKeyPair, String pin) async {
+  static storeUserKeyPair(
+      wallet_sdk.SigningKeyPair userSigningKeyPair, String pin) async {
     const FlutterSecureStorage storage = FlutterSecureStorage();
 
     // encrypt the secret key before saving it, so that only the user can decrypt it.
-    var encryptedSecretKey = AesHelper.encrypt(pin, userSigningKeyPair.secretKey);
+    var encryptedSecretKey =
+        AesHelper.encrypt(pin, userSigningKeyPair.secretKey);
     await storage.write(key: _userSecretStorageKey, value: encryptedSecretKey);
   }
 
@@ -83,7 +87,7 @@ class SecureStorage {
     return contacts;
   }
 
-  /// Saves the list of contacts to storage as a json string.
+  /// Saves the list of contacts to storage as json.
   static Future<void> _saveContacts(List<ContactInfo> contacts) async {
     var valArr = List<Map<String, dynamic>>.empty(growable: true);
     for (var contract in contacts) {
@@ -93,6 +97,89 @@ class SecureStorage {
     var data = json.encode(jsonContacts);
     const FlutterSecureStorage storage = FlutterSecureStorage();
     await storage.write(key: _contactsStorageKey, value: data);
+  }
+
+  /// Loads the user's KYC data from secure storage.
+  static Future<Map<String, String>> getKycData() async {
+    const FlutterSecureStorage storage = FlutterSecureStorage();
+    var kycJson = await storage.read(key: _kycDataStorageKey);
+    if (kycJson != null) {
+      var kycData = json.decode(kycJson)['kycData'];
+      var result = emptyKycData();
+      for (var key in kycData.keys) {
+        if (kycData[key] is String) {
+          result[key] = kycData[key];
+        }
+      }
+      return result;
+    } else {
+      var empty = emptyKycData();
+      _saveKycData(empty);
+      return empty;
+    }
+  }
+
+  /// Updates a user's kyc data entry.
+  static Future<Map<String, String>> updateKycDataEntry(
+      String key, String value) async {
+    var storedKycData = await getKycData();
+    storedKycData[key] = value;
+    _saveKycData(storedKycData);
+    return storedKycData;
+  }
+
+  /// Saves the user's kyc data to storage as json.
+  static Future<void> _saveKycData(Map<String, String> kycData) async {
+    Map<String, dynamic> jsonKyc = {'kycData': kycData};
+    var data = json.encode(jsonKyc);
+    const FlutterSecureStorage storage = FlutterSecureStorage();
+    await storage.write(key: _kycDataStorageKey, value: data);
+  }
+
+  static Map<String, String> emptyKycData() {
+    var result = <String, String>{};
+    result[core_sdk.NaturalPersonKYCFields.last_name_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.first_name_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.additional_name_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.address_country_code_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.state_or_province_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.city_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.postal_code_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.address_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.mobile_number_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.birth_date_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.birth_place_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.birth_country_code_field_key] = '';
+    result[core_sdk.FinancialAccountKYCFields.bank_account_number_field_key] =
+        '';
+    result[core_sdk.FinancialAccountKYCFields.bank_account_type_field_key] = '';
+    result[core_sdk.FinancialAccountKYCFields.bank_number_field_key] = '';
+    result[core_sdk.FinancialAccountKYCFields.bank_phone_number_field_key] = '';
+    result[core_sdk.FinancialAccountKYCFields.bank_branch_number_field_key] =
+        '';
+    result[core_sdk.FinancialAccountKYCFields.clabe_number_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.tax_id_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.tax_id_name_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.occupation_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.employer_name_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.employer_address_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.language_code_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.id_type_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.id_country_code_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.id_issue_date_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.id_expiration_date_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.id_number_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.photo_id_front_file_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.photo_id_back_file_key] = '';
+    result[core_sdk
+        .NaturalPersonKYCFields.notary_approval_of_photo_id_file_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.photo_proof_residence_file_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.sex_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.proof_of_income_file_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.proof_of_liveness_file_key] = '';
+    result[core_sdk.FinancialAccountKYCFields.cbu_number_field_key] = '';
+    result[core_sdk.FinancialAccountKYCFields.cbu_alias_field_key] = '';
+    return result;
   }
 }
 

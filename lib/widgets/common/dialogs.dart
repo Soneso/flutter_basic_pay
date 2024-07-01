@@ -208,7 +208,7 @@ class Dialogs {
         Radius.circular(2),
       ),
       animType: AnimType.rightSlide,
-      desc: 'Record custom asset',
+      desc: 'Add contact',
       showCloseIcon: false,
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -376,6 +376,79 @@ class Dialogs {
 
     if (action != null && action == DialogAction.ok) {
       return addressController.text;
+    }
+    return null;
+  }
+
+  static Future<String?> editValueDialog(
+      String key, String value, BuildContext context) async {
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    final valueController = TextEditingController();
+    final action = await AwesomeDialog(
+      context: context,
+      dialogType: DialogType.noHeader,
+      reverseBtnOrder: false,
+      buttonsBorderRadius: const BorderRadius.all(
+        Radius.circular(2),
+      ),
+      animType: AnimType.rightSlide,
+      desc: 'Edit value',
+      showCloseIcon: false,
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Form(
+          key: formKey,
+          child: Column(
+            children: <Widget>[
+              Text(
+                key,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Text(
+                value.isNotEmpty
+                    ? "Your current $key is '$value'. Please enter your new $key:"
+                    : "Your current $key is not set. Please enter your $key:",
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              TextFormField(
+                decoration: const InputDecoration(
+                  hintText: '',
+                ),
+                textCapitalization: TextCapitalization.characters,
+                style: Theme.of(context).textTheme.bodyMedium,
+                validator: (String? value) {
+                  return null;
+                },
+                controller: valueController,
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+            ],
+          ),
+        ),
+      ),
+      btnCancelOnPress: () {
+        Navigator.of(context).pop(DialogAction.cancel);
+      },
+      btnOkOnPress: () {
+        if (formKey.currentState!.validate()) {
+          Navigator.of(context).pop(DialogAction.ok);
+        }
+      },
+      autoDismiss: false,
+      onDismissCallback: (type) {},
+      barrierColor: Colors.purple[900]?.withOpacity(0.54),
+    ).show();
+
+    if (action != null && action == DialogAction.ok) {
+      return valueController.text;
     }
     return null;
   }
