@@ -25,6 +25,10 @@ The app currently offers following features:
 - Find strict send and strict receive payment paths
 - Send path payments
 - Add and use contacts
+- Add and use your KYC data
+- SEP-06 deposits and withdrawals
+- SEP-24 deposits and withdrawals
+- SEP-06 & SEP-24 transfer history
 
 
 ## Tutorial
