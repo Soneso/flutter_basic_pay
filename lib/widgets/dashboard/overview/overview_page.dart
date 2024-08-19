@@ -22,7 +22,6 @@ class DashboardOverview extends StatelessWidget {
           Card(surfaceTintColor: Colors.blue, child: BalancesOverview()),
           Card(surfaceTintColor: Colors.yellow, child: PaymentsOverview()),
           Card(surfaceTintColor: Colors.green, child: MyDataOverview()),
-          Card(surfaceTintColor: Colors.blue, child: Text("Transfers")),
         ],
       ),
     );

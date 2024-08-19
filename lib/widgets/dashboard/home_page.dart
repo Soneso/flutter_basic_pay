@@ -13,6 +13,7 @@ import 'package:flutter_basic_pay/widgets/dashboard/contacts/contacts_page.dart'
 import 'package:flutter_basic_pay/widgets/dashboard/kyc/kyc_page.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/overview/overview_page.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/payments/payments_page.dart';
+import 'package:flutter_basic_pay/widgets/dashboard/transfers/transfers_page.dart';
 import 'package:provider/provider.dart';
 
 class DashboardHomePage extends StatefulWidget {
@@ -70,11 +71,11 @@ class _DashboardHomePageState extends State<DashboardHomePage> {
           AdaptiveScaffoldDestination(title: 'Payments', icon: Icons.payments),
           AdaptiveScaffoldDestination(
               title: 'Assets', icon: Icons.currency_exchange),
-          AdaptiveScaffoldDestination(title: 'Contacts', icon: Icons.person),
           AdaptiveScaffoldDestination(
               title: 'Transfers', icon: Icons.anchor_sharp),
           AdaptiveScaffoldDestination(
               title: 'KYC', icon: Icons.policy_outlined),
+          AdaptiveScaffoldDestination(title: 'Contacts', icon: Icons.person),
         ],
         body: _pageAtIndex(_pageIndex),
         onNavigationIndexChange: (newIndex) {
@@ -89,7 +90,7 @@ class _DashboardHomePageState extends State<DashboardHomePage> {
   }
 
   bool get _hasFloatingActionButton {
-    if (_pageIndex == 3) return true;
+    if (_pageIndex == 5) return true;
     return false;
   }
 
@@ -101,7 +102,7 @@ class _DashboardHomePageState extends State<DashboardHomePage> {
   }
 
   void _handleFabPressed(BuildContext context) async {
-    if (_pageIndex == 3) {
+    if (_pageIndex == 5) {
       var contactInfo = await Dialogs.addContactDialog(context);
       if (contactInfo != null) {
         _dashboardState.data.addContact(contactInfo);
@@ -147,9 +148,11 @@ class _DashboardHomePageState extends State<DashboardHomePage> {
       case 2:
         return const AssetsPage();
       case 3:
-        return const ContactsPage();
-      case 5:
+        return const TransfersPage();
+      case 4:
         return const KYCInformationPage();
+      case 5:
+        return const ContactsPage();
       default:
         return const Center(child: Text('not yet implemented'));
     }

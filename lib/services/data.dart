@@ -16,11 +16,6 @@ class DashboardData {
   /// The assets currently hold by the user.
   List<AssetInfo> assets = List<AssetInfo>.empty(growable: true);
 
-  /// A list of "known assets" on the Stellar Test Network used to make
-  /// testing easier.
-  List<wallet_sdk.IssuedAssetId> knownAssets =
-      List<wallet_sdk.IssuedAssetId>.empty(growable: true);
-
   /// Stream controller that broadcasts updates within the list of
   /// assets owned by the user. Such as asset added, asset removed,
   /// asset balance changed.
@@ -44,22 +39,14 @@ class DashboardData {
       StreamController<List<ContactInfo>>.broadcast();
 
   /// KYC Information that the user stored
-  Map<String,String> kycData = <String, String>{};
+  Map<String, String> kycData = <String, String>{};
 
   /// Stream controller that broadcasts updates of the user's kyc data.
-  final StreamController<Map<String,String>> _kycDataStreamController =
-  StreamController<Map<String,String>>.broadcast();
+  final StreamController<Map<String, String>> _kycDataStreamController =
+      StreamController<Map<String, String>>.broadcast();
 
   /// Constructor. Creates a new (empty) object for the given user.
-  DashboardData(this.userAddress) {
-    // add known stellar test anchor assets which are great for testing
-    knownAssets.add(wallet_sdk.IssuedAssetId(
-        code: 'SRT',
-        issuer: 'GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B'));
-    knownAssets.add(wallet_sdk.IssuedAssetId(
-        code: 'USDC',
-        issuer: 'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5'));
-  }
+  DashboardData(this.userAddress);
 
   /// Funds the user account on the Stellar Test Network by using Friendbot.
   Future<bool> fundUserAccount() async {
@@ -130,7 +117,7 @@ class DashboardData {
   }
 
   /// Loads the user's kyc data from secure storage.
-  Future<Map<String,String>> loadKycData() async {
+  Future<Map<String, String>> loadKycData() async {
     kycData = await SecureStorage.getKycData();
     _emitKycDataInfo();
     return kycData;
@@ -181,7 +168,7 @@ class DashboardData {
 
   /// Submits a payment to the Stellar Network by using the wallet sdk.
   /// It requires the [destinationAddress] of the recipient, the [assetId]
-  /// representing the asset to be send, [amount], optional text [memo] and
+  /// representing the asset to be send, [amount], optional [memo] and [memoType] and
   /// the signing [userKeyPair] needed to sign the transaction before submission.
   /// Returns true on success.
   Future<bool> sendPayment(
@@ -189,11 +176,14 @@ class DashboardData {
       required wallet_sdk.StellarAssetId assetId,
       required String amount,
       String? memo,
+      String? memoType,
       required wallet_sdk.SigningKeyPair userKeyPair}) async {
     var success = StellarService.sendPayment(
         destinationAddress: destinationAddress,
         assetId: assetId,
         amount: amount,
+        memo: memo,
+        memoType: memoType,
         userKeyPair: userKeyPair);
 
     // Wait for the ledger to close.
@@ -311,7 +301,7 @@ class DashboardData {
   }
 
   /// Subscribe for updates on the user's kyc data.
-  Stream<Map<String,String>> subscribeForKycData() =>
+  Stream<Map<String, String>> subscribeForKycData() =>
       _kycDataStreamController.stream;
 
   /// Emit updates on the user's kyc data

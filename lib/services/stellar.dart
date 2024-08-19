@@ -1,16 +1,35 @@
+// Copyright 2024 The Flutter Basic Pay App Authors. All rights reserved.
+// Use of this source code is governed by a license that can be
+// found in the LICENSE file.
+
 import 'package:flutter_basic_pay/widgets/common/util.dart';
 import 'package:stellar_wallet_flutter_sdk/stellar_wallet_flutter_sdk.dart'
     as wallet_sdk;
 import 'package:stellar_flutter_sdk/stellar_flutter_sdk.dart' as core_sdk;
+import 'package:flutter/foundation.dart';
+import 'package:collection/collection.dart';
 
 class StellarService {
   /// [wallet_sdk.Wallet] used to communicate with the Stellar Test Network.
-  static final wallet_sdk.Wallet _wallet = wallet_sdk.Wallet.testNet;
+  static final wallet_sdk.Wallet wallet = wallet_sdk.Wallet.testNet;
+
+  /// A list of assets on the Stellar Test Network used to make
+  /// testing easier. (to be used with testanchor.stellar.org)
+  static List<wallet_sdk.IssuedAssetId> testAnchorAssets = [
+    wallet_sdk.IssuedAssetId(
+        code: 'SRT',
+        issuer: 'GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B'),
+    wallet_sdk.IssuedAssetId(
+        code: 'USDC',
+        issuer: 'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5')
+  ];
+
+  static String testAnchorDomain = 'testanchor.stellar.org';
 
   /// Funds the account given by [address] on the Stellar Test Network by using Friendbot.
   static Future<bool> fundTestNetAccount(String address) async {
     // fund account
-    return await _wallet.stellar().account().fundTestNetAccount(address);
+    return await wallet.stellar().account().fundTestNetAccount(address);
   }
 
   /// Loads the assets for a given account specified by [address] from the
@@ -19,7 +38,7 @@ class StellarService {
     var loadedAssets = List<AssetInfo>.empty(growable: true);
     try {
       var stellarAccountInfo =
-          await _wallet.stellar().account().getInfo(address);
+          await wallet.stellar().account().getInfo(address);
       for (var balance in stellarAccountInfo.balances) {
         loadedAssets.add(AssetInfo(
           asset: wallet_sdk.StellarAssetId.fromAsset(balance.asset),
@@ -35,7 +54,7 @@ class StellarService {
 
   /// Check if an account for the given [address] exists on the Stellar Network.
   static Future<bool> accountExists(String address) async {
-    return await _wallet.stellar().account().accountExists(address);
+    return await wallet.stellar().account().accountExists(address);
   }
 
   /// Adds a trust line by using the wallet sdk, so that the user can hold the
@@ -45,7 +64,7 @@ class StellarService {
   static Future<bool> addAssetSupport(wallet_sdk.IssuedAssetId asset,
       wallet_sdk.SigningKeyPair userKeyPair) async {
     // build sign and submit transaction to stellar.
-    var stellar = _wallet.stellar();
+    var stellar = wallet.stellar();
     var txBuilder = await stellar.transaction(userKeyPair);
     var tx = txBuilder.addAssetSupport(asset).build();
     stellar.sign(tx, userKeyPair);
@@ -60,7 +79,7 @@ class StellarService {
   static Future<bool> removeAssetSupport(wallet_sdk.IssuedAssetId asset,
       wallet_sdk.SigningKeyPair userKeyPair) async {
     // build sign and submit transaction to stellar.
-    var stellar = _wallet.stellar();
+    var stellar = wallet.stellar();
     var txBuilder = await stellar.transaction(userKeyPair);
     var tx = txBuilder.removeAssetSupport(asset).build();
     stellar.sign(tx, userKeyPair);
@@ -77,9 +96,8 @@ class StellarService {
       String? memo,
       String startingBalance = "1",
       required wallet_sdk.SigningKeyPair userKeyPair}) async {
-
     // Build, sign and submit transaction to stellar.
-    var stellar = _wallet.stellar();
+    var stellar = wallet.stellar();
     var txBuilder = await stellar.transaction(userKeyPair);
     txBuilder = txBuilder.createAccount(
         wallet_sdk.PublicKeyPair.fromAccountId(destinationAddress),
@@ -95,7 +113,7 @@ class StellarService {
 
   /// Submits a payment to the Stellar Network by using the wallet sdk.
   /// It requires the [destinationAddress] of the recipient, the [assetId]
-  /// representing the asset to be send, [amount], optional text [memo] and
+  /// representing the asset to be send, [amount], optional [memo] and [memoType] and
   /// the signing [userKeyPair] needed to sign the transaction before submission.
   /// The stellar address from [userKeyPair] will be used as the source account
   /// of the transaction.
@@ -105,13 +123,23 @@ class StellarService {
       required wallet_sdk.StellarAssetId assetId,
       required String amount,
       String? memo,
+      String? memoType,
       required wallet_sdk.SigningKeyPair userKeyPair}) async {
     // Build, sign and submit transaction to stellar.
-    var stellar = _wallet.stellar();
+    var stellar = wallet.stellar();
     var txBuilder = await stellar.transaction(userKeyPair);
     txBuilder = txBuilder.transfer(destinationAddress, assetId, amount);
     if (memo != null) {
-      txBuilder = txBuilder.setMemo(core_sdk.MemoText(memo));
+      try {
+        txBuilder = txBuilder
+            .setMemo(core_sdk.Memo.fromStrings(memo, memoType ?? 'text'));
+      } catch (e) {
+        // could not build memo, e.g. memo to long, could not be decoded, etc.
+        if (kDebugMode) {
+          print('error building memo: ${e.toString()}');
+        }
+        return false;
+      }
     }
     var tx = txBuilder.build();
     stellar.sign(tx, userKeyPair);
@@ -125,7 +153,7 @@ class StellarService {
       {required wallet_sdk.StellarAssetId sourceAsset,
       required String sourceAmount,
       required String destinationAddress}) async {
-    var stellar = _wallet.stellar();
+    var stellar = wallet.stellar();
     return await stellar.findStrictSendPathForDestinationAddress(
         sourceAsset, sourceAmount, destinationAddress);
   }
@@ -138,7 +166,7 @@ class StellarService {
       {required String sourceAddress,
       required wallet_sdk.StellarAssetId destinationAsset,
       required String destinationAmount}) async {
-    var stellar = _wallet.stellar();
+    var stellar = wallet.stellar();
     return await stellar.findStrictReceivePathForSourceAddress(
         destinationAsset, destinationAmount, sourceAddress);
   }
@@ -162,7 +190,7 @@ class StellarService {
       String? memo,
       required wallet_sdk.SigningKeyPair userKeyPair}) async {
     // Build, sign and submit transaction to stellar.
-    var stellar = _wallet.stellar();
+    var stellar = wallet.stellar();
     var txBuilder = await stellar.transaction(userKeyPair);
     txBuilder = txBuilder.strictSend(
         sendAssetId: sendAssetId,
@@ -198,7 +226,7 @@ class StellarService {
       String? memo,
       required wallet_sdk.SigningKeyPair userKeyPair}) async {
     // Build, sign and submit transaction to stellar.
-    var stellar = _wallet.stellar();
+    var stellar = wallet.stellar();
     var txBuilder = await stellar.transaction(userKeyPair);
     txBuilder = txBuilder.strictReceive(
         sendAssetId: sendAssetId,
@@ -217,8 +245,8 @@ class StellarService {
 
   /// Loads the list of the 5 most recent payments for given [address].
   static Future<List<PaymentInfo>> loadRecentPayments(String address) async {
-
-    var stellarPayments = await _wallet.stellar().account().loadRecentPayments(address, limit:5);
+    var stellarPayments =
+        await wallet.stellar().account().loadRecentPayments(address, limit: 5);
     if (stellarPayments.isEmpty) {
       return [];
     }
@@ -270,6 +298,53 @@ class StellarService {
     }
     return recentPayments;
   }
+
+  static Future<List<AnchoredAssetInfo>> getAnchoredAssets(
+      List<AssetInfo> fromAssets) async {
+    List<AnchoredAssetInfo> anchorAssets =
+        List<AnchoredAssetInfo>.empty(growable: true);
+    for (var assetInfo in fromAssets) {
+      var asset = assetInfo.asset;
+
+      // We are only interested in issued assets (not XLM)
+      if (asset is wallet_sdk.IssuedAssetId &&
+          await wallet.stellar().account().accountExists(asset.issuer)) {
+        String? anchorDomain;
+
+        // check if it is a known stellar testanchor asset
+        // if yes, we can use testanchor.stellar.org as anchor.
+        if (testAnchorAssets.firstWhereOrNull((val) =>
+                val.code == asset.code && val.issuer == asset.issuer) !=
+            null) {
+          anchorDomain = testAnchorDomain;
+        } else {
+          // otherwise load from home domain (maybe it is an anchor ...)
+          var issuerAccountInfo =
+              await wallet.stellar().account().getInfo(asset.issuer);
+          if (issuerAccountInfo.homeDomain != null) {
+            anchorDomain = issuerAccountInfo.homeDomain!;
+          }
+        }
+
+        if (anchorDomain != null) {
+          anchorAssets.add(AnchoredAssetInfo(
+              asset: asset,
+              balance: assetInfo.balance,
+              anchor: wallet.anchor(anchorDomain)));
+        }
+      }
+    }
+    return anchorAssets;
+  }
+}
+
+class AnchoredAssetInfo {
+  wallet_sdk.IssuedAssetId asset;
+  String balance;
+  wallet_sdk.Anchor anchor;
+
+  AnchoredAssetInfo(
+      {required this.asset, required this.balance, required this.anchor});
 }
 
 class AssetInfo {

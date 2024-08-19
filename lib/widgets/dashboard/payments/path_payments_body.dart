@@ -72,7 +72,6 @@ class _PathPaymentsBodyContentState extends State<PathPaymentsBodyContent> {
               AutoSizeText(
                 "Recipient:",
                 style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.start,
               ),
               const SizedBox(height: 10),
               StringItemsDropdown(
@@ -111,7 +110,7 @@ class _PathPaymentsBodyContentState extends State<PathPaymentsBodyContent> {
                 ),
               const SizedBox(height: 10),
               if (_state == PathPaymentsBodyState.loadingContactAssets)
-                getLoadingColumn('loading contact assets ...'),
+                Util.getLoadingColumn(context, 'loading contact assets ...'),
               if (_state == PathPaymentsBodyState.contactAssetsLoaded ||
                   _state == PathPaymentsBodyState.pathSelected)
                 PathPaymentsSwitcher(
@@ -120,13 +119,7 @@ class _PathPaymentsBodyContentState extends State<PathPaymentsBodyContent> {
                     onPathSelected: (pathData) => _handlePathSelected(pathData),
                     key: ObjectKey(_recipientAddress)),
               if (_submitError != null)
-                AutoSizeText(
-                  _submitError!,
-                  style: Theme.of(context)
-                      .textTheme
-                      .apply(bodyColor: Colors.red)
-                      .bodyMedium,
-                ),
+                Util.getErrorTextWidget(context, _submitError!),
               if (_state == PathPaymentsBodyState.pathSelected)
                 Column(
                   children: [
@@ -143,34 +136,9 @@ class _PathPaymentsBodyContentState extends State<PathPaymentsBodyContent> {
             ],
           ),
         if (_state == PathPaymentsBodyState.sending)
-          getLoadingColumn('sending payment ...'),
+          Util.getLoadingColumn(context, 'sending payment ...'),
         const Divider(
           color: Colors.blue,
-        ),
-      ],
-    );
-  }
-
-  Column getLoadingColumn(String text) {
-    return Column(
-      key: ObjectKey(text),
-      children: [
-        const Divider(
-          color: Colors.blue,
-        ),
-        Row(
-          children: [
-            const SizedBox(
-              height: 10.0,
-              width: 10.0,
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            const SizedBox(width: 10),
-            Text(
-              text,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
         ),
       ],
     );
@@ -218,8 +186,7 @@ class _PathPaymentsBodyContentState extends State<PathPaymentsBodyContent> {
       _recipientAddress = address;
     });
 
-    var destinationAssets =
-        await StellarService.loadAssetsForAddress(address);
+    var destinationAssets = await StellarService.loadAssetsForAddress(address);
     if (destinationAssets.isEmpty) {
       setState(() {
         _submitError =
@@ -478,7 +445,7 @@ class _PathPaymentSectionState extends State<PathPaymentSection> {
           const SizedBox(height: 10),
           if (_state == SectionState.initial) getAmountForm(dashboardState),
           if (_state == SectionState.searchingPaths)
-            getLoadingColumn('Searching best payment path')
+            Util.getLoadingColumn(context, 'Searching best payment path')
         ]);
   }
 
@@ -520,14 +487,7 @@ class _PathPaymentSectionState extends State<PathPaymentSection> {
               controller: amountTextController,
             ),
           ),
-          if (_errorText != null)
-            AutoSizeText(
-              _errorText!,
-              style: Theme.of(context)
-                  .textTheme
-                  .apply(bodyColor: Colors.red)
-                  .bodyMedium,
-            ),
+          if (_errorText != null) Util.getErrorTextWidget(context, _errorText!),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: ElevatedButton(
@@ -567,7 +527,8 @@ class _PathPaymentSectionState extends State<PathPaymentSection> {
     } else {
       paths = await StellarService.findStrictReceivePaymentPath(
           sourceAddress: dashboardState.data.userAddress,
-          destinationAsset: asset, destinationAmount: amount);
+          destinationAsset: asset,
+          destinationAmount: amount);
     }
     if (paths.isEmpty) {
       setState(() {
@@ -610,31 +571,6 @@ class _PathPaymentSectionState extends State<PathPaymentSection> {
       }
     }
     return 0;
-  }
-
-  Column getLoadingColumn(String text) {
-    return Column(
-      key: ObjectKey(text),
-      children: [
-        const Divider(
-          color: Colors.blue,
-        ),
-        Row(
-          children: [
-            const SizedBox(
-              height: 10.0,
-              width: 10.0,
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            const SizedBox(width: 10),
-            Text(
-              text,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
-        ),
-      ],
-    );
   }
 }
 

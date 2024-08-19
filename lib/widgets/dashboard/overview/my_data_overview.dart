@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_basic_pay/services/storage.dart';
 import 'package:flutter_basic_pay/widgets/common/navigation_service.dart';
 import 'package:flutter_basic_pay/widgets/common/pin_form.dart';
+import 'package:flutter_basic_pay/widgets/common/util.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/home_page.dart';
 import 'package:provider/provider.dart';
 
@@ -72,11 +73,7 @@ class _MyDataOverviewState extends State<MyDataOverview> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (_error != null)
-                          AutoSizeText(_error!,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .apply(bodyColor: Colors.red)
-                                  .bodyMedium),
+                          Util.getErrorTextWidget(context, _error!),
                         PinForm(
                           onPinSet: (String pin) async {
                             await _handlePinSet(pin, dashboardState);

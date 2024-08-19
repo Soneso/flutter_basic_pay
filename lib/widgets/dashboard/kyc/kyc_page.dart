@@ -1,4 +1,3 @@
-import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_basic_pay/services/data.dart';
 import 'package:flutter_basic_pay/widgets/common/dialogs.dart';
@@ -43,7 +42,7 @@ class KYCInformationPage extends StatelessWidget {
 class _KYCListItem extends ListTile {
   _KYCListItem(MapEntry entry, ValueChanged<MapEntry> onEdit)
       : super(
-            title: Text(entry.key.replaceAll('_', ' ')),
+            title: Text(entry.key.replaceAll('_', ' ').toUpperCase()),
             subtitle: Text(entry.value),
             key: ObjectKey(entry),
             trailing: IconButton(
@@ -95,7 +94,9 @@ class KYCInformationPageBody extends StatelessWidget {
 
   void _handleOnEdit(MapEntry entry) async {
     if (entry.key is String && entry.value is String) {
-      var newValue = await Dialogs.editValueDialog(entry.key.replaceAll('_', ' '), entry.value,
+      var newValue = await Dialogs.editValueDialog(
+          entry.key.replaceAll('_', ' ').toUpperCase(),
+          entry.value,
           NavigationService.navigatorKey.currentContext!);
       if (newValue != null) {
         await data.updateKycDataEntry(entry.key, newValue);

@@ -7,6 +7,7 @@ import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_basic_pay/services/stellar.dart';
 import 'package:flutter_basic_pay/services/storage.dart';
+import 'package:flutter_basic_pay/widgets/common/util.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/payments/payment_data_and_pin_form.dart';
 import 'package:flutter_basic_pay/widgets/common/dialogs.dart';
 import 'package:flutter_basic_pay/widgets/common/dropdowns.dart';
@@ -133,13 +134,7 @@ class _SimplePaymentsBodyContentState
                 ),
               const SizedBox(height: 10),
               if (_submitError != null)
-                Text(
-                  _submitError!,
-                  style: Theme.of(context)
-                      .textTheme
-                      .apply(bodyColor: Colors.red)
-                      .bodyMedium,
-                ),
+                Util.getErrorTextWidget(context, _submitError!),
               if (_state != SimplePaymentsPageState.initial)
                 PaymentDataAndPinForm(
                   onDataSet: (PaymentDataAndPin data) async {
@@ -153,27 +148,7 @@ class _SimplePaymentsBodyContentState
             ],
           ),
         if (_state == SimplePaymentsPageState.sending)
-          Column(
-            children: [
-              const Divider(
-                color: Colors.blue,
-              ),
-              Row(
-                children: [
-                  const SizedBox(
-                    height: 10.0,
-                    width: 10.0,
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'sending payment ...',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
-            ],
-          ),
+          Util.getLoadingColumn(context, 'sending payment ...'),
         const Divider(
           color: Colors.blue,
         ),

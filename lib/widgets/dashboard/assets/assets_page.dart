@@ -9,6 +9,7 @@ import 'package:flutter_basic_pay/services/storage.dart';
 import 'package:flutter_basic_pay/widgets/common/dialogs.dart';
 import 'package:flutter_basic_pay/widgets/common/dropdowns.dart';
 import 'package:flutter_basic_pay/widgets/common/navigation_service.dart';
+import 'package:flutter_basic_pay/widgets/common/util.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/assets/asset_balance_card.dart';
 import 'package:flutter_basic_pay/widgets/common/pin_form.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/home_page.dart';
@@ -133,7 +134,7 @@ class _AssetsPageBodyContentState extends State<AssetsPageBodyContent> {
   Widget build(BuildContext context) {
     var dashboardState = Provider.of<DashboardState>(context);
     // prepare assets to select from
-    List<String> dropdownItems = dashboardState.data.knownAssets
+    List<String> dropdownItems = StellarService.testAnchorAssets
         .map((asset) => asset.id)
         .toList(growable: true);
 
@@ -197,13 +198,7 @@ class _AssetsPageBodyContentState extends State<AssetsPageBodyContent> {
                       ),
                       const SizedBox(height: 10),
                       if (_submitError != null)
-                        Text(
-                          _submitError!,
-                          style: Theme.of(context)
-                              .textTheme
-                              .apply(bodyColor: Colors.red)
-                              .bodyMedium,
-                        ),
+                        Util.getErrorTextWidget(context, _submitError!),
                       if (_customAsset != null)
                         Text(
                           _customAsset!.id,
@@ -223,27 +218,7 @@ class _AssetsPageBodyContentState extends State<AssetsPageBodyContent> {
                     ],
                   ),
                 if (_state == AssetsPageState.sending)
-                  Column(
-                    children: [
-                      const Divider(
-                        color: Colors.blue,
-                      ),
-                      Row(
-                        children: [
-                          const SizedBox(
-                            height: 10.0,
-                            width: 10.0,
-                            child: Center(child: CircularProgressIndicator()),
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            'Adding asset ...',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                  Util.getLoadingColumn(context, 'Adding asset ...'),
                 const Divider(
                   color: Colors.blue,
                 ),
@@ -308,20 +283,18 @@ class _AssetsPageBodyContentState extends State<AssetsPageBodyContent> {
       _state = AssetsPageState.sending;
     });
     try {
-
       // compose the asset
       wallet_sdk.IssuedAssetId? asset;
       if (_selectedAsset == addCustomAsset && _customAsset != null) {
         asset = _customAsset;
       } else {
-        asset = dashboardState.data.knownAssets
+        asset = StellarService.testAnchorAssets
             .firstWhere((item) => item.id == _selectedAsset);
       }
 
       if (asset != null) {
         // check if the issuer account id exists on the stellar network
-        var issuerExists =
-            await StellarService.accountExists(asset.issuer);
+        var issuerExists = await StellarService.accountExists(asset.issuer);
         if (!issuerExists) {
           throw IssuerNotFound();
         }

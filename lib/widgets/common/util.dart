@@ -2,6 +2,9 @@
 // Use of this source code is governed by a license that can be
 // found in the LICENSE file.
 
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/material.dart';
+
 class Util {
   static String removeTrailingZerosFormAmount(String amount) {
     RegExp regex = RegExp(r"([.]*0+)(?!.*\d)");
@@ -15,5 +18,42 @@ class Util {
       return '${address.substring(0, 4)}...${address.substring(address.length - 4, address.length)}';
     }
     return address;
+  }
+
+  static Column getLoadingColumn(BuildContext context, String text,
+      {bool showDivider = true, Key? key}) {
+    return Column(
+      key: key ?? ObjectKey(text),
+      children: [
+        if (showDivider)
+          const Divider(
+            color: Colors.blue,
+          ),
+        Row(
+          children: [
+            const SizedBox(
+              height: 10.0,
+              width: 10.0,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              text,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  static AutoSizeText getErrorTextWidget(BuildContext context, String text,
+      {Key? key}) {
+    return AutoSizeText(
+      text,
+      key: key ?? ObjectKey(text),
+      style:
+          Theme.of(context).textTheme.apply(bodyColor: Colors.red).bodyMedium,
+    );
   }
 }
