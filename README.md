@@ -37,3 +37,9 @@ The tutorial can be found [here](tutorial/README.md).
 
 
 ![screenshots 2](/screenshots/screenshots-2.png)
+
+
+![screenshots 3](/screenshots/screenshots-3.png)
+
+
+![screenshots 4](/screenshots/screenshots-4.png)

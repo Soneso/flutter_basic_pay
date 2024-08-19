@@ -139,7 +139,7 @@ class _Sep24NewTransferWidgetState extends State<Sep24NewTransferWidget> {
         isScrollControlled: true,
         builder: (context) {
           return WebViewContainer(
-              title: "SEP-24 Deposit", controller: _controller);
+              title: "SEP-24 Withdrawal", controller: _controller);
         });
 
     setState(() {
