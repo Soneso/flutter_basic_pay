@@ -455,7 +455,7 @@ static Future<List<PaymentInfo>> loadRecentPayments(String address) async {
 }
 ```
 
-We receive the list of recent payments from the wallet sdk via the method `loadRecentPayments`. It returns a list of operations that represent payments. Depending on the type of payment, we extract the data needed and store it in a list of PaymentInfo objects, which we then display in the UI.
+We receive the list of recent payments from the wallet sdk via the method `loadRecentPayments`. It returns a list of operations that represent payments. Depending on the type of payment, we extract the data needed and store it in a list of `PaymentInfo` objects, which we then display in the UI.
 
 ```dart
 /// Loads the list of the 5 most recent payments for the user.

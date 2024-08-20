@@ -13,17 +13,16 @@ import 'package:stellar_wallet_flutter_sdk/stellar_wallet_flutter_sdk.dart';
 import 'package:flutter/foundation.dart';
 
 class Sep6DepositStepper extends StatefulWidget {
-  final AnchoredAssetInfo asset;
+  final AnchoredAssetInfo anchoredAsset;
   final Sep6DepositInfo depositInfo;
-  final Sep6EndpointInfo? feeEndpointInfo;
-
+  final bool anchorHasEnabledFeeEndpoint;
   final AuthToken authToken;
 
   const Sep6DepositStepper({
-    required this.asset,
+    required this.anchoredAsset,
     required this.depositInfo,
+    required this.anchorHasEnabledFeeEndpoint,
     required this.authToken,
-    this.feeEndpointInfo,
     super.key,
   });
 
@@ -245,9 +244,12 @@ class _Sep6DepositStepperState extends State<Sep6DepositStepper> {
     setState(() {
       _isSubmittingTransfer = true;
     });
+    var anchoredAsset = widget.anchoredAsset;
+    var authToken = widget.authToken;
+
     try {
-      var destinationAsset = widget.asset.asset;
-      var sep06 = widget.asset.anchor.sep6();
+      var destinationAsset = anchoredAsset.asset;
+      var sep06 = anchoredAsset.anchor.sep6();
       Map<String, String> extraFields = {};
       var transferDetailsForm = getTransferDetailsForm();
       for (var entry in transferDetailsForm.collectedFields.entries) {
@@ -258,12 +260,12 @@ class _Sep6DepositStepperState extends State<Sep6DepositStepper> {
       }
       var sep6DepositParams = Sep6DepositParams(
           assetCode: destinationAsset.code,
-          account: widget.authToken.account,
+          account: authToken.account,
           amount: _amount!.toString(),
           extraFields: extraFields);
 
       _submissionResult =
-          await sep06.deposit(sep6DepositParams, widget.authToken);
+          await sep06.deposit(sep6DepositParams, authToken);
     } catch (e) {
       _submissionError = 'Your request has been submitted to the Anchor '
           'but following error occurred: ${e.toString()}. Please close this '
@@ -276,7 +278,7 @@ class _Sep6DepositStepperState extends State<Sep6DepositStepper> {
   }
 
   String getAssetCode() {
-    return widget.asset.asset.code;
+    return widget.anchoredAsset.asset.code;
   }
 
   Map<String, Sep6FieldInfo> getTransferFields() {
@@ -303,8 +305,11 @@ class _Sep6DepositStepperState extends State<Sep6DepositStepper> {
   }
 
   Future<void> loadKycData() async {
+    var anchoredAsset = widget.anchoredAsset;
+    var authToken = widget.authToken;
+
     try {
-      var sep12 = await widget.asset.anchor.sep12(widget.authToken);
+      var sep12 = await anchoredAsset.anchor.sep12(authToken);
       _sep12Info = await sep12.getByAuthTokenOnly();
     } catch (e) {
       if (kDebugMode) {
@@ -325,13 +330,18 @@ class _Sep6DepositStepperState extends State<Sep6DepositStepper> {
   }
 
   Future<void> sendAndReloadKycData() async {
+    var anchoredAsset = widget.anchoredAsset;
+    var authToken = widget.authToken;
+
     try {
-      var sep12 = await widget.asset.anchor.sep12(widget.authToken);
+      var sep12 = await anchoredAsset.anchor.sep12(authToken);
       var customerId = _sep12Info?.id;
       var kycForm = getKycCollectorForm();
       if (customerId == null) {
+        // new anchor customer
         await sep12.add(kycForm.collectedFields);
       } else {
+        // known anchor customer
         await sep12.update(kycForm.collectedFields, customerId);
       }
     } catch (e) {
@@ -348,7 +358,7 @@ class _Sep6DepositStepperState extends State<Sep6DepositStepper> {
       _kycDataLoaded = false;
     });
     try {
-      var sep12 = await widget.asset.anchor.sep12(widget.authToken);
+      var sep12 = await widget.anchoredAsset.anchor.sep12(widget.authToken);
       sep12.delete(widget.authToken.account);
     } catch (e) {
       if (kDebugMode) {
@@ -365,7 +375,6 @@ class _Sep6DepositStepperState extends State<Sep6DepositStepper> {
   Future<void> loadFee(Map<String, String?> transferDetails) async {
     double? feeFixed = widget.depositInfo.feeFixed;
     double? feePercent = widget.depositInfo.feePercent;
-    Sep6EndpointInfo? feeEndpointInfo = widget.feeEndpointInfo;
 
     if (feeFixed != null) {
       _fee = feeFixed;
@@ -377,13 +386,13 @@ class _Sep6DepositStepperState extends State<Sep6DepositStepper> {
       return;
     }
 
-    if (feeEndpointInfo != null && _amount != null) {
+    if (widget.anchorHasEnabledFeeEndpoint && _amount != null) {
       String? type;
       if (transferDetails.containsKey('type')) {
         type = transferDetails['type'];
       }
       try {
-        _fee = await widget.asset.anchor.sep6().fee(
+        _fee = await widget.anchoredAsset.anchor.sep6().fee(
               operation: 'deposit',
               assetCode: getAssetCode(),
               type: type,

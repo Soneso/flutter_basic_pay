@@ -1,14 +1,14 @@
-# flutter_basic_pay
-This is a demo app showing how to uses flutter to implement a stellar payment app.
+# Flutter Basic Pay
+
+This is a demo app showing how to use the [Stellar Wallet Flutter SDK](https://github.com/Soneso/stellar_wallet_flutter_sdk/) to implement a Stellar Payment App.
 
 ## Installation
 
 Clone this repository, get the dependencies and start the app in `main.dart`.
 
-## Demo
+## Features
 
-The app showcases how to use the [flutter wallet sdk](https://github.com/Soneso/stellar_wallet_flutter_sdk/)
-to create a Stellar Payment App. It is a non-custodial app, that secures the users keypair encrypted in the
+Flutter Basic Pay is a non-custodial app, that secures the users keypair encrypted in the
 secure storage of the device. Only the user who knows the pin can decrypt it to sign transactions.
 
 The app currently offers following features:

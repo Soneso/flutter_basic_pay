@@ -11,16 +11,14 @@ import 'package:provider/provider.dart';
 import 'package:stellar_wallet_flutter_sdk/stellar_wallet_flutter_sdk.dart';
 
 class Sep6NewTransferWidget extends StatefulWidget {
-  final AnchoredAssetInfo asset;
+  final AnchoredAssetInfo anchoredAsset;
   final Sep6Info sep6Info;
   final AuthToken authToken;
-  final QuotesInfoResponse? sep38Info;
 
   const Sep6NewTransferWidget({
-    required this.asset,
+    required this.anchoredAsset,
     required this.sep6Info,
     required this.authToken,
-    this.sep38Info,
     super.key,
   });
 
@@ -29,14 +27,19 @@ class Sep6NewTransferWidget extends StatefulWidget {
 }
 
 class _Sep6NewTransferWidgetState extends State<Sep6NewTransferWidget> {
-  Sep6DepositInfo? depositInfo;
-  Sep6WithdrawInfo? withdrawalInfo;
+  Sep6DepositInfo? _depositInfo;
+  Sep6WithdrawInfo? _withdrawalInfo;
 
   @override
   Widget build(BuildContext context) {
     var dashboardState = Provider.of<DashboardState>(context);
-    depositInfo = getDepositInfoIfEnabled();
-    withdrawalInfo = getWithdrawalInfoIfEnabled();
+    var sep6Info = widget.sep6Info;
+    var anchoredAsset = widget.anchoredAsset;
+    var authToken = widget.authToken;
+    _depositInfo = getDepositInfoIfEnabled(sep6Info, anchoredAsset.asset.code);
+    _withdrawalInfo = getWithdrawalInfoIfEnabled(sep6Info, anchoredAsset.asset.code);
+
+    bool anchorHasEnabledFeeEndpoint = sep6Info.fee != null && sep6Info.fee!.enabled;
 
     return Column(children: [
       const SizedBox(height: 10),
@@ -48,7 +51,7 @@ class _Sep6NewTransferWidgetState extends State<Sep6NewTransferWidget> {
           children: [
             Text("SEP-06 Transfers",
                 style: Theme.of(context).textTheme.titleMedium),
-            if (depositInfo == null && withdrawalInfo == null)
+            if (_depositInfo == null && _withdrawalInfo == null)
               Text("not supported",
                   style: Theme.of(context).textTheme.titleMedium),
           ],
@@ -58,7 +61,7 @@ class _Sep6NewTransferWidgetState extends State<Sep6NewTransferWidget> {
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          if (depositInfo != null)
+          if (_depositInfo != null)
             ElevatedButton(
               onPressed: () async {
                 showModalBottomSheet(
@@ -66,16 +69,16 @@ class _Sep6NewTransferWidgetState extends State<Sep6NewTransferWidget> {
                     isScrollControlled: true,
                     builder: (context) {
                       return Sep6DepositStepper(
-                          asset: widget.asset,
-                          depositInfo: depositInfo!,
-                          feeEndpointInfo: getFeeEndpointInfo(),
-                          authToken: widget.authToken);
+                          anchoredAsset: anchoredAsset,
+                          depositInfo: _depositInfo!,
+                          anchorHasEnabledFeeEndpoint: anchorHasEnabledFeeEndpoint,
+                          authToken: authToken);
                     });
               },
               child:
                   const Text('Deposit', style: TextStyle(color: Colors.green)),
             ),
-          if (withdrawalInfo != null)
+          if (_withdrawalInfo != null)
             ElevatedButton(
               onPressed: () async {
                 showModalBottomSheet(
@@ -83,10 +86,10 @@ class _Sep6NewTransferWidgetState extends State<Sep6NewTransferWidget> {
                     isScrollControlled: true,
                     builder: (context) {
                       return Sep6WithdrawStepper(
-                        asset: widget.asset,
-                        withdrawInfo: withdrawalInfo!,
-                        feeEndpointInfo: getFeeEndpointInfo(),
-                        authToken: widget.authToken,
+                        anchoredAsset: anchoredAsset,
+                        withdrawInfo: _withdrawalInfo!,
+                        anchorHasEnabledFeeEndpoint: anchorHasEnabledFeeEndpoint,
+                        authToken: authToken,
                         dashboardState: dashboardState,
                       );
                     });
@@ -99,9 +102,8 @@ class _Sep6NewTransferWidgetState extends State<Sep6NewTransferWidget> {
     ]);
   }
 
-  Sep6DepositInfo? getDepositInfoIfEnabled() {
-    var assetCode = getAssetCode();
-    var sep6Info = widget.sep6Info;
+  Sep6DepositInfo? getDepositInfoIfEnabled(
+      Sep6Info sep6Info, String assetCode) {
     if (sep6Info.deposit != null && sep6Info.deposit!.containsKey(assetCode)) {
       var depositInfo = sep6Info.deposit![assetCode]!;
       if (depositInfo.enabled) {
@@ -111,13 +113,8 @@ class _Sep6NewTransferWidgetState extends State<Sep6NewTransferWidget> {
     return null;
   }
 
-  Sep6EndpointInfo? getFeeEndpointInfo() {
-    return widget.sep6Info.fee;
-  }
-
-  Sep6WithdrawInfo? getWithdrawalInfoIfEnabled() {
-    var assetCode = getAssetCode();
-    var sep6Info = widget.sep6Info;
+  Sep6WithdrawInfo? getWithdrawalInfoIfEnabled(
+      Sep6Info sep6Info, String assetCode) {
     if (sep6Info.withdraw != null &&
         sep6Info.withdraw!.containsKey(assetCode)) {
       var withdrawInfo = sep6Info.withdraw![assetCode]!;
@@ -126,9 +123,5 @@ class _Sep6NewTransferWidgetState extends State<Sep6NewTransferWidget> {
       }
     }
     return null;
-  }
-
-  String getAssetCode() {
-    return widget.asset.asset.code;
   }
 }

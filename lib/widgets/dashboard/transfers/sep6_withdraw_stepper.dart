@@ -16,19 +16,19 @@ import 'package:stellar_wallet_flutter_sdk/stellar_wallet_flutter_sdk.dart';
 import 'package:flutter/foundation.dart';
 
 class Sep6WithdrawStepper extends StatefulWidget {
-  final AnchoredAssetInfo asset;
+  final AnchoredAssetInfo anchoredAsset;
   final Sep6WithdrawInfo withdrawInfo;
-  final Sep6EndpointInfo? feeEndpointInfo;
+  final bool anchorHasEnabledFeeEndpoint;
 
   final AuthToken authToken;
   final DashboardState dashboardState;
 
   const Sep6WithdrawStepper({
-    required this.asset,
+    required this.anchoredAsset,
     required this.withdrawInfo,
+    required this.anchorHasEnabledFeeEndpoint,
     required this.authToken,
     required this.dashboardState,
-    this.feeEndpointInfo,
     super.key,
   });
 
@@ -252,7 +252,7 @@ class _Sep6WithdrawStepperState extends State<Sep6WithdrawStepper> {
       _isSubmittingTransfer = true;
     });
     try {
-      var sep06 = widget.asset.anchor.sep6();
+      var sep06 = widget.anchoredAsset.anchor.sep6();
       Map<String, String> extraFields = {};
       var transferDetailsForm = getTransferDetailsForm();
       for (var entry in transferDetailsForm.collectedFields.entries) {
@@ -282,7 +282,7 @@ class _Sep6WithdrawStepperState extends State<Sep6WithdrawStepper> {
   }
 
   String getAssetCode() {
-    return widget.asset.asset.code;
+    return widget.anchoredAsset.asset.code;
   }
 
   Map<String, Sep6FieldInfo> getTransferFields() {
@@ -324,7 +324,7 @@ class _Sep6WithdrawStepperState extends State<Sep6WithdrawStepper> {
 
   Future<void> loadKycData() async {
     try {
-      var sep12 = await widget.asset.anchor.sep12(widget.authToken);
+      var sep12 = await widget.anchoredAsset.anchor.sep12(widget.authToken);
       _sep12Info = await sep12.getByAuthTokenOnly();
     } catch (e) {
       if (kDebugMode) {
@@ -346,7 +346,7 @@ class _Sep6WithdrawStepperState extends State<Sep6WithdrawStepper> {
 
   Future<void> sendAndReloadKycData() async {
     try {
-      var sep12 = await widget.asset.anchor.sep12(widget.authToken);
+      var sep12 = await widget.anchoredAsset.anchor.sep12(widget.authToken);
       var customerId = _sep12Info?.id;
       var kycForm = getKycCollectorForm();
       if (customerId == null) {
@@ -368,7 +368,7 @@ class _Sep6WithdrawStepperState extends State<Sep6WithdrawStepper> {
       _kycDataLoaded = false;
     });
     try {
-      var sep12 = await widget.asset.anchor.sep12(widget.authToken);
+      var sep12 = await widget.anchoredAsset.anchor.sep12(widget.authToken);
       sep12.delete(widget.authToken.account);
     } catch (e) {
       if (kDebugMode) {
@@ -385,7 +385,6 @@ class _Sep6WithdrawStepperState extends State<Sep6WithdrawStepper> {
   Future<void> loadFee(Map<String, String?> transferDetails) async {
     double? feeFixed = widget.withdrawInfo.feeFixed;
     double? feePercent = widget.withdrawInfo.feePercent;
-    Sep6EndpointInfo? feeEndpointInfo = widget.feeEndpointInfo;
 
     if (feeFixed != null) {
       _fee = feeFixed;
@@ -397,13 +396,13 @@ class _Sep6WithdrawStepperState extends State<Sep6WithdrawStepper> {
       return;
     }
 
-    if (feeEndpointInfo != null && _amount != null) {
+    if (widget.anchorHasEnabledFeeEndpoint && _amount != null) {
       String? type;
       if (transferDetails.containsKey('type')) {
         type = transferDetails['type'];
       }
       try {
-        _fee = await widget.asset.anchor.sep6().fee(
+        _fee = await widget.anchoredAsset.anchor.sep6().fee(
               operation: 'withdraw',
               assetCode: getAssetCode(),
               type: type,
@@ -576,7 +575,7 @@ class _Sep6WithdrawStepperState extends State<Sep6WithdrawStepper> {
 
       bool ok = await dashboardState.data.sendPayment(
           destinationAddress: receiverAccountId,
-          assetId: widget.asset.asset,
+          assetId: widget.anchoredAsset.asset,
           amount: _amount!.toString(),
           memo: memo,
           memoType: memoType,

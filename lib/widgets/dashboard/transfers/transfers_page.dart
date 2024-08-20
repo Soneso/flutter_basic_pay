@@ -64,12 +64,8 @@ class TransfersPage extends StatelessWidget {
 
 enum TransfersPageState {
   initial,
-  loadingAssetSep10Info,
+  loading,
   sep10AuthPinRequired,
-  sep10Authenticating,
-  loadingSep6Info,
-  loadingSep24Info,
-  loadingSep38Info,
   transferInfoLoaded
 }
 
@@ -85,10 +81,10 @@ class TransfersPageBody extends StatefulWidget {
 class _TransfersPageBodyState extends State<TransfersPageBody> {
   String? _selectedAsset;
   String? _errorText;
+  String? _loadingText;
   var _state = TransfersPageState.initial;
   AuthToken? _sep10AuthToken;
   Sep6Info? _sep6Info;
-  QuotesInfoResponse? _sep38Info;
   AnchorServiceInfo? _sep24Info;
   List<Sep6Transaction>? _sep6HistoryTransactions;
   List<Sep24Transaction>? _sep24HistoryTransactions;
@@ -173,7 +169,8 @@ class _TransfersPageBodyState extends State<TransfersPageBody> {
 
   Widget getBody(BuildContext context) {
     var dashboardState = Provider.of<DashboardState>(context);
-    bool showHistory = _toggleSelections[1];
+    bool newTransfer = _toggleSelections[0];
+    bool showHistory = !newTransfer;
 
     List<String> dropdownItems = widget.anchoredAssets
         .map((asset) => asset.asset.id)
@@ -183,12 +180,12 @@ class _TransfersPageBodyState extends State<TransfersPageBody> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         AutoSizeText(
-          showHistory
-              ? "History (testanchor.stellar.org): "
-              : "Here you can initiate a transfer with an anchor for your assets which have the needed infrastructure available.",
-          style: showHistory
-              ? Theme.of(context).textTheme.titleMedium
-              : Theme.of(context).textTheme.bodyMedium,
+          newTransfer
+              ? "Here you can initiate a transfer with an anchor for your assets which have the needed infrastructure available."
+              : "History",
+          style: newTransfer
+              ? Theme.of(context).textTheme.bodyMedium
+              : Theme.of(context).textTheme.titleMedium,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 10),
@@ -216,37 +213,27 @@ class _TransfersPageBodyState extends State<TransfersPageBody> {
                   ),
                   const SizedBox(height: 10),
                   if (_errorText != null)
-                    Util.getErrorTextWidget(context, _errorText!),
-                  if (_state == TransfersPageState.loadingAssetSep10Info)
-                    Util.getLoadingColumn(context, 'Loading SEP-10 data.'),
+                    Util.getErrorTextWidget(context, 'Error: $_errorText'),
+                  if (_state == TransfersPageState.loading && _loadingText != null)
+                    Util.getLoadingColumn(context, _loadingText!),
                   if (_state == TransfersPageState.sep10AuthPinRequired)
                     getSep10AuthPinForm(dashboardState),
-                  if (_state == TransfersPageState.sep10Authenticating)
-                    Util.getLoadingColumn(
-                        context, 'Authenticating with anchor.'),
-                  if (_state == TransfersPageState.loadingSep6Info)
-                    Util.getLoadingColumn(context, 'Loading SEP-06 data.'),
-                  if (_state == TransfersPageState.loadingSep24Info)
-                    Util.getLoadingColumn(context, 'Loading SEP-24 data.'),
-                  if (_state == TransfersPageState.loadingSep38Info)
-                    Util.getLoadingColumn(context, 'Loading SEP-38 data.'),
-                  if (!showHistory &&
+                  if (newTransfer &&
                       _state == TransfersPageState.transferInfoLoaded &&
                       _sep6Info != null &&
                       _sep10AuthToken != null)
                     Sep6NewTransferWidget(
-                      asset: getSelectedAnchorAsset(),
+                      anchoredAsset: getSelectedAnchorAsset(),
                       sep6Info: _sep6Info!,
                       authToken: _sep10AuthToken!,
-                      sep38Info: _sep38Info,
                       key: ObjectKey([_sep6Info, _sep10AuthToken]),
                     ),
-                  if (!showHistory &&
+                  if (newTransfer &&
                       _state == TransfersPageState.transferInfoLoaded &&
                       _sep24Info != null &&
                       _sep10AuthToken != null)
                     Sep24NewTransferWidget(
-                        asset: getSelectedAnchorAsset(),
+                        anchoredAsset: getSelectedAnchorAsset(),
                         sep24Info: _sep24Info!,
                         authToken: _sep10AuthToken!,
                         key: ObjectKey([_sep24Info, _sep10AuthToken])),
@@ -310,31 +297,36 @@ class _TransfersPageBodyState extends State<TransfersPageBody> {
       _errorText = null;
       _sep6Info = null;
       _sep24Info = null;
-      _sep38Info = null;
-      _state = TransfersPageState.loadingAssetSep10Info;
+      _loadingText = 'Loading SEP-10 info';
+      _state = TransfersPageState.loading;
     });
 
-    var asset = getSelectedAnchorAsset();
+    var anchoredAsset = getSelectedAnchorAsset();
+    String? error;
     try {
-      await asset.anchor.sep10();
-    } catch (e, stacktrace) {
-      var errorText =
-          "error: could not load the asset's SEP-10 authentication service data. $stacktrace";
-      if (e is AnchorAuthNotSupported) {
-        errorText =
-            "error: the anchor does not provide an SEP-10 authentication service";
+      TomlInfo tomlInfo = await anchoredAsset.anchor.sep1();
+      if (tomlInfo.webAuthEndpoint == null) {
+        error = "the anchor does not provide an authentication service (SEP-10)";
       }
-      setState(() {
-        _errorText = errorText;
-        _state = TransfersPageState.initial;
-      });
-      return;
+    } catch (e) {
+      if (e is TomlNotFoundException) {
+        error = "the anchor does not provide a stellar.toml file";
+      } else {
+        error = "could not load the asset's anchor toml data. ${e.toString()}";
+      }
     }
 
-    setState(() {
-      _selectedAsset = newSelectedAsset;
-      _state = TransfersPageState.sep10AuthPinRequired;
-    });
+    if (error != null) {
+      setState(() {
+        _errorText = error;
+        _state = TransfersPageState.initial;
+      });
+    } else {
+      setState(() {
+        _selectedAsset = newSelectedAsset;
+        _state = TransfersPageState.sep10AuthPinRequired;
+      });
+    }
   }
 
   AnchoredAssetInfo getSelectedAnchorAsset() {
@@ -356,31 +348,31 @@ class _TransfersPageBodyState extends State<TransfersPageBody> {
       String pin, DashboardState dashboardState) async {
     setState(() {
       _errorText = null;
-      _state = TransfersPageState.sep10Authenticating;
+      _loadingText = 'Authenticating with anchor.';
+      _state = TransfersPageState.loading;
     });
 
     var anchoredAsset = getSelectedAnchorAsset();
-    bool isShowingHistory = _toggleSelections[1];
+    bool newTransfer = _toggleSelections[0];
 
     try {
-      // load secret seed and check if pin is valid.
+      // load and decode the secret key by using the users pin
       var userKeyPair = await dashboardState.authService.userKeyPair(pin);
 
       // authenticate with anchor
       var sep10 = await anchoredAsset.anchor.sep10();
       _sep10AuthToken = await sep10.authenticate(userKeyPair);
     } catch (e) {
-      var errorText = "error: could not authenticate with the asset's anchor.";
+      var error = "could not authenticate with the asset's anchor.";
       if (e is InvalidPin) {
-        errorText = "error: invalid pin";
+        error = "invalid pin";
       } else if (e is AnchorAuthException) {
-        errorText += ' ${e.message}';
+        error += ' ${e.message}';
       } else if (e is AnchorAuthNotSupported) {
-        errorText =
-            "error: the anchor does not provide an SEP-10 authentication service";
+        error = "the anchor does not provide an authentication service (SEP-10)";
       }
       setState(() {
-        _errorText = errorText;
+        _errorText = error;
         _state = TransfersPageState.sep10AuthPinRequired;
       });
       return;
@@ -391,91 +383,76 @@ class _TransfersPageBodyState extends State<TransfersPageBody> {
     setState(() {
       _sep6Info = null;
       _sep6HistoryTransactions = null;
-      _state = TransfersPageState.loadingSep6Info;
+      _loadingText = 'Loading SEP-6 data';
+      _state = TransfersPageState.loading;
     });
 
-    var sep6 = anchoredAsset.anchor.sep6();
+    bool sep6Supported = false;
+    TomlInfo tomlInfo = await anchoredAsset.anchor.sep1();
+    if (tomlInfo.transferServer != null) {
+      sep6Supported = true;
+    }
 
-    if (isShowingHistory) {
-      try {
-        _sep6HistoryTransactions = await sep6.getTransactionsForAsset(
-            authToken: _sep10AuthToken!, assetCode: anchoredAsset.asset.code);
-      } catch (e) {
-        setState(() {
+    if (sep6Supported) {
+      if (newTransfer) {
+        // new transfer selected
+        try {
+          var sep6 = anchoredAsset.anchor.sep6();
+          _sep6Info = await sep6.info();
+        } catch (e) {
+          _errorText = 'error loading SEP-06 info: ${e.toString()}';
+        }
+      } else {
+        // history selected
+        try {
+          var sep6 = anchoredAsset.anchor.sep6();
+          _sep6HistoryTransactions = await sep6.getTransactionsForAsset(
+              authToken: _sep10AuthToken!, assetCode: anchoredAsset.asset.code);
+        } catch (e) {
           _errorText = 'error loading SEP-06 history: ${e.toString()}';
-        });
-      }
-    } else {
-      try {
-        _sep6Info = await sep6.info(authToken: _sep10AuthToken);
-      } catch (e) {
-        if (e is! AnchorDepositAndWithdrawalAPINotSupported) {
-          setState(() {
-            _errorText = 'error loading SEP-06 info: ${e.toString()}';
-          });
         }
       }
     }
 
     // load sep-24 info
-
     setState(() {
       _sep24Info = null;
       _sep24HistoryTransactions = null;
-      _state = TransfersPageState.loadingSep24Info;
+      _loadingText = 'Loading SEP-24 data';
+      _state = TransfersPageState.loading;
     });
 
-    var sep24 = anchoredAsset.anchor.sep24();
-    if (isShowingHistory) {
-      try {
-        _sep24HistoryTransactions = await sep24.getTransactionsForAsset(
-            anchoredAsset.asset, _sep10AuthToken!);
-      } catch (e) {
-        setState(() {
+    bool sep24Supported = false;
+    if (tomlInfo.transferServerSep24 != null) {
+      sep24Supported = true;
+    }
+
+    if (sep24Supported) {
+      if (newTransfer) {
+        // new transfer selected
+        try {
+          var sep24 = anchoredAsset.anchor.sep24();
+          _sep24Info = await sep24.getServiceInfo();
+        } catch (e) {
+          _errorText = 'error loading SEP-24 info: ${e.toString()}';
+        }
+      } else {
+        // history selected
+        try {
+          var sep24 = anchoredAsset.anchor.sep24();
+          _sep24HistoryTransactions = await sep24.getTransactionsForAsset(
+              anchoredAsset.asset, _sep10AuthToken!);
+        } catch (e) {
           _errorText = 'error loading SEP-24 history: ${e.toString()}';
-        });
-      }
-    } else {
-      try {
-        _sep24Info = await sep24.getServiceInfo();
-      } catch (e) {
-        if (e is! AnchorInteractiveFlowNotSupported) {
-          setState(() {
-            _errorText = 'error loading SEP-24 info: ${e.toString()}';
-          });
         }
       }
     }
 
-    if (!isShowingHistory && _sep6Info == null && _sep24Info == null) {
-      setState(() {
-        _errorText = 'anchor does not support SEP-06 & SEP-24 transfers.';
-        _state = TransfersPageState.initial;
-      });
-      return;
+    if (!sep6Supported && !sep24Supported) {
+      _errorText = 'the anchor does not support SEP-06 & SEP-24 transfers.';
     }
 
-    /*
-
-    // load sep-38 info for quotes.
     setState(() {
-      _sep38Info = null;
-      _state = TransfersPageState.loadingSep38Info;
-    });
-
-    try {
-      var sep38 = await anchoredAsset.anchor.sep38(authToken: _sep10AuthToken!);
-      // load only by auth token
-      _sep38Info = await sep38.info();
-    } catch (e) {
-      // e.g. sep38 not supported by anchor.
-      if (kDebugMode) {
-        print('error loading SEP-38 info: ${e.toString()}');
-      }
-    } */
-
-    setState(() {
-      _errorText = null;
       _state = TransfersPageState.transferInfoLoaded;
     });
   }
@@ -487,4 +464,5 @@ class _TransfersPageBodyState extends State<TransfersPageBody> {
       _errorText = null;
     });
   }
+
 }

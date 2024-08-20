@@ -12,12 +12,12 @@ import 'package:stellar_wallet_flutter_sdk/stellar_wallet_flutter_sdk.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class Sep24NewTransferWidget extends StatefulWidget {
-  final AnchoredAssetInfo asset;
+  final AnchoredAssetInfo anchoredAsset;
   final AnchorServiceInfo sep24Info;
   final AuthToken authToken;
 
   const Sep24NewTransferWidget({
-    required this.asset,
+    required this.anchoredAsset,
     required this.sep24Info,
     required this.authToken,
     super.key,
@@ -37,8 +37,10 @@ class _Sep24NewTransferWidgetState extends State<Sep24NewTransferWidget> {
   final _controller = WebViewController();
   @override
   Widget build(BuildContext context) {
-    _depositInfo = getDepositInfoIfEnabled();
-    _withdrawalInfo = getWithdrawalInfoIfEnabled();
+    var anchoredAsset = widget.anchoredAsset;
+    var sep24Info = widget.sep24Info;
+    _depositInfo = getDepositInfoIfEnabled(sep24Info, anchoredAsset.asset.code);
+    _withdrawalInfo = getWithdrawalInfoIfEnabled(sep24Info, anchoredAsset.asset.code);
 
     return Column(children: [
       const SizedBox(height: 10),
@@ -96,10 +98,11 @@ class _Sep24NewTransferWidgetState extends State<Sep24NewTransferWidget> {
       _state = Sep24WidgetState.loading;
     });
 
+    var anchoredAsset = widget.anchoredAsset;
+    var authToken = widget.authToken;
     try {
-      var sep24 = widget.asset.anchor.sep24();
-      var interactiveResponse =
-          await sep24.deposit(widget.asset.asset, widget.authToken);
+      var sep24 = anchoredAsset.anchor.sep24();
+      var interactiveResponse = await sep24.deposit(anchoredAsset.asset, authToken);
       var url = interactiveResponse.url;
       _controller.loadRequest(Uri.parse(url));
     } catch (e) {
@@ -124,10 +127,13 @@ class _Sep24NewTransferWidgetState extends State<Sep24NewTransferWidget> {
       _state = Sep24WidgetState.loading;
     });
 
+    var anchoredAsset = widget.anchoredAsset;
+    var authToken = widget.authToken;
+
     try {
-      var sep24 = widget.asset.anchor.sep24();
+      var sep24 = anchoredAsset.anchor.sep24();
       var interactiveResponse =
-          await sep24.withdraw(widget.asset.asset, widget.authToken);
+          await sep24.withdraw(anchoredAsset.asset, authToken);
       var url = interactiveResponse.url;
       _controller.loadRequest(Uri.parse(url));
     } catch (e) {
@@ -147,9 +153,7 @@ class _Sep24NewTransferWidgetState extends State<Sep24NewTransferWidget> {
     });
   }
 
-  AnchorServiceAsset? getDepositInfoIfEnabled() {
-    var assetCode = getAssetCode();
-    var sep24Info = widget.sep24Info;
+  AnchorServiceAsset? getDepositInfoIfEnabled(AnchorServiceInfo sep24Info, String assetCode) {
     if (sep24Info.deposit.containsKey(assetCode)) {
       var depositInfo = sep24Info.deposit[assetCode]!;
       if (depositInfo.enabled) {
@@ -159,9 +163,7 @@ class _Sep24NewTransferWidgetState extends State<Sep24NewTransferWidget> {
     return null;
   }
 
-  AnchorServiceAsset? getWithdrawalInfoIfEnabled() {
-    var assetCode = getAssetCode();
-    var sep24Info = widget.sep24Info;
+  AnchorServiceAsset? getWithdrawalInfoIfEnabled(AnchorServiceInfo sep24Info, String assetCode) {
     if (sep24Info.withdraw.containsKey(assetCode)) {
       var withdrawInfo = sep24Info.withdraw[assetCode]!;
       if (withdrawInfo.enabled) {
@@ -169,10 +171,6 @@ class _Sep24NewTransferWidgetState extends State<Sep24NewTransferWidget> {
       }
     }
     return null;
-  }
-
-  String getAssetCode() {
-    return widget.asset.asset.code;
   }
 
   static AutoSizeText getErrorTextWidget(BuildContext context, String text,

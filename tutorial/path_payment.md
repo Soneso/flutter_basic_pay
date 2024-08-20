@@ -497,3 +497,7 @@ static Future<bool> strictReceivePayment(
 As soon as the transaction has been successfully sent, we inform the user and they can see the payment in our `Recent payments` overview:
 
 ![recent payments strict receive](./img/payment/recent_payments_strict_received.png)
+
+# Next
+
+Continue with [Anchor integration](anchor_integration.md).
