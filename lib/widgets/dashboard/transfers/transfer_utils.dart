@@ -319,7 +319,7 @@ class Sep6TransferResponseView extends StatelessWidget {
     result.add(_text(
         context,
         'We have submitted your transfer to the anchor,  '
-        'and teh anchor responding with the status: "pending".'));
+        'and the anchor responded with the status: "pending".'));
 
     result.add(const Divider(color: Colors.blue));
 

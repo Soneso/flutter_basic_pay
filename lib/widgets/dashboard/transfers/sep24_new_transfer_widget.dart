@@ -34,7 +34,7 @@ class _Sep24NewTransferWidgetState extends State<Sep24NewTransferWidget> {
   AnchorServiceAsset? _depositInfo;
   AnchorServiceAsset? _withdrawalInfo;
   String? _errorText;
-  final _controller = WebViewController();
+  final _controller = WebViewController()..setJavaScriptMode(JavaScriptMode.unrestricted);
   @override
   Widget build(BuildContext context) {
     var anchoredAsset = widget.anchoredAsset;
