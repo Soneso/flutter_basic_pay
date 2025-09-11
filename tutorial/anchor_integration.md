@@ -38,7 +38,7 @@ static Future<List<AnchoredAssetInfo>> getAnchoredAssets(
         String? anchorDomain;
 
         // check if it is a known stellar testanchor asset
-        // if yes, we can use testanchor.stellar.org as anchor.
+        // if yes, we can use anchor-sep-server-dev.stellar.org as anchor.
         if (testAnchorAssets.firstWhereOrNull((val) =>
                 val.code == asset.code && val.issuer == asset.issuer) !=
             null) {
@@ -65,7 +65,7 @@ static Future<List<AnchoredAssetInfo>> getAnchoredAssets(
 ```
 Source: [stellar.dart](https://github.com/Soneso/flutter_basic_pay/blob/main/lib/services/stellar.dart)
 
-In this demo app, we will use the predefined assets `SRT` and `USDC`, because we know for sure that they are supported by the *Stellar Test Anchor* (see [https://testanchor.stellar.org/.well-known/stellar.toml](https://testanchor.stellar.org/.well-known/stellar.toml)). So, please make sure to add a trustline to those assets as described in [Mange Trust](manage_trust.md) before continuing. For all other issued assets from the balances, we are going to use their home domain as an anchor domain.
+In this demo app, we will use the predefined assets `SRT` and `USDC`, because we know for sure that they are supported by the *Stellar Test Anchor* (see [https://anchor-sep-server-dev.stellar.org/.well-known/stellar.toml](https://anchor-sep-server-dev.stellar.org/.well-known/stellar.toml)). So, please make sure to add a trustline to those assets as described in [Mange Trust](manage_trust.md) before continuing. For all other issued assets from the balances, we are going to use their home domain as an anchor domain.
 
 As soon as the anchored assets are loaded, the Transfers view will display them in a dropdown.
 
@@ -79,7 +79,7 @@ The [stellar.toml file](https://developers.stellar.org/docs/tokens/publishing-as
 
 For anchors, we’re interested in the `CURRENCIES` they issue, the `TRANSFER_SERVER` and/or `TRANSFER_SERVER_SEP0024` keywords that indicate if the anchor supports SEP-6, SEP-24, or both, and the `WEB_AUTH_ENDPOINT` which allows a wallet to set up an authenticated user session.
 
-For `SRT`, Flutter Basic Pay is interoperating with the testing anchor located at `testanchor.stellar.org` and you can view its toml file [here](https://testanchor.stellar.org/.well-known/stellar.toml).
+For `SRT`, Flutter Basic Pay is interoperating with the testing anchor located at `testanchor.stellar.org` and you can view its toml file [here](https://anchor-sep-server-dev.stellar.org/.well-known/stellar.toml).
 
 The wallet sdk offers support for parsing the anchors toml data. We can access it to see if the anchor provides an authentication service (SEP-10):
 

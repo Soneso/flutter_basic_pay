@@ -14,7 +14,7 @@ class StellarService {
   static final wallet_sdk.Wallet wallet = wallet_sdk.Wallet.testNet;
 
   /// A list of assets on the Stellar Test Network used to make
-  /// testing easier. (to be used with testanchor.stellar.org)
+  /// testing easier. (to be used with anchor-sep-server-dev.stellar.org)
   static List<wallet_sdk.IssuedAssetId> testAnchorAssets = [
     wallet_sdk.IssuedAssetId(
         code: 'SRT',
@@ -24,7 +24,7 @@ class StellarService {
         issuer: 'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5')
   ];
 
-  static String testAnchorDomain = 'testanchor.stellar.org';
+  static String testAnchorDomain = 'anchor-sep-server-dev.stellar.org';
 
   /// Funds the account given by [address] on the Stellar Test Network by using Friendbot.
   static Future<bool> fundTestNetAccount(String address) async {
@@ -312,7 +312,7 @@ class StellarService {
         String? anchorDomain;
 
         // check if it is a known stellar testanchor asset
-        // if yes, we can use testanchor.stellar.org as anchor.
+        // if yes, we can use anchor-sep-server-dev.stellar.org as anchor.
         if (testAnchorAssets.firstWhereOrNull((val) =>
                 val.code == asset.code && val.issuer == asset.issuer) !=
             null) {
