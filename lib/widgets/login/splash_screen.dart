@@ -116,7 +116,7 @@ class _SplashScreenState extends State<SplashScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Building a payment app with Flutter',
+                            'Building a payment app with Flutter12',
                             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                               color: const Color(0xFF6B7280),
                               letterSpacing: 2,

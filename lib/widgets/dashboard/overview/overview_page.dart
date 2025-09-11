@@ -12,17 +12,20 @@ class DashboardOverview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scrollbar(
-      child: GridView(
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          childAspectRatio: 2,
-          maxCrossAxisExtent: double.infinity,
+    return Container(
+      color: const Color(0xFFF9FAFB),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const BalancesOverview(),
+            const SizedBox(height: 20),
+            const PaymentsOverview(),
+            const SizedBox(height: 20),
+            const MyDataOverview(),
+          ],
         ),
-        children: const [
-          Card(surfaceTintColor: Colors.blue, child: BalancesOverview()),
-          Card(surfaceTintColor: Colors.yellow, child: PaymentsOverview()),
-          Card(surfaceTintColor: Colors.green, child: MyDataOverview()),
-        ],
       ),
     );
   }

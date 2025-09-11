@@ -2,7 +2,6 @@
 // Use of this source code is governed by a license that can be
 // found in the LICENSE file.
 
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_basic_pay/services/storage.dart';
@@ -30,62 +29,187 @@ class _MyDataOverviewState extends State<MyDataOverview> {
   @override
   Widget build(BuildContext context) {
     var dashboardState = Provider.of<DashboardState>(context);
-    return Scrollbar(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  const Color(0xFF10B981).withOpacity(0.08),
+                  const Color(0xFF10B981).withOpacity(0.03),
+                ],
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("My data", style: Theme.of(context).textTheme.titleMedium),
-                _getSwitchSecretKeyRow()
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF10B981).withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.person,
+                    color: Color(0xFF10B981),
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Text(
+                  "My Data",
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1F2937),
+                  ),
+                ),
               ],
             ),
           ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 5.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (_state == _ViewState.data)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Address: ",
-                            style: Theme.of(context).textTheme.bodySmall),
-                        _getCopyRow(dashboardState.data.userAddress),
-                        if (_secretKey != null)
-                          Column(
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: _state == _ViewState.data
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF9FAFB),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE5E7EB)),
+                        ),
+                        child: _getCompactAddressRow(dashboardState.data.userAddress),
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF9FAFB),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE5E7EB)),
+                        ),
+                        child: _getSwitchSecretKeyRow(),
+                      ),
+                      if (_secretKey != null) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFEF2F2),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFFFECACA)),
+                          ),
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("Secret key: ",
-                                  style: Theme.of(context).textTheme.bodySmall),
-                              _getCopyRow(_secretKey!),
+                              _getCompactSecretRow(_secretKey!),
+                              const SizedBox(height: 10),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFEE2E2),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.warning_amber_rounded,
+                                      size: 14,
+                                      color: Color(0xFF991B1B),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Keep secret - controls your funds',
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: const Color(0xFF991B1B),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
+                        ),
                       ],
+                    ],
+                  )
+                : Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF9FAFB),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFE5E7EB)),
                     ),
-                  if (_state == _ViewState.pinForm)
-                    Column(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (_error != null)
-                          Util.getErrorTextWidget(context, _error!),
+                        if (_error != null) ...[
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            margin: const EdgeInsets.only(bottom: 16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFEE2E2),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: const Color(0xFFFCA5A5)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.error_outline,
+                                  size: 20,
+                                  color: Color(0xFF991B1B),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _error!,
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: const Color(0xFF991B1B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                         PinForm(
                           onPinSet: (String pin) async {
                             await _handlePinSet(pin, dashboardState);
                           },
                           onCancel: _onPinCancel,
-                          hintText: 'Enter pin to show secret key',
+                          hintText: 'Enter PIN to reveal secret key',
                         ),
                       ],
                     ),
-                ],
-              ),
-            ),
+                  ),
           ),
         ],
       ),
@@ -121,48 +245,153 @@ class _MyDataOverviewState extends State<MyDataOverview> {
     });
   }
 
-  Row _getSwitchSecretKeyRow() {
+  Widget _getSwitchSecretKeyRow() {
     return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Text('Show secret key?', style: Theme.of(context).textTheme.bodySmall),
-        Switch(
-          value: _showSecretKey,
-          onChanged: (bool? value) {
-            setState(() {
-              _showSecretKey = value ?? false;
-              if (_showSecretKey == false) {
-                _secretKey = null;
-                _state = _ViewState.data;
-              } else {
-                _state = _ViewState.pinForm;
-              }
-            });
-          },
+      children: [
+        Icon(
+          _showSecretKey ? Icons.visibility : Icons.visibility_off,
+          size: 18,
+          color: _showSecretKey
+              ? const Color(0xFFF59E0B)
+              : const Color(0xFF6B7280),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            _showSecretKey ? 'Hide secret key' : 'Show secret key',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: _showSecretKey
+                ? const Color(0xFF92400E)
+                : const Color(0xFF6B7280),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        Transform.scale(
+          scale: 0.9,
+          child: Switch(
+            value: _showSecretKey,
+            onChanged: (bool? value) {
+              setState(() {
+                _showSecretKey = value ?? false;
+                if (_showSecretKey == false) {
+                  _secretKey = null;
+                  _state = _ViewState.data;
+                } else {
+                  _state = _ViewState.pinForm;
+                }
+              });
+            },
+            activeColor: const Color(0xFFF59E0B),
+            activeTrackColor: const Color(0xFFFDE68A),
+          ),
         ),
       ],
     );
   }
 
-  Row _getCopyRow(String text) {
+  Widget _getCompactAddressRow(String address) {
     return Row(
       children: [
+        const Icon(
+          Icons.account_circle_outlined,
+          color: Color(0xFF6B7280),
+          size: 20,
+        ),
+        const SizedBox(width: 10),
         Expanded(
-          flex: 7,
-          child: AutoSizeText(
-            text,
-            style: Theme.of(context)
-                .textTheme
-                .apply(bodyColor: Colors.blue)
-                .bodySmall,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Stellar Address',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: const Color(0xFF6B7280),
+                  fontSize: 11,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                Util.shortAddress(address),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontFamily: 'monospace',
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF1F2937),
+                ),
+              ),
+            ],
           ),
         ),
-        IconButton(
-          icon: const Icon(
-            Icons.copy_outlined,
-            size: 20,
+        InkWell(
+          onTap: () => _copyToClipboard(address),
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0xFFE5E7EB)),
+            ),
+            child: const Icon(
+              Icons.copy,
+              size: 16,
+              color: Color(0xFF6B7280),
+            ),
           ),
-          onPressed: () => _copyToClipboard(text),
+        ),
+      ],
+    );
+  }
+
+  Widget _getCompactSecretRow(String secret) {
+    return Row(
+      children: [
+        const Icon(
+          Icons.key,
+          color: Color(0xFF991B1B),
+          size: 20,
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Secret Key',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: const Color(0xFF991B1B),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '${secret.substring(0, 8)}...${secret.substring(secret.length - 6)}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontFamily: 'monospace',
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF991B1B),
+                ),
+              ),
+            ],
+          ),
+        ),
+        InkWell(
+          onTap: () => _copyToClipboard(secret),
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFEE2E2),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0xFFFECACA)),
+            ),
+            child: const Icon(
+              Icons.copy,
+              size: 16,
+              color: Color(0xFF991B1B),
+            ),
+          ),
         ),
       ],
     );
@@ -176,9 +405,20 @@ class _MyDataOverviewState extends State<MyDataOverview> {
   void _showCopied() {
     ScaffoldMessenger.of(NavigationService.navigatorKey.currentContext!)
         .showSnackBar(
-      const SnackBar(
-        content: Text('Copied to clipboard'),
-        backgroundColor: Colors.green,
+      SnackBar(
+        content: const Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.white, size: 20),
+            SizedBox(width: 8),
+            Text('Copied to clipboard'),
+          ],
+        ),
+        backgroundColor: const Color(0xFF10B981),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        margin: const EdgeInsets.all(16),
       ),
     );
   }
