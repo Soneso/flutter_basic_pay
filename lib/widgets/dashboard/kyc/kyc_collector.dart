@@ -53,16 +53,18 @@ class _KycCollectorFormState extends State<KycCollectorForm> {
         // TODO...
         continue;
       }
+      
+      // Skip optional fields - only show required fields
+      bool optional = entry.value.optional ?? false;
+      if (optional) {
+        continue;
+      }
+      
       formFields.add(const SizedBox(height: 10));
       String fieldName = entry.key;
       String? initialValue;
       if (initialValues.containsKey(entry.key)) {
         initialValue = initialValues[entry.key];
-      }
-      bool optional = false;
-      if (entry.value.optional != null && entry.value.optional!) {
-        optional = true;
-        fieldName += ' (optional)';
       }
 
       formFields.add(AutoSizeText(
@@ -103,7 +105,7 @@ class _KycCollectorFormState extends State<KycCollectorForm> {
             });
           },
           validator: (String? value) {
-            if (!optional && (value == null || value.isEmpty)) {
+            if (value == null || value.isEmpty) {
               return 'Please select an option';
             }
             return null;
@@ -114,13 +116,11 @@ class _KycCollectorFormState extends State<KycCollectorForm> {
           key: ObjectKey(entry),
           style: Theme.of(context).textTheme.bodyMedium,
           validator: (String? value) {
-            if (!optional && (value == null || value.isEmpty)) {
+            if (value == null || value.isEmpty) {
               widget.collectedFields.remove(entry.key);
               return 'Please enter the ${entry.key}';
             }
-            if (value != null) {
-              widget.collectedFields[entry.key] = value;
-            }
+            widget.collectedFields[entry.key] = value;
             return null;
           },
           initialValue: initialValue,

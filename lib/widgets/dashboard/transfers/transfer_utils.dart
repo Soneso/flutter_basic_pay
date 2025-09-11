@@ -50,7 +50,8 @@ class _TransferDetailsFormState extends State<TransferDetailsForm> {
       formFields.add(const SizedBox(height: 10));
       String fieldName = entry.key;
       bool optional = false;
-      if (entry.value.optional != null && entry.value.optional!) {
+      if (entry.value.optional != null && entry.value.optional!
+          && fieldName != "type") { // patch: the test anchor returns optional for the field "type", but it is required.
         optional = true;
         fieldName += ' (optional)';
       }
