@@ -15,80 +15,180 @@ class Dialogs {
   static Future<DialogAction> confirmPinDialog(
       BuildContext context, String pinToCheck) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    final action = await AwesomeDialog(
+    final pinController = TextEditingController();
+    
+    final action = await showDialog<DialogAction>(
       context: context,
-      dialogType: DialogType.noHeader,
-      reverseBtnOrder: true,
-      buttonsBorderRadius: const BorderRadius.all(
-        Radius.circular(2),
-      ),
-      animType: AnimType.rightSlide,
-      desc: 'Please re-type your 6-digit pin code to encrypt the secret key.',
-      showCloseIcon: false,
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Form(
-          key: formKey,
-          child: Column(
-            children: <Widget>[
-              Text(
-                'Confirm Pin code',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Text(
-                'Please re-type your 6-digit pin code to encrypt the secret key.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Material(
-                elevation: 0,
-                color: Colors.blueGrey.withAlpha(40),
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    hintText: 'Confirm pin code',
-                  ),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(6),
-                  ],
-                  obscureText: true,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  validator: (String? value) {
-                    if (value == null || value.isEmpty || value.length != 6) {
-                      return 'Please enter 6 digits';
-                    } else if (value != pinToCheck) {
-                      return 'Mismatch, try again';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-            ],
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.5),
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
           ),
-        ),
-      ),
-      btnCancelOnPress: () {
-        Navigator.of(context).pop(DialogAction.cancel);
+          elevation: 8,
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 400),
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Icon(
+                    Icons.lock_outline,
+                    size: 48,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Confirm PIN',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1A1F36),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Please re-enter your PIN to secure your wallet',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: const Color(0xFF6B7280),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  TextFormField(
+                    controller: pinController,
+                    decoration: InputDecoration(
+                      hintText: '••••••',
+                      hintStyle: const TextStyle(
+                        color: Color(0xFF9CA3AF),
+                        fontSize: 18,
+                        letterSpacing: 8,
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xFFF9FAFB),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor,
+                          width: 2,
+                        ),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFFEF4444)),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFEF4444),
+                          width: 2,
+                        ),
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.lock_outline,
+                        color: Color(0xFF6B7280),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
+                    ),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(6),
+                    ],
+                    obscureText: true,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      letterSpacing: 8,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                    autofocus: true,
+                    validator: (String? value) {
+                      if (value == null || value.isEmpty || value.length != 6) {
+                        return 'PIN must be exactly 6 digits';
+                      } else if (value != pinToCheck) {
+                        return 'PINs do not match. Please try again';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(DialogAction.cancel);
+                          },
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: const BorderSide(color: Color(0xFFE5E7EB)),
+                            ),
+                          ),
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (formKey.currentState!.validate()) {
+                              Navigator.of(context).pop(DialogAction.ok);
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF10B981),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: const Text(
+                            'Confirm',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
       },
-      btnOkOnPress: () {
-        if (formKey.currentState!.validate()) {
-          Navigator.of(context).pop(DialogAction.ok);
-        }
-      },
-      autoDismiss: false,
-      onDismissCallback: (type) {},
-      barrierColor: Colors.purple[900]?.withOpacity(0.54),
-    ).show();
-    return (action != null) ? action : DialogAction.cancel;
+    );
+    
+    return action ?? DialogAction.cancel;
   }
 
   static Future<wallet_sdk.IssuedAssetId?> customAssetDialog(
