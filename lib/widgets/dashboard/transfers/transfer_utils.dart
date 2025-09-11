@@ -397,6 +397,10 @@ class _WebViewContainerState extends State<WebViewContainer> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         title: Text(widget.title),
       ),
       body: WebViewWidget(

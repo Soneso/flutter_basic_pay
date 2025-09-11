@@ -67,6 +67,7 @@ class _Sep6NewTransferWidgetState extends State<Sep6NewTransferWidget> {
                 showModalBottomSheet(
                     context: context,
                     isScrollControlled: true,
+                    useSafeArea: true,
                     builder: (context) {
                       return Sep6DepositStepper(
                           anchoredAsset: anchoredAsset,
@@ -84,6 +85,7 @@ class _Sep6NewTransferWidgetState extends State<Sep6NewTransferWidget> {
                 showModalBottomSheet(
                     context: context,
                     isScrollControlled: true,
+                    useSafeArea: true,
                     builder: (context) {
                       return Sep6WithdrawStepper(
                         anchoredAsset: anchoredAsset,

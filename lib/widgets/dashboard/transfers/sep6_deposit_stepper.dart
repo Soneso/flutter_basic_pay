@@ -48,6 +48,10 @@ class _Sep6DepositStepperState extends State<Sep6DepositStepper> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         title: const Text('SEP-06 Deposit'),
       ),
       body: Stepper(

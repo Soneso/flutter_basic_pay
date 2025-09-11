@@ -112,6 +112,7 @@ class _Sep24NewTransferWidgetState extends State<Sep24NewTransferWidget> {
     showModalBottomSheet(
         context: NavigationService.navigatorKey.currentContext!,
         isScrollControlled: true,
+        useSafeArea: true,
         builder: (context) {
           return WebViewContainer(
               title: "SEP-24 Deposit", controller: _controller);
@@ -143,6 +144,7 @@ class _Sep24NewTransferWidgetState extends State<Sep24NewTransferWidget> {
     showModalBottomSheet(
         context: NavigationService.navigatorKey.currentContext!,
         isScrollControlled: true,
+        useSafeArea: true,
         builder: (context) {
           return WebViewContainer(
               title: "SEP-24 Withdrawal", controller: _controller);
