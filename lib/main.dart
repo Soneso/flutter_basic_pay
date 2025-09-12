@@ -9,6 +9,7 @@ import 'package:flutter_basic_pay/widgets/dashboard/home_page.dart';
 import 'package:flutter_basic_pay/widgets/login/sign_in_page.dart';
 import 'package:flutter_basic_pay/widgets/login/sign_up_page.dart';
 import 'package:flutter_basic_pay/widgets/login/splash_screen.dart';
+import 'package:flutter_basic_pay/services/storage.dart';
 
 void main() {
   runApp(FlutterBasicPayApp());
@@ -72,8 +73,13 @@ class _SignInSwitcherState extends State<SignInSwitcher> {
 
   void _signOut() async {
     widget.authService.signOut();
+    
+    // Check if a user still exists in storage (they won't after a reset)
+    bool hasUser = await SecureStorage.hasUser();
+    
     setState(() {
-      _userState = UserState.signedOut;
+      // If no user exists (after reset), show signup. Otherwise show signin.
+      _userState = hasUser ? UserState.signedOut : UserState.needsSignup;
     });
   }
 }

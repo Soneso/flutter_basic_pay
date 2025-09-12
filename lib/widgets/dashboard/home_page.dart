@@ -14,6 +14,7 @@ import 'package:flutter_basic_pay/widgets/dashboard/kyc/kyc_page.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/overview/overview_page.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/payments/payments_page.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/transfers/transfers_page.dart';
+import 'package:flutter_basic_pay/widgets/dashboard/settings/settings_page.dart';
 import 'package:provider/provider.dart';
 
 class DashboardHomePage extends StatefulWidget {
@@ -29,9 +30,10 @@ class DashboardHomePage extends StatefulWidget {
 
 class DashboardState {
   final AuthService authService;
+  final VoidCallback onSignOutRequest;
   late DashboardData data;
 
-  DashboardState(this.authService) {
+  DashboardState(this.authService, this.onSignOutRequest) {
     data = DashboardData(authService.signedInUserAddress!);
   }
 }
@@ -46,7 +48,7 @@ class _DashboardHomePageState extends State<DashboardHomePage> {
   @override
   void initState() {
     super.initState();
-    _dashboardState = DashboardState(widget.authService);
+    _dashboardState = DashboardState(widget.authService, widget.onSignOutRequest);
   }
 
   @override
@@ -61,50 +63,7 @@ class _DashboardHomePageState extends State<DashboardHomePage> {
             fontSize: 18,
           ),
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12.0),
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFF3B82F6),
-                    Color(0xFF8B5CF6),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: TextButton(
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                ),
-                onPressed: () => _handleSignOut(),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.logout,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                    SizedBox(width: 6),
-                    Text(
-                      'Sign Out',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
+        actions: const [],
         currentIndex: _pageIndex <= 3 ? _pageIndex : 4,
         destinations: const [
           AdaptiveScaffoldDestination(title: 'Overview', icon: Icons.home),
@@ -269,6 +228,43 @@ class _DashboardHomePageState extends State<DashboardHomePage> {
                     });
                   },
                 ),
+                const SizedBox(height: 8),
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF3B82F6).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.settings,
+                      color: Color(0xFF3B82F6),
+                      size: 24,
+                    ),
+                  ),
+                  title: const Text(
+                    'Settings',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
+                  subtitle: const Text(
+                    'Account and app settings',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      _pageIndex = 4;
+                      _moreMenuPageIndex = 6;
+                    });
+                  },
+                ),
                 const SizedBox(height: 20),
               ],
             ),
@@ -276,98 +272,6 @@ class _DashboardHomePageState extends State<DashboardHomePage> {
         );
       },
     );
-  }
-
-  Future<void> _handleSignOut() async {
-    var shouldSignOut = await (showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: const Row(
-          children: [
-            Icon(
-              Icons.logout,
-              color: Color(0xFF3B82F6),
-              size: 28,
-            ),
-            SizedBox(width: 12),
-            Text(
-              'Sign Out',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF1E293B),
-              ),
-            ),
-          ],
-        ),
-        content: const Text(
-          'Are you sure you want to sign out of your account?',
-          style: TextStyle(
-            fontSize: 15,
-            color: Color(0xFF64748B),
-          ),
-        ),
-        actionsPadding: const EdgeInsets.all(16),
-        actions: [
-          TextButton(
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 10,
-              ),
-            ),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(
-                color: Color(0xFF64748B),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-          ),
-          Container(
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF3B82F6),
-                  Color(0xFF8B5CF6),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: TextButton(
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-              ),
-              child: const Text(
-                'Sign Out',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-            ),
-          ),
-        ],
-      ),
-    ));
-
-    if (shouldSignOut == null || !shouldSignOut) {
-      return;
-    }
-
-    widget.onSignOutRequest();
   }
 
   static Widget _pageAtIndex(int index) {
@@ -384,6 +288,8 @@ class _DashboardHomePageState extends State<DashboardHomePage> {
         return const KYCInformationPage();
       case 5:
         return const ContactsPage();
+      case 6:
+        return const SettingsPage();
       default:
         return const Center(child: Text('not yet implemented'));
     }
