@@ -2,6 +2,7 @@
 // Use of this source code is governed by a license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_basic_pay/services/stellar.dart';
@@ -29,103 +30,283 @@ enum CardState { initial, enterPin, sending }
 class _AssetBalanceCardState extends State<AssetBalanceCard> {
   CardState _state = CardState.initial;
   String? _submitError;
+  
+  String _truncateMiddle(String text, int maxLength) {
+    if (text.length <= maxLength) return text;
+    final startLength = (maxLength - 3) ~/ 2;
+    final endLength = maxLength - 3 - startLength;
+    return '${text.substring(0, startLength)}...${text.substring(text.length - endLength)}';
+  }
 
   @override
   Widget build(BuildContext context) {
+    final isNative = widget.asset.asset is wallet_sdk.NativeAssetId;
+    final assetCode = isNative 
+        ? 'XLM' 
+        : (widget.asset.asset as wallet_sdk.IssuedAssetId).code;
+    final balance = Util.removeTrailingZerosFormAmount(widget.asset.balance);
+    final hasBalance = double.parse(widget.asset.balance) > 0.0;
+    
     return Container(
-      constraints: const BoxConstraints(
-          minHeight: 80, minWidth: double.infinity, maxHeight: 400),
-      child: Card(
-        color: widget.asset.asset is wallet_sdk.NativeAssetId
-            ? Colors.blue[200]
-            : Colors.lightGreen[200],
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: widget.asset.asset is wallet_sdk.NativeAssetId
-              ? _getXLMBalanceWidget()
-              : widget.asset.asset is wallet_sdk.IssuedAssetId
-                  ? _getIssuedAssetBalanceWidget()
-                  : const SizedBox(height: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isNative ? Colors.blue.shade200 : Colors.grey.shade200,
+          width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: widget.asset.asset is wallet_sdk.NativeAssetId
+            ? _getXLMBalanceWidget()
+            : widget.asset.asset is wallet_sdk.IssuedAssetId
+                ? _getIssuedAssetBalanceWidget()
+                : const SizedBox(height: 10),
       ),
     );
   }
 
   Widget _getXLMBalanceWidget() {
+    final balance = Util.removeTrailingZerosFormAmount(widget.asset.balance);
+    
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Flexible(
-          child: AutoSizeText(
-              "XML Balance: ${Util.removeTrailingZerosFormAmount(widget.asset.balance)}",
-              style: Theme.of(context).textTheme.bodyMedium),
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blue.shade500, Colors.blue.shade600],
+            ),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: const Center(
+            child: Text(
+              'XLM',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Stellar Lumens',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Native Asset',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              balance,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            Text(
+              'XLM',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
 
   Widget _getIssuedAssetBalanceWidget() {
+    final assetId = widget.asset.asset as wallet_sdk.IssuedAssetId;
+    final balance = Util.removeTrailingZerosFormAmount(widget.asset.balance);
+    final hasZeroBalance = double.parse(widget.asset.balance) == 0.0;
+    
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Flexible(
-              child: AutoSizeText(
-                  "${(widget.asset.asset as wallet_sdk.IssuedAssetId).code} Balance: ${Util.removeTrailingZerosFormAmount(widget.asset.balance)}",
-                  style: Theme.of(context).textTheme.bodyMedium),
-            ),
-            if (double.parse(widget.asset.balance) == 0.0)
-              IconButton(
-                icon: const Icon(Icons.delete),
-                tooltip: 'Remove asset',
-                onPressed: _state == CardState.initial
-                    ? () => _handleRemoveAsset(widget.asset)
-                    : null,
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.green.shade100,
+                borderRadius: BorderRadius.circular(10),
               ),
+              child: Center(
+                child: Text(
+                  assetId.code.substring(0, min(3, assetId.code.length)),
+                  style: TextStyle(
+                    color: Colors.green.shade700,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    assetId.code,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _truncateMiddle(assetId.issuer, 12),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  balance,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                Text(
+                  assetId.code,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+            if (hasZeroBalance && _state == CardState.initial) ...[  
+              const SizedBox(width: 8),
+              IconButton(
+                icon: Icon(
+                  Icons.remove_circle_outline,
+                  color: Colors.red.shade400,
+                ),
+                tooltip: 'Remove asset',
+                onPressed: () => _handleRemoveAsset(widget.asset),
+              ),
+            ],
           ],
         ),
-        if (_submitError != null)
-          Text(
-            _submitError!,
-            style: const TextStyle(color: Colors.red),
+        if (_submitError != null) ...[  
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.red.shade50,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  color: Colors.red.shade600,
+                  size: 16,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _submitError!,
+                    style: TextStyle(
+                      color: Colors.red.shade700,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        if (_state == CardState.sending) _getRemovingAssetProgressWidget(),
-        if (_state == CardState.enterPin)
+        ],
+        if (_state == CardState.sending) ...[  
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.blue.shade600,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Removing asset...',
+                  style: TextStyle(
+                    color: Colors.blue.shade700,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+        if (_state == CardState.enterPin) ...[  
+          const SizedBox(height: 12),
           PinForm(
             onPinSet: (String pin) async {
               await _handlePinSet(pin, widget);
             },
             onCancel: _onPinCancel,
-            hintText: 'Enter pin to remove asset',
+            hintText: 'Enter PIN to remove asset',
           ),
+        ],
       ],
     );
   }
 
-  Widget _getRemovingAssetProgressWidget() {
-    return Row(
-      children: [
-        const SizedBox(
-          height: 10.0,
-          width: 10.0,
-          child: Center(child: CircularProgressIndicator()),
-        ),
-        const SizedBox(width: 10),
-        Text(
-          'Removing asset ...',
-          style: Theme.of(context)
-              .textTheme
-              .apply(bodyColor: Colors.pink)
-              .bodyMedium,
-        ),
-      ],
-    );
-  }
 
   void _handleRemoveAsset(AssetInfo asset) {
     if (_state != CardState.initial) {

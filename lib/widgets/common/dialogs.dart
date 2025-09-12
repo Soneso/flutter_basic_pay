@@ -196,100 +196,287 @@ class Dialogs {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     final codeController = TextEditingController();
     final issuerController = TextEditingController();
-    final action = await AwesomeDialog(
+    
+    final action = await showDialog<DialogAction>(
       context: context,
-      dialogType: DialogType.noHeader,
-      reverseBtnOrder: false,
-      buttonsBorderRadius: const BorderRadius.all(
-        Radius.circular(2),
-      ),
-      animType: AnimType.rightSlide,
-      desc: 'Record custom asset',
-      showCloseIcon: false,
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Form(
-          key: formKey,
-          child: Column(
-            children: <Widget>[
-              Text(
-                'Custom Asset',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Text(
-                'Please enter the asset code and asset issuer.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(
-                  hintText: 'Asset code',
-                ),
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
-                  LengthLimitingTextInputFormatter(12),
-                ],
-                style: Theme.of(context).textTheme.bodyMedium,
-                validator: (String? value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter the asset code';
-                  }
-                  return null;
-                },
-                controller: codeController,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(
-                  hintText: 'Asset issuer',
-                ),
-                textCapitalization: TextCapitalization.characters,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9]')),
-                  LengthLimitingTextInputFormatter(56),
-                ],
-                style: Theme.of(context).textTheme.bodyMedium,
-                validator: (String? value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter the asset issuer address';
-                  } else if (value.length < 56) {
-                    return 'Asset issuer address must have 56 characters';
-                  } else if (!value.startsWith('G')) {
-                    return 'Issuer address must start with the letter G';
-                  } else if (!wallet_sdk.AccountService.validateAddress(
-                      value)) {
-                    return 'Invalid issuer address';
-                  }
-                  return null;
-                },
-                controller: issuerController,
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-            ],
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.5),
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
           ),
-        ),
-      ),
-      btnCancelOnPress: () {
-        Navigator.of(context).pop(DialogAction.cancel);
+          elevation: 8,
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 400),
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.blue.shade100, Colors.blue.shade50],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.token,
+                      size: 36,
+                      color: Colors.blue.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Add Custom Asset',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1A1F36),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Enter the asset code and issuer address',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: const Color(0xFF6B7280),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Asset Code',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: codeController,
+                        decoration: InputDecoration(
+                          hintText: 'e.g., USDC',
+                          hintStyle: TextStyle(
+                            color: Colors.grey.shade400,
+                          ),
+                          filled: true,
+                          fillColor: const Color(0xFFF9FAFB),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: Colors.blue.shade400,
+                              width: 2,
+                            ),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFFEF4444)),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFEF4444),
+                              width: 2,
+                            ),
+                          ),
+                          prefixIcon: Icon(
+                            Icons.code,
+                            color: Colors.grey.shade500,
+                            size: 20,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                        ),
+                        inputFormatters: <TextInputFormatter>[
+                          FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
+                          LengthLimitingTextInputFormatter(12),
+                        ],
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        validator: (String? value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter the asset code';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Issuer Address',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: issuerController,
+                        decoration: InputDecoration(
+                          hintText: 'G...',
+                          hintStyle: TextStyle(
+                            color: Colors.grey.shade400,
+                          ),
+                          filled: true,
+                          fillColor: const Color(0xFFF9FAFB),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: Colors.blue.shade400,
+                              width: 2,
+                            ),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFFEF4444)),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFEF4444),
+                              width: 2,
+                            ),
+                          ),
+                          prefixIcon: Icon(
+                            Icons.account_balance_wallet,
+                            color: Colors.grey.shade500,
+                            size: 20,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                        ),
+                        textCapitalization: TextCapitalization.characters,
+                        inputFormatters: <TextInputFormatter>[
+                          FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9]')),
+                          LengthLimitingTextInputFormatter(56),
+                        ],
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'monospace',
+                        ),
+                        validator: (String? value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter the issuer address';
+                          } else if (value.length < 56) {
+                            return 'Address must be 56 characters';
+                          } else if (!value.startsWith('G')) {
+                            return 'Address must start with G';
+                          } else if (!wallet_sdk.AccountService.validateAddress(value)) {
+                            return 'Invalid issuer address';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(DialogAction.cancel);
+                          },
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(color: Colors.grey.shade300),
+                            ),
+                          ),
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey.shade700,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Colors.blue.shade600, Colors.blue.shade500],
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (formKey.currentState!.validate()) {
+                                Navigator.of(context).pop(DialogAction.ok);
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              'Add Asset',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
       },
-      btnOkOnPress: () {
-        if (formKey.currentState!.validate()) {
-          Navigator.of(context).pop(DialogAction.ok);
-        }
-      },
-      autoDismiss: false,
-      onDismissCallback: (type) {},
-      barrierColor: Colors.purple[900]?.withOpacity(0.54),
-    ).show();
+    );
+    
     wallet_sdk.IssuedAssetId? asset;
     if (action != null && action == DialogAction.ok) {
-      var assetCode = codeController.text;
+      var assetCode = codeController.text.toUpperCase();
       var address = issuerController.text;
       asset = wallet_sdk.IssuedAssetId(code: assetCode, issuer: address);
     }

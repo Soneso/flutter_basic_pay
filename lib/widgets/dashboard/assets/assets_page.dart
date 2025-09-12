@@ -64,52 +64,177 @@ class _AssetsPageBodyState extends State<AssetsPageBody> {
   @override
   Widget build(BuildContext context) {
     var dashboardState = Provider.of<DashboardState>(context);
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Assets", style: Theme.of(context).textTheme.titleLarge),
-            ],
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.blue.shade50,
+            Colors.white,
+          ],
         ),
-        Expanded(
-          child: Padding(
-              padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 8.0),
-              child: dashboardState.data.assets.isEmpty
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                            "Your account does not exist on the Stellar Test Network and needs to be funded!",
-                            style: Theme.of(context).textTheme.bodyMedium),
-                        const SizedBox(height: 10),
-                        ElevatedButton(
-                          onPressed: () async {
-                            if (waitForAccountFunding) {
-                              return;
-                            }
-                            setState(() {
-                              waitForAccountFunding = true;
-                            });
-                            dashboardState.data.fundUserAccount();
-                          },
-                          child: waitForAccountFunding
-                              ? const SizedBox(
-                                  height: 15,
-                                  width: 15,
-                                  child: CircularProgressIndicator(),
-                                )
-                              : const Text('Fund on testnet',
-                                  style: TextStyle(color: Colors.purple)),
+      ),
+      child: Column(
+        children: [
+          // Compact modern header with gradient
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.blue.shade600, Colors.blue.shade400],
+              ),
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(20),
+                bottomRight: Radius.circular(20),
+              ),
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.account_balance_wallet,
+                      color: Colors.blue.shade600,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Asset Management',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
-                      ],
-                    )
-                  : const AssetsPageBodyContent()),
-        ),
-      ],
+                      ),
+                      Text(
+                        'Manage your Stellar assets',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white.withOpacity(0.9),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: dashboardState.data.assets.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Card(
+                      elevation: 8,
+                      shadowColor: Colors.blue.withOpacity(0.3),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.shade50,
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              child: Icon(
+                                Icons.info_outline,
+                                color: Colors.orange.shade600,
+                                size: 32,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Account Not Funded',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey.shade800,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Your account needs to be funded on the Stellar Test Network to manage assets.',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade600,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 20),
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [Colors.blue.shade600, Colors.blue.shade400],
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: ElevatedButton(
+                                onPressed: waitForAccountFunding
+                                    ? null
+                                    : () async {
+                                        setState(() {
+                                          waitForAccountFunding = true;
+                                        });
+                                        await dashboardState.data.fundUserAccount();
+                                        setState(() {
+                                          waitForAccountFunding = false;
+                                        });
+                                      },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  shadowColor: Colors.transparent,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 32,
+                                    vertical: 14,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: waitForAccountFunding
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Text(
+                                        'Fund on Testnet',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                : const AssetsPageBodyContent(),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -147,108 +272,259 @@ class _AssetsPageBodyContentState extends State<AssetsPageBodyContent> {
     dropdownItems.add(addCustomAsset);
 
     return SingleChildScrollView(
-      child: Container(
-        decoration: const BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.lightBlue,
-              blurRadius: 50.0,
-            ),
-          ],
-        ),
-        child: Card(
-          margin: const EdgeInsets.all(20.0),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                AutoSizeText(
-                  "Here you can manage the Stellar assets your account carries trustlines to. Select from pre-suggested assets, or specify your own asset to trust using an asset code and issuer public key. You can also remove trustlines that already exist on your account.",
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 10),
-                const Divider(
-                  color: Colors.blue,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Add Trusted Asset',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 10),
-                AutoSizeText(
-                  "Add a trustline on your account, allowing you to hold the specified asset.",
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.start,
-                ),
-                const SizedBox(height: 10),
-                if (_state != AssetsPageState.sending)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      StringItemsDropdown(
-                        title: "Select Asset",
-                        items: dropdownItems,
-                        onItemSelected: (String item) async {
-                          await _handleAssetSelected(item);
-                        },
-                        initialSelectedItem: _selectedAsset,
-                      ),
-                      const SizedBox(height: 10),
-                      if (_submitError != null)
-                        Util.getErrorTextWidget(context, _submitError!),
-                      if (_customAsset != null)
-                        Text(
-                          _customAsset!.id,
-                          style: Theme.of(context)
-                              .textTheme
-                              .apply(bodyColor: Colors.blue)
-                              .bodyMedium,
-                        ),
-                      if (_state != AssetsPageState.initial)
-                        PinForm(
-                          onPinSet: (String pin) async {
-                            await _handlePinSet(pin, dashboardState);
-                          },
-                          onCancel: _onPinCancel,
-                          hintText: 'Enter pin to add asset',
-                        ),
-                    ],
-                  ),
-                if (_state == AssetsPageState.sending)
-                  Util.getLoadingColumn(context, 'Adding asset ...'),
-                const Divider(
-                  color: Colors.blue,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Existing Balances',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 10),
-                AutoSizeText(
-                  "View or remove asset trustlines on your Stellar account.",
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.start,
-                ),
-                const SizedBox(height: 10),
-                Column(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            // Add Asset Card
+            Card(
+              elevation: 8,
+              shadowColor: Colors.blue.withOpacity(0.3),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ...dashboardState.data.assets.map(
-                      (asset) => AssetBalanceCard(
-                          asset,
-                          dashboardState.authService.userKeyPair,
-                          dashboardState.data.removeAssetSupport,
-                          key: ObjectKey(asset)),
-                    )
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade50,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            Icons.add_circle_outline,
+                            color: Colors.green.shade600,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Add Trusted Asset',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Add a trustline to hold new assets in your account',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (_state != AssetsPageState.sending)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          StringItemsDropdown(
+                            title: "Select Asset",
+                            items: dropdownItems,
+                            onItemSelected: (String item) async {
+                              await _handleAssetSelected(item);
+                            },
+                            initialSelectedItem: _selectedAsset,
+                          ),
+                          const SizedBox(height: 12),
+                          if (_submitError != null)
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: Colors.red.shade200,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.error_outline,
+                                    color: Colors.red.shade600,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      _submitError!,
+                                      style: TextStyle(
+                                        color: Colors.red.shade700,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          if (_customAsset != null) ...[  
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: Colors.blue.shade200,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.info_outline,
+                                    color: Colors.blue.shade600,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      _customAsset!.id,
+                                      style: TextStyle(
+                                        color: Colors.blue.shade700,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                          if (_state != AssetsPageState.initial) ...[  
+                            const SizedBox(height: 16),
+                            PinForm(
+                              onPinSet: (String pin) async {
+                                await _handlePinSet(pin, dashboardState);
+                              },
+                              onCancel: _onPinCancel,
+                              hintText: 'Enter PIN to add asset',
+                            ),
+                          ],
+                        ],
+                      ),
+                    if (_state == AssetsPageState.sending)
+                      Container(
+                        margin: const EdgeInsets.only(top: 12),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.blue.shade600,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Adding asset...',
+                              style: TextStyle(
+                                color: Colors.blue.shade700,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                   ],
-                )
-              ],
+                ),
+              ),
             ),
-          ),
+            const SizedBox(height: 20),
+            // Existing Balances Card
+            Card(
+              elevation: 8,
+              shadowColor: Colors.blue.withOpacity(0.3),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            Icons.account_balance,
+                            color: Colors.blue.shade600,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Your Assets',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'View balances and manage trustlines',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (dashboardState.data.assets.isEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: Center(
+                          child: Text(
+                            'No assets yet',
+                            style: TextStyle(
+                              color: Colors.grey.shade500,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      Column(
+                        children: dashboardState.data.assets.map(
+                          (asset) => Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: AssetBalanceCard(
+                              asset,
+                              dashboardState.authService.userKeyPair,
+                              dashboardState.data.removeAssetSupport,
+                              key: ObjectKey(asset),
+                            ),
+                          ),
+                        ).toList(),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
