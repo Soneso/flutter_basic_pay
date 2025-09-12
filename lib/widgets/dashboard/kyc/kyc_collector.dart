@@ -96,6 +96,13 @@ class _KycCollectorFormState extends State<KycCollectorForm> {
       
       if (choices != null) {
         // Dropdown field
+        // Set initial value in collectedFields if it exists and not already set
+        if (initialValue != null && 
+            choices.contains(initialValue) && 
+            !widget.collectedFields.containsKey(entry.key)) {
+          widget.collectedFields[entry.key] = initialValue;
+        }
+        
         formFields.add(DropdownButtonFormField<String>(
           key: ObjectKey(entry),
           value: widget.collectedFields.containsKey(entry.key)
@@ -144,6 +151,7 @@ class _KycCollectorFormState extends State<KycCollectorForm> {
           style: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w500,
+            color: Colors.black87,
           ),
           icon: Icon(
             Icons.keyboard_arrow_down_rounded,
@@ -157,6 +165,7 @@ class _KycCollectorFormState extends State<KycCollectorForm> {
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
+                  color: Colors.black87,
                 ),
               ),
             );
@@ -179,6 +188,13 @@ class _KycCollectorFormState extends State<KycCollectorForm> {
         ));
       } else {
         // Text input field
+        // Set initial value in collectedFields if it exists and not already set
+        if (initialValue != null && 
+            initialValue.isNotEmpty &&
+            !widget.collectedFields.containsKey(entry.key)) {
+          widget.collectedFields[entry.key] = initialValue;
+        }
+        
         formFields.add(TextFormField(
           key: ObjectKey(entry),
           decoration: InputDecoration(
@@ -223,6 +239,13 @@ class _KycCollectorFormState extends State<KycCollectorForm> {
             fontSize: 15,
             fontWeight: FontWeight.w500,
           ),
+          onChanged: (String? value) {
+            if (value != null && value.isNotEmpty) {
+              widget.collectedFields[entry.key] = value;
+            } else {
+              widget.collectedFields.remove(entry.key);
+            }
+          },
           validator: (String? value) {
             if (value == null || value.isEmpty) {
               widget.collectedFields.remove(entry.key);

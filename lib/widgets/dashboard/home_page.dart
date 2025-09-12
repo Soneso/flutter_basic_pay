@@ -2,7 +2,6 @@
 // Use of this source code is governed by a license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_basic_pay/services/data.dart';
 import 'package:flutter_basic_pay/services/auth.dart';

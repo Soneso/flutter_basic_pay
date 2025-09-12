@@ -399,12 +399,12 @@ class Sep6TransferResponseView extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: const Color(0xFFEF4444).withOpacity(0.1),
+            color: const Color(0xFF10B981).withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: const Icon(
             Icons.arrow_upward,
-            color: Color(0xFFEF4444),
+            color: Color(0xFF10B981),
             size: 20,
           ),
         ),
@@ -415,7 +415,7 @@ class Sep6TransferResponseView extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Color(0xFFEF4444),
+              color: Color(0xFF10B981),
             ),
           ),
         ),

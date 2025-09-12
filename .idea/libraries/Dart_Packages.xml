@@ -418,14 +418,14 @@
         <entry key="stellar_flutter_sdk">
           <value>
             <list>
-              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/stellar_flutter_sdk-2.1.3/lib" />
+              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/stellar_flutter_sdk-2.1.4/lib" />
             </list>
           </value>
         </entry>
         <entry key="stellar_wallet_flutter_sdk">
           <value>
             <list>
-              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/stellar_wallet_flutter_sdk-1.0.6/lib" />
+              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/stellar_wallet_flutter_sdk-1.0.7/lib" />
             </list>
           </value>
         </entry>
@@ -599,8 +599,8 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/rational-2.2.3/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/source_span-1.10.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/stack_trace-1.11.1/lib" />
-      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/stellar_flutter_sdk-2.1.3/lib" />
-      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/stellar_wallet_flutter_sdk-1.0.6/lib" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/stellar_flutter_sdk-2.1.4/lib" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/stellar_wallet_flutter_sdk-1.0.7/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/stream_channel-2.1.2/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/string_scanner-1.2.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/term_glyph-1.2.1/lib" />

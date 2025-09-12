@@ -485,8 +485,13 @@ class _TransfersPageBodyState extends State<TransfersPageBody> {
         Sep6TransferHistoryWidget(
             assetCode: anchorAsset.asset.code,
             transactions: transactions,
+            authToken: _sep10AuthToken,
+            anchoredAsset: anchorAsset,
+            onTransactionsNeedReload: () async {
+              await _reloadSep6History();
+            },
             key: ObjectKey(transactions)),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
       ],
     );
   }
@@ -528,7 +533,7 @@ class _TransfersPageBodyState extends State<TransfersPageBody> {
             assetCode: anchorAsset.asset.code,
             transactions: transactions,
             key: ObjectKey(transactions)),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
       ],
     );
   }
@@ -706,6 +711,31 @@ class _TransfersPageBodyState extends State<TransfersPageBody> {
       _state = TransfersPageState.initial;
       _selectedAsset = null;
       _errorText = null;
+    });
+  }
+
+  Future<void> _reloadSep6History() async {
+    if (_sep10AuthToken == null || _selectedAsset == null) {
+      return;
+    }
+
+    setState(() {
+      _loadingText = 'Reloading SEP-6 history';
+      _state = TransfersPageState.loading;
+    });
+
+    var anchoredAsset = getSelectedAnchorAsset();
+    
+    try {
+      var sep6 = anchoredAsset.anchor.sep6();
+      _sep6HistoryTransactions = await sep6.getTransactionsForAsset(
+          authToken: _sep10AuthToken!, assetCode: anchoredAsset.asset.code);
+    } catch (e) {
+      _errorText = 'Error reloading SEP-06 history: ${e.toString()}';
+    }
+
+    setState(() {
+      _state = TransfersPageState.transferInfoLoaded;
     });
   }
 

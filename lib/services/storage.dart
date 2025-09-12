@@ -136,6 +136,11 @@ class SecureStorage {
     await storage.write(key: _kycDataStorageKey, value: data);
   }
 
+  /// Public method to save KYC data
+  static Future<void> setKycData(Map<String, String> kycData) async {
+    await _saveKycData(kycData);
+  }
+
   static Map<String, String> demoKycData() {
     var result = <String, String>{};
     result[core_sdk.NaturalPersonKYCFields.last_name_field_key] = '';

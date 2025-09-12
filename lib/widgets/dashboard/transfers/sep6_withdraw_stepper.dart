@@ -216,6 +216,32 @@ class _Sep6WithdrawStepperState extends State<Sep6WithdrawStepper> {
           spacer,
           Expanded(child: submitButton),
         ]);
+      } else {
+        // showing submission result
+        var closeButton = Container(
+          height: 48,
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.grey[600],
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            child: const Text(
+              'Close',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        );
+        return Row(children: [Expanded(child: closeButton)]);
       }
     }
     return const Row(children: []);

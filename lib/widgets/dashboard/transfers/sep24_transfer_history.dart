@@ -377,27 +377,63 @@ class _Sep24TransferHistoryWidgetState
   }
 
   Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
+    // Check for TransactionStatus enum values (e.g., TransactionStatus.completed)
+    String statusStr = status.toLowerCase();
+    if (status.contains('.')) {
+      // Handle enum format like "TransactionStatus.completed"
+      statusStr = status.split('.').last.toLowerCase();
+    }
+    
+    switch (statusStr) {
       case 'completed':
-        return const Color(0xFF10B981);
+        return const Color(0xFF10B981); // Green
       case 'pending':
-        return const Color(0xFF3B82F6);
+      case 'pending_external':
+      case 'pending_anchor':
+      case 'pending_stellar':
+      case 'pending_trust':
+      case 'pending_user':
+      case 'pending_user_transfer_start':
+      case 'pending_user_transfer_complete':
+      case 'pending_customer_info_update':
+        return const Color(0xFF3B82F6); // Blue
       case 'error':
       case 'failed':
-        return const Color(0xFFEF4444);
+      case 'no_market':
+      case 'too_small':
+      case 'too_large':
+        return const Color(0xFFEF4444); // Red
       default:
-        return const Color(0xFFF59E0B);
+        return const Color(0xFFF59E0B); // Yellow/Orange for other statuses
     }
   }
 
   IconData _getStatusIcon(String status) {
-    switch (status.toLowerCase()) {
+    // Check for TransactionStatus enum values (e.g., TransactionStatus.completed)
+    String statusStr = status.toLowerCase();
+    if (status.contains('.')) {
+      // Handle enum format like "TransactionStatus.completed"
+      statusStr = status.split('.').last.toLowerCase();
+    }
+    
+    switch (statusStr) {
       case 'completed':
         return Icons.check_circle;
       case 'pending':
+      case 'pending_external':
+      case 'pending_anchor':
+      case 'pending_stellar':
+      case 'pending_trust':
+      case 'pending_user':
+      case 'pending_user_transfer_start':
+      case 'pending_user_transfer_complete':
+      case 'pending_customer_info_update':
         return Icons.schedule;
       case 'error':
       case 'failed':
+      case 'no_market':
+      case 'too_small':
+      case 'too_large':
         return Icons.error;
       default:
         return Icons.info;
