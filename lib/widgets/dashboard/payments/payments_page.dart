@@ -2,7 +2,6 @@
 // Use of this source code is governed by a license that can be
 // found in the LICENSE file.
 
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_basic_pay/services/stellar.dart';
 import 'package:flutter_basic_pay/services/storage.dart';
@@ -83,102 +82,258 @@ class _PaymentsPageBodyState extends State<PaymentsPageBody> {
     var dashboardState = Provider.of<DashboardState>(context);
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        // Header with gradient background
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.blue.shade600,
+                Colors.blue.shade400,
+              ],
+            ),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20),
+            ),
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Payments", style: Theme.of(context).textTheme.titleLarge),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.payment,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  const Text(
+                    'Payments',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Send and receive Stellar assets',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.9),
+                  fontSize: 14,
+                ),
+              ),
             ],
           ),
         ),
         Expanded(
-          child: Padding(
-              padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 8.0),
-              child: dashboardState.data.assets.isEmpty
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                            "Your account does not exist on the Stellar Test Network and needs to be funded!",
-                            style: Theme.of(context).textTheme.bodyMedium),
-                        const SizedBox(height: 10),
-                        ElevatedButton(
-                          onPressed: () async {
-                            if (waitForAccountFunding) {
-                              return;
-                            }
-                            setState(() {
-                              waitForAccountFunding = true;
-                            });
-                            dashboardState.data.fundUserAccount();
-                          },
-                          child: waitForAccountFunding
-                              ? const SizedBox(
-                                  height: 15,
-                                  width: 15,
-                                  child: CircularProgressIndicator(),
-                                )
-                              : const Text('Fund on testnet',
-                                  style: TextStyle(color: Colors.purple)),
-                        ),
-                      ],
-                    )
-                  : SingleChildScrollView(
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.lightBlue,
-                              blurRadius: 50.0,
+          child: dashboardState.data.assets.isEmpty
+              ? // Account needs funding
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.shade50,
+                              shape: BoxShape.circle,
                             ),
-                          ],
-                        ),
-                        child: Card(
-                          margin: const EdgeInsets.all(20.0),
+                            child: Icon(
+                              Icons.account_balance_wallet,
+                              color: Colors.orange.shade600,
+                              size: 48,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            'Account Not Funded',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Your account needs to be funded on the Stellar Test Network to start making payments.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 48,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue.shade600,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 0,
+                              ),
+                              onPressed: waitForAccountFunding
+                                  ? null
+                                  : () async {
+                                      setState(() {
+                                        waitForAccountFunding = true;
+                                      });
+                                      await dashboardState.data.fundUserAccount();
+                                      setState(() {
+                                        waitForAccountFunding = false;
+                                      });
+                                    },
+                              child: waitForAccountFunding
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Fund Account on Testnet',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              : SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        // Payment Type Toggle Card
+                        Card(
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                           child: Padding(
-                            padding: const EdgeInsets.all(16.0),
+                            padding: const EdgeInsets.all(20),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                AutoSizeText(
-                                  "Here you can send payments to other Stellar addresses.",
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 10),
-                                const Divider(
-                                  color: Colors.blue,
-                                ),
+                              children: [
                                 Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const Text(
-                                        "Send and receive different assets?"),
-                                    Switch(
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          'Payment Type',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          pathPayment
+                                              ? 'Path Payment (Cross-asset)'
+                                              : 'Simple Payment',
+                                          style: TextStyle(
+                                            color: pathPayment
+                                                ? Colors.blue.shade600
+                                                : Colors.grey.shade600,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Switch.adaptive(
                                       value: pathPayment,
+                                      activeColor: Colors.blue.shade600,
                                       onChanged: (value) {
                                         setState(() {
                                           pathPayment = value;
                                         });
                                       },
-                                    )
+                                    ),
                                   ],
                                 ),
-                                const Divider(
-                                  color: Colors.blue,
-                                ),
-                                const SizedBox(height: 10),
-                                pathPayment
-                                    ? const PathPaymentsBodyContent()
-                                    : const SimplePaymentsPageBodyContent()
+                                if (pathPayment)
+                                  Container(
+                                    margin: const EdgeInsets.only(top: 12),
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.shade50,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.info_outline,
+                                          size: 16,
+                                          color: Colors.blue.shade700,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            'Send one asset and receive another',
+                                            style: TextStyle(
+                                              color: Colors.blue.shade700,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                               ],
                             ),
                           ),
                         ),
-                      ),
-                    )),
+                        const SizedBox(height: 16),
+                        // Payment Form Card
+                        Card(
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: pathPayment
+                                ? const PathPaymentsBodyContent()
+                                : const SimplePaymentsPageBodyContent(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
         ),
       ],
     );

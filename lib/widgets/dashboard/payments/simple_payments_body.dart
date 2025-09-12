@@ -2,12 +2,10 @@
 // Use of this source code is governed by a license that can be
 // found in the LICENSE file.
 
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_basic_pay/services/stellar.dart';
 import 'package:flutter_basic_pay/services/storage.dart';
-import 'package:flutter_basic_pay/widgets/common/util.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/payments/payment_data_and_pin_form.dart';
 import 'package:flutter_basic_pay/widgets/common/dialogs.dart';
 import 'package:flutter_basic_pay/widgets/common/dropdowns.dart';
@@ -46,6 +44,13 @@ class _SimplePaymentsBodyContentState
   static const otherContact = 'Other';
   List<ContactInfo> contacts = List<ContactInfo>.empty(growable: true);
   List<AssetInfo> assets = List<AssetInfo>.empty(growable: true);
+  
+  String _truncateMiddle(String text, int maxLength) {
+    if (text.length <= maxLength) return text;
+    final startLength = (maxLength - 3) ~/ 2;
+    final endLength = maxLength - 3 - startLength;
+    return '${text.substring(0, startLength)}...${text.substring(text.length - endLength)}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,89 +74,292 @@ class _SimplePaymentsBodyContentState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(
-          'Send payment',
-          style: Theme.of(context).textTheme.titleMedium,
+        // Title Section
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.send,
+                color: Colors.blue.shade600,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Send Payment',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 10),
-        if (_state != SimplePaymentsPageState.sending)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AutoSizeText(
-                "Asset to send:",
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.start,
-              ),
-              const SizedBox(height: 10),
-              StringItemsDropdown(
-                title: "Select Asset",
-                items: assetsDropdownItems,
-                onItemSelected: (String item) {
-                  _handleAssetSelected(item);
-                },
-                initialSelectedItem: _selectedAsset,
-              ),
-              const SizedBox(height: 10),
-              AutoSizeText(
-                "Recipient:",
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.start,
-              ),
-              const SizedBox(height: 10),
-              StringItemsDropdown(
-                title: "Select Contact",
-                items: contactsDropdownItems,
-                onItemSelected: (String item) async {
-                  await _handleContactSelected(item);
-                },
-                initialSelectedItem: _selectedContact,
-              ),
-              if (_recipientAddress != null)
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
+        const SizedBox(height: 20),
+        
+        if (_state == SimplePaymentsPageState.sending)
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 40),
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Container(
+                    width: 48,
+                    height: 48,
+                    padding: const EdgeInsets.all(8),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      color: Colors.blue.shade600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Sending Payment',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Processing your transaction...',
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                   child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Expanded(
-                        flex: 7,
-                        child: AutoSizeText(
-                          _recipientAddress!,
-                          style: Theme.of(context)
-                              .textTheme
-                              .apply(bodyColor: Colors.blue)
-                              .bodyMedium,
-                        ),
+                      Icon(
+                        Icons.lock_outline,
+                        size: 16,
+                        color: Colors.blue.shade700,
                       ),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.copy_outlined,
-                          size: 20,
+                      const SizedBox(width: 6),
+                      Text(
+                        'Secure transaction',
+                        style: TextStyle(
+                          color: Colors.blue.shade700,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
                         ),
-                        onPressed: () => _copyToClipboard(_recipientAddress!),
                       ),
                     ],
                   ),
                 ),
-              const SizedBox(height: 10),
+              ],
+            ),
+          )
+        else
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Asset Selection
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.grey.shade200,
+                    width: 1,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Asset to Send',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    StringItemsDropdown(
+                      title: "Select Asset",
+                      items: assetsDropdownItems,
+                      onItemSelected: (String item) {
+                        _handleAssetSelected(item);
+                      },
+                      initialSelectedItem: _selectedAsset,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              // Recipient Selection
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.grey.shade200,
+                    width: 1,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Recipient',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    StringItemsDropdown(
+                      title: "Select Contact",
+                      items: contactsDropdownItems,
+                      onItemSelected: (String item) async {
+                        await _handleContactSelected(item);
+                      },
+                      initialSelectedItem: _selectedContact,
+                    ),
+                    if (_recipientAddress != null)
+                      Container(
+                        margin: const EdgeInsets.only(top: 12),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Colors.grey.shade300,
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.account_balance_wallet,
+                              size: 16,
+                              color: Colors.grey.shade600,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Tooltip(
+                                message: _recipientAddress!,
+                                child: Text(
+                                  _truncateMiddle(_recipientAddress!, 20),
+                                  style: TextStyle(
+                                    color: Colors.grey.shade700,
+                                    fontSize: 13,
+                                    fontFamily: 'monospace',
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            InkWell(
+                              onTap: () => _copyToClipboard(_recipientAddress!),
+                              borderRadius: BorderRadius.circular(4),
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                child: Icon(
+                                  Icons.copy,
+                                  size: 16,
+                                  color: Colors.blue.shade600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              
+              // Error Message
               if (_submitError != null)
-                Util.getErrorTextWidget(context, _submitError!),
+                Container(
+                  margin: const EdgeInsets.only(top: 16),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Colors.red.shade200,
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 20,
+                        color: Colors.red.shade700,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _submitError!,
+                          style: TextStyle(
+                            color: Colors.red.shade700,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              
+              // Payment Form
               if (_state != SimplePaymentsPageState.initial)
-                PaymentDataAndPinForm(
-                  onDataSet: (PaymentDataAndPin data) async {
-                    await _handleAmountAndPinSet(data, dashboardState);
-                  },
-                  onCancel: _onPinCancel,
-                  hintText: 'Enter pin to send the payment',
-                  requestAmount: true,
-                  maxAmount: _maxAmount(_selectedAsset),
+                Container(
+                  margin: const EdgeInsets.only(top: 20),
+                  child: PaymentDataAndPinForm(
+                    onDataSet: (PaymentDataAndPin data) async {
+                      await _handleAmountAndPinSet(data, dashboardState);
+                    },
+                    onCancel: _onPinCancel,
+                    hintText: 'Enter pin to send the payment',
+                    requestAmount: true,
+                    maxAmount: _maxAmount(_selectedAsset),
+                  ),
                 ),
             ],
           ),
-        if (_state == SimplePaymentsPageState.sending)
-          Util.getLoadingColumn(context, 'sending payment ...'),
-        const Divider(
-          color: Colors.blue,
-        ),
       ],
     );
   }
