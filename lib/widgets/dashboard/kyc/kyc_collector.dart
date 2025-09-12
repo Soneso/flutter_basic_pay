@@ -48,6 +48,7 @@ class _KycCollectorFormState extends State<KycCollectorForm> {
   Form getKycFieldsForm() {
     var initialValues = widget.initialValues;
     List<Widget> formFields = [];
+    
     for (var entry in widget.sep12Fields.entries) {
       if (entry.value.type == FieldType.binary) {
         // TODO...
@@ -60,39 +61,105 @@ class _KycCollectorFormState extends State<KycCollectorForm> {
         continue;
       }
       
-      formFields.add(const SizedBox(height: 10));
+      if (formFields.isNotEmpty) {
+        formFields.add(const SizedBox(height: 16));
+      }
+      
       String fieldName = entry.key;
+      String displayName = fieldName
+          .replaceAll('_', ' ')
+          .split(' ')
+          .map((word) => word.isNotEmpty 
+              ? '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}'
+              : '')
+          .join(' ');
+      
       String? initialValue;
       if (initialValues.containsKey(entry.key)) {
         initialValue = initialValues[entry.key];
       }
 
-      formFields.add(AutoSizeText(
-        fieldName,
-        style: Theme.of(context).textTheme.titleSmall,
-        textAlign: TextAlign.left,
+      // Field label
+      formFields.add(Text(
+        displayName,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: Colors.grey.shade700,
+        ),
       ));
+      formFields.add(const SizedBox(height: 8));
 
       var choices = entry.value.choices;
       if (choices != null && choices.isEmpty) {
         choices = null;
       }
+      
       if (choices != null) {
-        formFields.add(DropdownButtonFormField(
+        // Dropdown field
+        formFields.add(DropdownButtonFormField<String>(
           key: ObjectKey(entry),
           value: widget.collectedFields.containsKey(entry.key)
               ? widget.collectedFields[entry.key]
               : (initialValue != null && choices.contains(initialValue)
                   ? initialValue
                   : null),
-          hint: Text(
-            'Select one',
-            style: Theme.of(context).textTheme.bodyMedium,
+          decoration: InputDecoration(
+            hintText: 'Select $displayName',
+            hintStyle: TextStyle(
+              color: Colors.grey.shade400,
+            ),
+            filled: true,
+            fillColor: const Color(0xFFF9FAFB),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.blue.shade400,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFEF4444)),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Color(0xFFEF4444),
+                width: 2,
+              ),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
+          ),
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+          ),
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: Colors.grey.shade600,
           ),
           items: choices.map<DropdownMenuItem<String>>((String value) {
             return DropdownMenuItem<String>(
               value: value,
-              child: Text(value),
+              child: Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             );
           }).toList(),
           onChanged: (String? value) {
@@ -106,19 +173,61 @@ class _KycCollectorFormState extends State<KycCollectorForm> {
           },
           validator: (String? value) {
             if (value == null || value.isEmpty) {
-              return 'Please select an option';
+              return 'Please select $displayName';
             }
             return null;
           },
         ));
       } else {
+        // Text input field
         formFields.add(TextFormField(
           key: ObjectKey(entry),
-          style: Theme.of(context).textTheme.bodyMedium,
+          decoration: InputDecoration(
+            hintText: 'Enter $displayName',
+            hintStyle: TextStyle(
+              color: Colors.grey.shade400,
+            ),
+            filled: true,
+            fillColor: const Color(0xFFF9FAFB),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.blue.shade400,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFEF4444)),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Color(0xFFEF4444),
+                width: 2,
+              ),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
+          ),
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+          ),
           validator: (String? value) {
             if (value == null || value.isEmpty) {
               widget.collectedFields.remove(entry.key);
-              return 'Please enter the ${entry.key}';
+              return 'Please enter $displayName';
             }
             widget.collectedFields[entry.key] = value;
             return null;
@@ -126,20 +235,30 @@ class _KycCollectorFormState extends State<KycCollectorForm> {
           initialValue: initialValue,
         ));
       }
+      
+      // Description text if available
       if (entry.value.description != null) {
-        formFields.add(AutoSizeText(
+        formFields.add(const SizedBox(height: 6));
+        formFields.add(Text(
           entry.value.description!,
-          style: Theme.of(context).textTheme.bodyMedium,
+          style: TextStyle(
+            fontSize: 13,
+            color: Colors.grey.shade600,
+          ),
         ));
       }
     }
 
-    formFields.add(const SizedBox(height: 10));
+    if (formFields.isNotEmpty) {
+      formFields.add(const SizedBox(height: 20));
+    }
 
     return Form(
       key: widget.formKey,
       child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, children: formFields),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: formFields,
+      ),
     );
   }
 }
