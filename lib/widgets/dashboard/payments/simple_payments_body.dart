@@ -10,6 +10,7 @@ import 'package:flutter_basic_pay/widgets/dashboard/payments/payment_data_and_pi
 import 'package:flutter_basic_pay/widgets/common/dialogs.dart';
 import 'package:flutter_basic_pay/widgets/common/dropdowns.dart';
 import 'package:flutter_basic_pay/widgets/common/navigation_service.dart';
+import 'package:flutter_basic_pay/widgets/common/loading.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/home_page.dart';
 import 'package:provider/provider.dart';
 import 'package:stellar_wallet_flutter_sdk/stellar_wallet_flutter_sdk.dart'
@@ -125,14 +126,9 @@ class _SimplePaymentsBodyContentState
                     color: Colors.blue.shade50,
                     shape: BoxShape.circle,
                   ),
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    padding: const EdgeInsets.all(8),
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3,
-                      color: Colors.blue.shade600,
-                    ),
+                  child: LoadingWidget(
+                    size: 48,
+                    showCard: false,
                   ),
                 ),
                 const SizedBox(height: 20),

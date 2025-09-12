@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_basic_pay/services/stellar.dart';
+import 'package:flutter_basic_pay/widgets/common/loading.dart';
 import 'package:flutter_basic_pay/widgets/common/util.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/home_page.dart';
 import 'package:provider/provider.dart';
@@ -20,7 +21,10 @@ class PaymentsOverview extends StatelessWidget {
       builder: (context, futureSnapshot) {
         if (!futureSnapshot.hasData) {
           return const Center(
-            child: CircularProgressIndicator(),
+            child: LoadingWidget(
+              message: 'Loading payments...',
+              showCard: false,
+            ),
           );
         }
         return StreamBuilder<List<PaymentInfo>>(
@@ -29,7 +33,10 @@ class PaymentsOverview extends StatelessWidget {
           builder: (context, snapshot) {
             if (snapshot.data == null) {
               return const Center(
-                child: CircularProgressIndicator(),
+                child: LoadingWidget(
+                  message: 'Loading payments...',
+                  showCard: false,
+                ),
               );
             }
             return PaymentsBody(snapshot.data!);

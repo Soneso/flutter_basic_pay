@@ -2,14 +2,13 @@
 // Use of this source code is governed by a license that can be
 // found in the LICENSE file.
 
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_basic_pay/services/stellar.dart';
 import 'package:flutter_basic_pay/services/storage.dart';
 import 'package:flutter_basic_pay/widgets/common/dialogs.dart';
 import 'package:flutter_basic_pay/widgets/common/dropdowns.dart';
+import 'package:flutter_basic_pay/widgets/common/loading.dart';
 import 'package:flutter_basic_pay/widgets/common/navigation_service.dart';
-import 'package:flutter_basic_pay/widgets/common/util.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/assets/asset_balance_card.dart';
 import 'package:flutter_basic_pay/widgets/common/pin_form.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/home_page.dart';
@@ -28,7 +27,10 @@ class AssetsPage extends StatelessWidget {
       builder: (context, futureSnapshot) {
         if (!futureSnapshot.hasData) {
           return const Center(
-            child: CircularProgressIndicator(),
+            child: LoadingWidget(
+              message: 'Loading assets...',
+              showCard: false,
+            ),
           );
         }
         return StreamBuilder<List<AssetInfo>>(
@@ -37,7 +39,10 @@ class AssetsPage extends StatelessWidget {
           builder: (context, snapshot) {
             if (snapshot.data == null) {
               return const Center(
-                child: CircularProgressIndicator(),
+                child: LoadingWidget(
+                  message: 'Loading assets...',
+                  showCard: false,
+                ),
               );
             }
             return AssetsPageBody(
@@ -211,9 +216,10 @@ class _AssetsPageBodyState extends State<AssetsPageBody> {
                                     ? const SizedBox(
                                         height: 20,
                                         width: 20,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
+                                        child: CircularProgress(
+                                          size: 20,
                                           strokeWidth: 2,
+                                          color: Colors.white,
                                         ),
                                       )
                                     : const Text(
@@ -425,7 +431,8 @@ class _AssetsPageBodyContentState extends State<AssetsPageBodyContent> {
                             SizedBox(
                               width: 16,
                               height: 16,
-                              child: CircularProgressIndicator(
+                              child: CircularProgress(
+                                size: 16,
                                 strokeWidth: 2,
                                 color: Colors.blue.shade600,
                               ),

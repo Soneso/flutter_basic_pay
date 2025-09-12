@@ -2,13 +2,12 @@
 // Use of this source code is governed by a license that can be
 // found in the LICENSE file.
 
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_basic_pay/services/stellar.dart';
 import 'package:flutter_basic_pay/services/storage.dart';
 import 'package:flutter_basic_pay/widgets/common/dropdowns.dart';
 import 'package:flutter_basic_pay/widgets/common/pin_form.dart';
-import 'package:flutter_basic_pay/widgets/common/util.dart';
+import 'package:flutter_basic_pay/widgets/common/loading.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/home_page.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/transfers/sep24_new_transfer_widget.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/transfers/sep24_transfer_history.dart';
@@ -28,7 +27,9 @@ class TransfersPage extends StatelessWidget {
       builder: (context, futureSnapshot) {
         if (!futureSnapshot.hasData) {
           return const Center(
-            child: CircularProgressIndicator(),
+            child: LoadingWidget(
+              message: 'Loading assets...',
+            ),
           );
         }
         return StreamBuilder<List<AssetInfo>>(
@@ -37,7 +38,9 @@ class TransfersPage extends StatelessWidget {
           builder: (context, assetsSnapshot) {
             if (assetsSnapshot.data == null) {
               return const Center(
-                child: CircularProgressIndicator(),
+                child: LoadingWidget(
+                  message: 'Loading assets...',
+                ),
               );
             }
             return FutureBuilder<List<AnchoredAssetInfo>>(
@@ -45,7 +48,9 @@ class TransfersPage extends StatelessWidget {
               builder: (context, futureSnapshot) {
                 if (!futureSnapshot.hasData) {
                   return const Center(
-                    child: CircularProgressIndicator(),
+                    child: LoadingWidget(
+                      message: 'Loading anchor information...',
+                    ),
                   );
                 }
                 var key = List<Object>.empty(growable: true);
@@ -95,73 +100,164 @@ class _TransfersPageBodyState extends State<TransfersPageBody> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 5.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Transfers", style: Theme.of(context).textTheme.titleLarge),
-              ToggleButtons(
-                isSelected: _toggleSelections,
-                selectedColor: Colors.blue,
-                selectedBorderColor: Colors.blue,
-                onPressed: (int index) {
-                  setState(() {
-                    if (index == 0) {
-                      _toggleSelections = [true, false];
-                    } else {
-                      _toggleSelections = [false, true];
-                    }
-                    _selectedAsset = null;
-                    _errorText = null;
-                    _state = TransfersPageState.initial;
-                  });
-                },
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      const Icon(Icons.add),
-                      const SizedBox(height: 5.0),
-                      Text(" New ",
-                          style: Theme.of(context).textTheme.titleMedium),
-                    ],
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      const Icon(Icons.history),
-                      const SizedBox(height: 5.0),
-                      Text(" History ",
-                          style: Theme.of(context).textTheme.titleMedium),
-                    ],
-                  ),
-                ],
-              )
-            ],
+        // Modern header with gradient background
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
           ),
-        ),
-        Expanded(
-          child: Padding(
-              padding: const EdgeInsets.only(left: 2.0, right: 2.0, top: 8.0),
-              child: SingleChildScrollView(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.lightBlue,
-                        blurRadius: 50.0,
+          padding: const EdgeInsets.all(20.0),
+          child: SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.swap_horiz,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Text(
+                      "Transfers",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                // Modern toggle buttons
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: EdgeInsets.all(4),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () async {
+                            setState(() {
+                              _toggleSelections = [true, false];
+                              _errorText = null;
+                              _state = TransfersPageState.initial;
+                            });
+                            // If an asset was selected, reload data for new transfer
+                            if (_selectedAsset != null) {
+                              await _handleAssetSelected(_selectedAsset!);
+                            }
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color: _toggleSelections[0]
+                                  ? Colors.white
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.add_circle_outline,
+                                  color: _toggleSelections[0]
+                                      ? Color(0xFF3B82F6)
+                                      : Colors.white,
+                                  size: 20,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  "New Transfer",
+                                  style: TextStyle(
+                                    color: _toggleSelections[0]
+                                        ? Color(0xFF3B82F6)
+                                        : Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 4),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () async {
+                            setState(() {
+                              _toggleSelections = [false, true];
+                              _errorText = null;
+                              _state = TransfersPageState.initial;
+                            });
+                            // If an asset was selected, reload data for history
+                            if (_selectedAsset != null) {
+                              await _handleAssetSelected(_selectedAsset!);
+                            }
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color: _toggleSelections[1]
+                                  ? Colors.white
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.history,
+                                  color: _toggleSelections[1]
+                                      ? Color(0xFF3B82F6)
+                                      : Colors.white,
+                                  size: 20,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  "History",
+                                  style: TextStyle(
+                                    color: _toggleSelections[1]
+                                        ? Color(0xFF3B82F6)
+                                        : Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  child: Card(
-                    margin: const EdgeInsets.all(20.0),
-                    child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: getBody(context)),
-                  ),
                 ),
-              )),
+              ],
+            ),
+          ),
+        ),
+        // Content area
+        Expanded(
+          child: Container(
+            color: Color(0xFFF9FAFB),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(20),
+              child: getBody(context),
+            ),
+          ),
         ),
       ],
     );
@@ -176,46 +272,145 @@ class _TransfersPageBodyState extends State<TransfersPageBody> {
         .map((asset) => asset.asset.id)
         .toList(growable: true);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        AutoSizeText(
-          newTransfer
-              ? "Here you can initiate a transfer with an anchor for your assets which have the needed infrastructure available."
-              : "History",
-          style: newTransfer
-              ? Theme.of(context).textTheme.bodyMedium
-              : Theme.of(context).textTheme.titleMedium,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 10),
-        const Divider(
-          color: Colors.blue,
-        ),
-        widget.anchoredAssets.isEmpty
-            ? AutoSizeText(
-                "You have no assets that have the needed infrastructure for anchor transfers. For testing, "
-                "add a trustline to one of the Stellar Test Anchor Assets (SRT or UDSC) "
-                "on the Assets page.",
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.center,
-              )
-            : Column(
-                children: [
-                  const SizedBox(height: 10),
-                  StringItemsDropdown(
-                    title: "Select Asset",
-                    items: dropdownItems,
-                    onItemSelected: (String item) async {
-                      await _handleAssetSelected(item);
-                    },
-                    initialSelectedItem: _selectedAsset,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          if (newTransfer) ...[
+            Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  color: Color(0xFF3B82F6),
+                  size: 20,
+                ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    "Initiate transfers with anchors for your supported assets",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF6B7280),
+                    ),
                   ),
-                  const SizedBox(height: 10),
-                  if (_errorText != null)
-                    Util.getErrorTextWidget(context, 'Error: $_errorText'),
-                  if (_state == TransfersPageState.loading && _loadingText != null)
-                    Util.getLoadingColumn(context, _loadingText!),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+          ],
+          widget.anchoredAssets.isEmpty
+              ? Container(
+                  padding: EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFFEF3C7),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Color(0xFFFBBF24),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        color: Color(0xFFF59E0B),
+                        size: 48,
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        "No Anchor Assets Available",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF92400E),
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        "You have no assets that support anchor transfers. For testing, add a trustline to SRT or UDSC on the Assets page.",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF92400E),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                )
+              : Column(
+                  children: [
+                    // Modern dropdown
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Color(0xFFF3F4F6),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Color(0xFFE5E7EB),
+                          width: 1,
+                        ),
+                      ),
+                      child: StringItemsDropdown(
+                        title: "Select Asset",
+                        items: dropdownItems,
+                        onItemSelected: (String item) async {
+                          await _handleAssetSelected(item);
+                        },
+                        initialSelectedItem: _selectedAsset,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    if (_errorText != null)
+                      Container(
+                        margin: EdgeInsets.only(bottom: 16),
+                        padding: EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Color(0xFFFEE2E2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Color(0xFFFCA5A5),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              color: Color(0xFFEF4444),
+                              size: 20,
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                _errorText!,
+                                style: TextStyle(
+                                  color: Color(0xFF991B1B),
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    if (_state == TransfersPageState.loading && _loadingText != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: LoadingWidget(
+                          message: _loadingText,
+                          showCard: false,
+                        ),
+                      ),
                   if (_state == TransfersPageState.sep10AuthPinRequired)
                     getSep10AuthPinForm(dashboardState),
                   if (newTransfer &&
@@ -247,9 +442,10 @@ class _TransfersPageBodyState extends State<TransfersPageBody> {
                       _sep24HistoryTransactions != null &&
                       _sep24HistoryTransactions!.isNotEmpty)
                     getSep24HistoryColumn(_sep24HistoryTransactions!),
-                ],
-              )
-      ],
+                  ],
+                )
+        ],
+      ),
     );
   }
 
@@ -258,15 +454,39 @@ class _TransfersPageBodyState extends State<TransfersPageBody> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Divider(color: Colors.blue),
-        Text("SEP-06 Transfers",
-            style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 10),
+        Container(
+          margin: EdgeInsets.symmetric(vertical: 16),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Color(0xFF3B82F6).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.history,
+                  color: Color(0xFF3B82F6),
+                  size: 20,
+                ),
+              ),
+              SizedBox(width: 12),
+              Text(
+                "SEP-06 Transfer History",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
+            ],
+          ),
+        ),
         Sep6TransferHistoryWidget(
             assetCode: anchorAsset.asset.code,
             transactions: transactions,
             key: ObjectKey(transactions)),
-        const Divider(color: Colors.blue),
+        SizedBox(height: 16),
       ],
     );
   }
@@ -276,15 +496,39 @@ class _TransfersPageBodyState extends State<TransfersPageBody> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Divider(color: Colors.blue),
-        Text("SEP-24 Transfers",
-            style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 10),
+        Container(
+          margin: EdgeInsets.symmetric(vertical: 16),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Color(0xFF3B82F6).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.language,
+                  color: Color(0xFF3B82F6),
+                  size: 20,
+                ),
+              ),
+              SizedBox(width: 12),
+              Text(
+                "SEP-24 Transfer History",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
+            ],
+          ),
+        ),
         Sep24TransferHistoryWidget(
             assetCode: anchorAsset.asset.code,
             transactions: transactions,
             key: ObjectKey(transactions)),
-        const Divider(color: Colors.blue),
+        SizedBox(height: 16),
       ],
     );
   }

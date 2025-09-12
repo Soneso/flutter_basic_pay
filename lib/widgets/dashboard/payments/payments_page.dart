@@ -8,6 +8,7 @@ import 'package:flutter_basic_pay/services/storage.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/home_page.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/payments/path_payments_body.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/payments/simple_payments_body.dart';
+import 'package:flutter_basic_pay/widgets/common/loading.dart';
 import 'package:provider/provider.dart';
 
 class PaymentsPage extends StatelessWidget {
@@ -21,7 +22,10 @@ class PaymentsPage extends StatelessWidget {
       builder: (context, futureSnapshot) {
         if (!futureSnapshot.hasData) {
           return const Center(
-            child: CircularProgressIndicator(),
+            child: LoadingWidget(
+              message: 'Loading assets...',
+              showCard: false,
+            ),
           );
         }
         return StreamBuilder<List<AssetInfo>>(
@@ -30,7 +34,10 @@ class PaymentsPage extends StatelessWidget {
           builder: (context, assetsSnapshot) {
             if (assetsSnapshot.data == null) {
               return const Center(
-                child: CircularProgressIndicator(),
+                child: LoadingWidget(
+                  message: 'Loading assets...',
+                  showCard: false,
+                ),
               );
             }
             return FutureBuilder<List<ContactInfo>>(
@@ -38,7 +45,10 @@ class PaymentsPage extends StatelessWidget {
               builder: (context, futureSnapshot) {
                 if (!futureSnapshot.hasData) {
                   return const Center(
-                    child: CircularProgressIndicator(),
+                    child: LoadingWidget(
+                      message: 'Loading contacts...',
+                      showCard: false,
+                    ),
                   );
                 }
                 return StreamBuilder<List<ContactInfo>>(
@@ -47,7 +57,10 @@ class PaymentsPage extends StatelessWidget {
                   builder: (context, contactsSnapshot) {
                     if (contactsSnapshot.data == null) {
                       return const Center(
-                        child: CircularProgressIndicator(),
+                        child: LoadingWidget(
+                          message: 'Loading contacts...',
+                          showCard: false,
+                        ),
                       );
                     }
                     var key = List<Object>.empty(growable: true);
@@ -207,13 +220,10 @@ class _PaymentsPageBodyState extends State<PaymentsPageBody> {
                                       });
                                     },
                               child: waitForAccountFunding
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2,
-                                      ),
+                                  ? const CircularProgress(
+                                      size: 20,
+                                      strokeWidth: 2,
+                                      color: Colors.white,
                                     )
                                   : const Text(
                                       'Fund Account on Testnet',

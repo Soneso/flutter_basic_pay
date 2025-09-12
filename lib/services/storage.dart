@@ -105,7 +105,7 @@ class SecureStorage {
     var kycJson = await storage.read(key: _kycDataStorageKey);
     if (kycJson != null) {
       var kycData = json.decode(kycJson)['kycData'];
-      var result = emptyKycData();
+      var result = demoKycData();
       for (var key in kycData.keys) {
         if (kycData[key] is String) {
           result[key] = kycData[key];
@@ -113,7 +113,7 @@ class SecureStorage {
       }
       return result;
     } else {
-      var empty = emptyKycData();
+      var empty = demoKycData();
       _saveKycData(empty);
       return empty;
     }
@@ -136,7 +136,7 @@ class SecureStorage {
     await storage.write(key: _kycDataStorageKey, value: data);
   }
 
-  static Map<String, String> emptyKycData() {
+  static Map<String, String> demoKycData() {
     var result = <String, String>{};
     result[core_sdk.NaturalPersonKYCFields.last_name_field_key] = '';
     result[core_sdk.NaturalPersonKYCFields.first_name_field_key] = '';
@@ -145,18 +145,18 @@ class SecureStorage {
     result[core_sdk.NaturalPersonKYCFields.state_or_province_field_key] = '';
     result[core_sdk.NaturalPersonKYCFields.city_field_key] = '';
     result[core_sdk.NaturalPersonKYCFields.postal_code_field_key] = '';
-    result[core_sdk.NaturalPersonKYCFields.address_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.address_field_key] = 'Lange Strasse 12, 80803 Hundsdorf, Germany';
     result[core_sdk.NaturalPersonKYCFields.mobile_number_field_key] = '';
-    result[core_sdk.NaturalPersonKYCFields.birth_date_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.birth_date_field_key] = '1999-09-09';
     result[core_sdk.NaturalPersonKYCFields.birth_place_field_key] = '';
     result[core_sdk.NaturalPersonKYCFields.birth_country_code_field_key] = '';
     result[core_sdk.FinancialAccountKYCFields.bank_account_number_field_key] =
-        '';
-    result[core_sdk.FinancialAccountKYCFields.bank_account_type_field_key] = '';
-    result[core_sdk.FinancialAccountKYCFields.bank_number_field_key] = '';
+        'DE02100500000054540402';
+    result[core_sdk.FinancialAccountKYCFields.bank_account_type_field_key] = 'IBAN';
+    result[core_sdk.FinancialAccountKYCFields.bank_number_field_key] = '12030000';
     result[core_sdk.FinancialAccountKYCFields.bank_phone_number_field_key] = '';
     result[core_sdk.FinancialAccountKYCFields.bank_branch_number_field_key] =
-        '';
+        '972837';
     result[core_sdk.FinancialAccountKYCFields.clabe_number_field_key] = '';
     result[core_sdk.NaturalPersonKYCFields.tax_id_field_key] = '';
     result[core_sdk.NaturalPersonKYCFields.tax_id_name_field_key] = '';
@@ -164,11 +164,11 @@ class SecureStorage {
     result[core_sdk.NaturalPersonKYCFields.employer_name_field_key] = '';
     result[core_sdk.NaturalPersonKYCFields.employer_address_field_key] = '';
     result[core_sdk.NaturalPersonKYCFields.language_code_field_key] = '';
-    result[core_sdk.NaturalPersonKYCFields.id_type_field_key] = '';
-    result[core_sdk.NaturalPersonKYCFields.id_country_code_field_key] = '';
-    result[core_sdk.NaturalPersonKYCFields.id_issue_date_field_key] = '';
-    result[core_sdk.NaturalPersonKYCFields.id_expiration_date_field_key] = '';
-    result[core_sdk.NaturalPersonKYCFields.id_number_field_key] = '';
+    result[core_sdk.NaturalPersonKYCFields.id_type_field_key] = 'passport';
+    result[core_sdk.NaturalPersonKYCFields.id_country_code_field_key] = 'DE';
+    result[core_sdk.NaturalPersonKYCFields.id_issue_date_field_key] = '2022-12-11';
+    result[core_sdk.NaturalPersonKYCFields.id_expiration_date_field_key] = '2032-12-11';
+    result[core_sdk.NaturalPersonKYCFields.id_number_field_key] = 'GE7182733361226333';
     result[core_sdk.NaturalPersonKYCFields.photo_id_front_file_key] = '';
     result[core_sdk.NaturalPersonKYCFields.photo_id_back_file_key] = '';
     result[core_sdk

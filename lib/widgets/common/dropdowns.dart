@@ -42,7 +42,6 @@ class _StringItemsDropdownState extends State<StringItemsDropdown> {
   
   @override
   Widget build(BuildContext context) {
-    final isCustomAsset = _selectedValue == 'Add custom asset';
     
     return DropdownButtonHideUnderline(
       child: DropdownButton2<String>(

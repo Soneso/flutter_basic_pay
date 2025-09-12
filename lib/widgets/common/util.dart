@@ -2,8 +2,8 @@
 // Use of this source code is governed by a license that can be
 // found in the LICENSE file.
 
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_basic_pay/widgets/common/loading.dart';
 
 class Util {
   static String removeTrailingZerosFormAmount(String amount) {
@@ -20,40 +20,95 @@ class Util {
     return address;
   }
 
-  static Column getLoadingColumn(BuildContext context, String text,
+  static Widget getLoadingColumn(BuildContext context, String text,
       {bool showDivider = true, Key? key}) {
     return Column(
       key: key ?? ObjectKey(text),
       children: [
         if (showDivider)
-          const Divider(
-            color: Colors.blue,
+          Container(
+            height: 1,
+            margin: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  const Color(0xFF3B82F6).withOpacity(0.3),
+                  const Color(0xFF3B82F6).withOpacity(0.3),
+                  Colors.transparent,
+                ],
+                stops: const [0.0, 0.2, 0.8, 1.0],
+              ),
+            ),
           ),
-        Row(
-          children: [
-            const SizedBox(
-              height: 10.0,
-              width: 10.0,
-              child: Center(child: CircularProgressIndicator()),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF3B82F6).withOpacity(0.05),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: const Color(0xFF3B82F6).withOpacity(0.2),
+              width: 1,
             ),
-            const SizedBox(width: 10),
-            Text(
-              text,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgress(
+                size: 20,
+                strokeWidth: 2.5,
+              ),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Text(
+                  text,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF1F2937),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
 
-  static AutoSizeText getErrorTextWidget(BuildContext context, String text,
+  static Widget getErrorTextWidget(BuildContext context, String text,
       {Key? key}) {
-    return AutoSizeText(
-      text,
+    return Container(
       key: key ?? ObjectKey(text),
-      style:
-          Theme.of(context).textTheme.apply(bodyColor: Colors.red).bodyMedium,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFEE2E2),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFFFCA5A5),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.error_outline,
+            color: Color(0xFFEF4444),
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                color: Color(0xFF991B1B),
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

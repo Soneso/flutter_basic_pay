@@ -4,12 +4,13 @@
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_basic_pay/services/stellar.dart';
 import 'package:flutter_basic_pay/services/storage.dart';
-import 'package:flutter_basic_pay/widgets/common/util.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/kyc/kyc_collector.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/transfers/transfer_utils.dart';
 import 'package:stellar_wallet_flutter_sdk/stellar_wallet_flutter_sdk.dart';
+import 'package:flutter_basic_pay/widgets/common/loading.dart';
 import 'package:flutter/foundation.dart';
 
 class Sep6DepositStepper extends StatefulWidget {
@@ -47,89 +48,180 @@ class _Sep6DepositStepperState extends State<Sep6DepositStepper> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text('SEP-06 Deposit'),
+        title: const Text(
+          'SEP-06 Deposit',
+          style: TextStyle(
+            color: Colors.black87,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
       ),
-      body: Stepper(
-        controlsBuilder: (BuildContext context, ControlsDetails details) {
-          return Container(
-              margin: const EdgeInsets.only(top: 50),
-              child: buttonsForStep(_currentStep, details));
-        },
-        type: StepperType.vertical,
-        currentStep: _currentStep,
-        onStepContinue: () async {
-          await onStepContinue();
-        },
-        onStepCancel: () async {
-          await onStepBack();
-        },
-        steps: <Step>[
-          Step(
-            title: const Text('Transfer details'),
-            content: getTransferDetailsColumn(context),
-            isActive: _currentStep >= 0,
-            state: _currentStep >= 0 ? StepState.complete : StepState.disabled,
-          ),
-          Step(
-            title: const Text('KYC Data'),
-            content: getKycColumn(context),
-            isActive: _currentStep >= 0,
-            state: _currentStep >= 1 ? StepState.complete : StepState.disabled,
-          ),
-          Step(
-            title: const Text('Fee'),
-            content: getFeeColumn(context),
-            isActive: _currentStep >= 0,
-            state: _currentStep >= 2 ? StepState.complete : StepState.disabled,
-          ),
-          Step(
-            title: const Text('Summary'),
-            content: getSendColumn(context),
-            isActive: _currentStep >= 0,
-            state: _currentStep >= 3 ? StepState.complete : StepState.disabled,
-          ),
-        ],
+      body: Container(
+        color: Colors.grey[50],
+        child: Stepper(
+          controlsBuilder: (BuildContext context, ControlsDetails details) {
+            return Container(
+              margin: const EdgeInsets.only(top: 24),
+              child: buttonsForStep(_currentStep, details),
+            );
+          },
+          type: StepperType.vertical,
+          currentStep: _currentStep,
+          onStepContinue: () async {
+            await onStepContinue();
+          },
+          onStepCancel: () async {
+            await onStepBack();
+          },
+          steps: <Step>[
+            Step(
+              title: const Text('Transfer details'),
+              content: getTransferDetailsColumn(context),
+              isActive: _currentStep >= 0,
+              state: _currentStep >= 0 ? StepState.complete : StepState.disabled,
+            ),
+            Step(
+              title: const Text('KYC Data'),
+              content: getKycColumn(context),
+              isActive: _currentStep >= 0,
+              state: _currentStep >= 1 ? StepState.complete : StepState.disabled,
+            ),
+            Step(
+              title: const Text('Fee'),
+              content: getFeeColumn(context),
+              isActive: _currentStep >= 0,
+              state: _currentStep >= 2 ? StepState.complete : StepState.disabled,
+            ),
+            Step(
+              title: const Text('Summary'),
+              content: getSendColumn(context),
+              isActive: _currentStep >= 0,
+              state: _currentStep >= 3 ? StepState.complete : StepState.disabled,
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Row buttonsForStep(int step, ControlsDetails details) {
-    var nextButton = ElevatedButton(
-        onPressed: details.onStepContinue, child: const Text('Next'));
-    var backButton = ElevatedButton(
-        onPressed: details.onStepCancel, child: const Text('Back'));
-    var spacer = const SizedBox(width: 10);
+  Widget buttonsForStep(int step, ControlsDetails details) {
+    Widget nextButton = SizedBox(
+      height: 48,
+      child: ElevatedButton(
+        onPressed: details.onStepContinue,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF3B82F6),
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 0,
+        ),
+        child: const Text(
+          'Next',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+
+    Widget backButton = SizedBox(
+      height: 48,
+      child: OutlinedButton(
+        onPressed: details.onStepCancel,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.grey[700],
+          side: BorderSide(color: Colors.grey[300]!),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: const Text(
+          'Back',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+
+    var spacer = const SizedBox(width: 12);
 
     if (step == 0) {
       // transfer details
-      return Row(children: [nextButton]);
+      return Row(children: [Expanded(child: nextButton)]);
     }
     if ((step == 1 && _kycDataLoaded) || (step == 2 && _feeDetermined)) {
       // kyc or fee
-      return Row(children: [backButton, spacer, nextButton]);
+      return Row(children: [Expanded(child: backButton), spacer, Expanded(child: nextButton)]);
     } else if (step == 3 && !_isSubmittingTransfer) {
       // summary
       if (_submissionResult == null && _submissionError == null) {
         // not submitted yet
-        var submitButton = ElevatedButton(
-            onPressed: onSubmitTransfer, child: const Text('Submit'));
-        return Row(children: [backButton, spacer, submitButton]);
+        Widget submitButton = SizedBox(
+          height: 48,
+          child: ElevatedButton(
+            onPressed: onSubmitTransfer,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF10B981),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            child: const Text(
+              'Submit Transfer',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        );
+        return Row(children: [Expanded(child: backButton), spacer, Expanded(child: submitButton)]);
       } else {
         // showing submission result
-        var closeButton = ElevatedButton(
+        Widget closeButton = SizedBox(
+          height: 48,
+          child: ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
             },
-            child: const Text('Close'));
-        return Row(children: [closeButton]);
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.grey[600],
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            child: const Text(
+              'Close',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        );
+        return Row(children: [Expanded(child: closeButton)]);
       }
     }
-    return const Row(children: []);
+    return const SizedBox.shrink();
   }
 
   Future<void> onStepContinue() async {
@@ -289,22 +381,72 @@ class _Sep6DepositStepperState extends State<Sep6DepositStepper> {
     return widget.depositInfo.fieldsInfo ?? {};
   }
 
-  Column getTransferDetailsColumn(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        text(context, 'Asset: ${getAssetCode()}'),
-        const SizedBox(height: 10),
-        AutoSizeText(
-          'Transfer fields',
-          style: Theme.of(context).textTheme.titleSmall,
-          textAlign: TextAlign.left,
-        ),
-        const SizedBox(height: 10),
-        text(context,
-            'The anchor requested following information about your transfer:'),
-        getTransferDetailsForm(),
-      ],
+  Widget getTransferDetailsColumn(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF3B82F6).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.info_outline,
+                  color: Color(0xFF3B82F6),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Asset: ${getAssetCode()}',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Transfer Information',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[800],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Please provide the required information for your deposit:',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 16),
+          getTransferDetailsForm(),
+        ],
+      ),
     );
   }
 
@@ -409,109 +551,555 @@ class _Sep6DepositStepperState extends State<Sep6DepositStepper> {
     }
   }
 
-  Column getKycColumn(BuildContext context) {
+  Widget getKycColumn(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: _buildKycContent(context),
+    );
+  }
+
+  Widget _buildKycContent(BuildContext context) {
     if (!_kycDataLoaded) {
-      return Util.getLoadingColumn(context, 'Loading ...', showDivider: false);
+      return Row(
+        children: [
+          CircularProgress(
+            size: 20,
+            strokeWidth: 2,
+          ),
+          const SizedBox(width: 12),
+          Text(
+            'Loading KYC information...',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      );
     } else if (_sep12Info == null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const Row(children: []),
-          text(context, 'Could not load KYC data from Anchor.'),
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.error_outline,
+                color: Color(0xFFEF4444),
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'KYC Data Unavailable',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFFEF4444),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Could not load KYC data from anchor.',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
         ],
       );
     }
 
     var sep12Info = _sep12Info!;
     var status = sep12Info.sep12Status;
+    
     if (status == Sep12Status.accepted) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const Row(children: []),
-          text(context, 'Your KYC data has been accepted by the anchor.'),
-          const SizedBox(height: 10),
-          ElevatedButton(
-              onPressed: deleteAnchorKycData, child: const Text('Delete')),
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10B981).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Icon(
+                  Icons.check_circle,
+                  color: Color(0xFF10B981),
+                  size: 16,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'KYC Approved',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF10B981),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Your KYC data has been accepted by the anchor.',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 36,
+            child: OutlinedButton(
+              onPressed: deleteAnchorKycData,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Color(0xFFEF4444),
+                side: BorderSide(color: Color(0xFFEF4444)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                'Delete KYC Data',
+                style: TextStyle(fontSize: 12),
+              ),
+            ),
+          ),
         ],
       );
     } else if (status == Sep12Status.processing) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const Row(children: []),
-          text(context,
-              'Your KYC data is currently being processed by the anchor.'),
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF3B82F6).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Icon(
+                  Icons.schedule,
+                  color: Color(0xFF3B82F6),
+                  size: 16,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'KYC Processing',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF3B82F6),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Your KYC data is currently being processed by the anchor.',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
         ],
       );
     } else if (status == Sep12Status.rejected) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const Row(children: []),
-          text(context, 'Your KYC data has been rejected by the anchor.'),
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEF4444).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Icon(
+                  Icons.cancel,
+                  color: Color(0xFFEF4444),
+                  size: 16,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'KYC Rejected',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFFEF4444),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Your KYC data has been rejected by the anchor.',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
         ],
       );
     } else if (status == Sep12Status.needsInfo) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const Row(children: []),
-          text(context, 'The Anchor needs following of your KYC data:'),
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF59E0B).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Icon(
+                  Icons.info_outline,
+                  color: Color(0xFFF59E0B),
+                  size: 16,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'KYC Information Required',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFFF59E0B),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Please provide the additional KYC information requested by the anchor:',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 16),
           getKycCollectorForm(),
         ],
       );
     } else {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const Row(children: []),
-          text(context, 'Your KYC data status is unknown.'),
-        ],
-      );
-    }
-  }
-
-  Column getFeeColumn(BuildContext context) {
-    if (_feeDetermined) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const Row(children: []),
-          if (_fee != null)
-            text(context,
-                'The Anchor will charge a fee of: $_fee ${getAssetCode()}'),
-          if (_fee == null)
-            AutoSizeText(
-              'The Anchor provides no fee info for the Asset ${getAssetCode()}',
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.left,
-            ),
-        ],
-      );
-    } else {
-      return Util.getLoadingColumn(context, 'Loading ...', showDivider: false);
-    }
-  }
-
-  Column getSendColumn(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const Row(children: []),
-        text(context, 'Deposit: $_amount ${getAssetCode()}'),
-        const SizedBox(height: 10),
-        if (_fee != null) text(context, 'Fee: $_fee ${getAssetCode()}'),
-        const SizedBox(height: 10),
-        if (_isSubmittingTransfer)
-          Util.getLoadingColumn(context, "Submitting ..."),
-        if (_submissionResult != null)
-          Sep6TransferResponseView(
-            response: _submissionResult!,
-            key: ObjectKey(_submissionResult!),
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.help_outline,
+                color: Color(0xFFF59E0B),
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Unknown KYC Status',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFFF59E0B),
+                ),
+              ),
+            ],
           ),
-        if (_submissionError != null) text(context, _submissionError!),
-      ],
+          const SizedBox(height: 8),
+          Text(
+            'Your KYC data status is unknown.',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      );
+    }
+  }
+
+  Widget getFeeColumn(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: _feeDetermined ? Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF3B82F6).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.attach_money,
+                  color: Color(0xFF3B82F6),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Fee Information',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (_fee != null) ...
+            [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey[200]!),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: Colors.grey[600],
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Fee: $_fee ${getAssetCode()}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ] else ...
+            [
+              Text(
+                'No fee information available for ${getAssetCode()}',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+        ],
+      ) : Row(
+        children: [
+          CircularProgress(
+            size: 20,
+            strokeWidth: 2,
+          ),
+          const SizedBox(width: 12),
+          Text(
+            'Loading fee information...',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget getSendColumn(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10B981).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.summarize,
+                  color: Color(0xFF10B981),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Transfer Summary',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey[200]!),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Deposit Amount:',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    Text(
+                      '$_amount ${getAssetCode()}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+                if (_fee != null) ...
+                  [
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Fee:',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        Text(
+                          '$_fee ${getAssetCode()}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+              ],
+            ),
+          ),
+          if (_isSubmittingTransfer) ...
+            [
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  CircularProgress(
+                    size: 20,
+                    strokeWidth: 2,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Submitting transfer...',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          if (_submissionResult != null) ...
+            [
+              const SizedBox(height: 16),
+              Sep6TransferResponseView(
+                response: _submissionResult!,
+                key: ObjectKey(_submissionResult!),
+              ),
+            ],
+          if (_submissionError != null) ...
+            [
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF2F2),
+                  border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.2)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      color: Color(0xFFEF4444),
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _submissionError!,
+                        style: TextStyle(
+                          color: Color(0xFFEF4444),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+        ],
+      ),
     );
   }
 

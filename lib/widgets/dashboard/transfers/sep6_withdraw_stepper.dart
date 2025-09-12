@@ -4,6 +4,7 @@
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_basic_pay/services/stellar.dart';
 import 'package:flutter_basic_pay/services/storage.dart';
 import 'package:flutter_basic_pay/widgets/common/navigation_service.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_basic_pay/widgets/dashboard/kyc/kyc_collector.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/transfers/transfer_utils.dart';
 import 'package:stellar_wallet_flutter_sdk/stellar_wallet_flutter_sdk.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_basic_pay/widgets/common/loading.dart';
 
 class Sep6WithdrawStepper extends StatefulWidget {
   final AnchoredAssetInfo anchoredAsset;
@@ -62,19 +64,33 @@ class _Sep6WithdrawStepperState extends State<Sep6WithdrawStepper> {
       _withdrawalType = types.first;
     }
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text('SEP-06 Withdraw'),
+        title: const Text(
+          'SEP-06 Withdraw',
+          style: TextStyle(
+            color: Colors.black87,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
       ),
-      body: Stepper(
-        controlsBuilder: (BuildContext context, ControlsDetails details) {
-          return Container(
-              margin: const EdgeInsets.only(top: 50),
-              child: buttonsForStep(_currentStep, details));
-        },
+      body: Container(
+        color: Colors.grey[50],
+        child: Stepper(
+          controlsBuilder: (BuildContext context, ControlsDetails details) {
+            return Container(
+              margin: const EdgeInsets.only(top: 24),
+              child: buttonsForStep(_currentStep, details),
+            );
+          },
         type: StepperType.vertical,
         currentStep: _currentStep,
         onStepContinue: () async {
@@ -109,31 +125,97 @@ class _Sep6WithdrawStepperState extends State<Sep6WithdrawStepper> {
             state: _currentStep >= 3 ? StepState.complete : StepState.disabled,
           ),
         ],
+        ),
       ),
     );
   }
 
   Row buttonsForStep(int step, ControlsDetails details) {
-    var nextButton = ElevatedButton(
-        onPressed: details.onStepContinue, child: const Text('Next'));
-    var backButton = ElevatedButton(
-        onPressed: details.onStepCancel, child: const Text('Back'));
-    var spacer = const SizedBox(width: 10);
+    var nextButton = Container(
+      height: 48,
+      child: ElevatedButton(
+        onPressed: details.onStepContinue,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF3B82F6),
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 0,
+        ),
+        child: const Text(
+          'Next',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+    
+    var backButton = Container(
+      height: 48,
+      child: TextButton(
+        onPressed: details.onStepCancel,
+        style: TextButton.styleFrom(
+          foregroundColor: const Color(0xFF6B7280),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: const Text(
+          'Back',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+    
+    var spacer = const SizedBox(width: 12);
 
     if (step == 0) {
       // transfer details
-      return Row(children: [nextButton]);
+      return Row(children: [Expanded(child: nextButton)]);
     }
     if ((step == 1 && _kycDataLoaded) || (step == 2 && _feeDetermined)) {
       // kyc or fee
-      return Row(children: [backButton, spacer, nextButton]);
+      return Row(children: [
+        Expanded(child: backButton),
+        spacer,
+        Expanded(child: nextButton),
+      ]);
     } else if (step == 3 && !_isSubmittingTransfer) {
       // summary
       if (_submissionResult == null && _submissionError == null) {
         // not submitted yet
-        var submitButton = ElevatedButton(
-            onPressed: onSubmitTransfer, child: const Text('Submit'));
-        return Row(children: [backButton, spacer, submitButton]);
+        var submitButton = Container(
+          height: 48,
+          child: ElevatedButton(
+            onPressed: onSubmitTransfer,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF10B981),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            child: const Text(
+              'Submit Transfer',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        );
+        return Row(children: [
+          Expanded(child: backButton),
+          spacer,
+          Expanded(child: submitButton),
+        ]);
       }
     }
     return const Row(children: []);
@@ -311,17 +393,69 @@ class _Sep6WithdrawStepperState extends State<Sep6WithdrawStepper> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        text(context, 'Asset: ${getAssetCode()}'),
-        const SizedBox(height: 10),
-        AutoSizeText(
-          'Transfer fields',
-          style: Theme.of(context).textTheme.titleSmall,
-          textAlign: TextAlign.left,
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF3B82F6).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.info_outline,
+                      color: const Color(0xFF3B82F6),
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Asset: ${getAssetCode()}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1F2937),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Transfer Information',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Please provide the following information for your withdrawal:',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF6B7280),
+                ),
+              ),
+              const SizedBox(height: 16),
+              getTransferDetailsForm(),
+            ],
+          ),
         ),
-        const SizedBox(height: 10),
-        text(context,
-            'The anchor requested following information about your transfer:'),
-        getTransferDetailsForm(),
       ],
     );
   }
@@ -421,104 +555,567 @@ class _Sep6WithdrawStepperState extends State<Sep6WithdrawStepper> {
 
   Column getKycColumn(BuildContext context) {
     if (!_kycDataLoaded) {
-      return Util.getLoadingColumn(context, 'Loading ...', showDivider: false);
+      return Column(
+        children: [
+          Center(
+            child: LoadingWidget(
+              message: 'Loading KYC requirements...',
+              showCard: false,
+              size: 40,
+            ),
+          ),
+        ],
+      );
     } else if (_sep12Info == null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Row(children: []),
-          text(context, 'Could not load KYC data from Anchor.'),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFEE2E2),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: const Color(0xFFFCA5A5),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  color: Color(0xFFEF4444),
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Could not load KYC data from Anchor.',
+                    style: const TextStyle(
+                      color: Color(0xFF991B1B),
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       );
     }
 
     var sep12Info = _sep12Info!;
     var status = sep12Info.sep12Status;
+    
+    Widget statusCard;
     if (status == Sep12Status.accepted) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const Row(children: []),
-          text(context, 'Your KYC data has been accepted by the anchor.'),
-          const SizedBox(height: 10),
-          ElevatedButton(
-              onPressed: deleteAnchorKycData, child: const Text('Delete')),
-        ],
+      statusCard = Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFFDCFCE7),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFF86EFAC),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.check_circle,
+                  color: Color(0xFF10B981),
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'KYC Approved',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF065F46),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Your KYC data has been accepted by the anchor.',
+              style: TextStyle(
+                fontSize: 14,
+                color: Color(0xFF065F46),
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: deleteAnchorKycData,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFEF4444),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('Delete KYC Data'),
+              ),
+            ),
+          ],
+        ),
       );
     } else if (status == Sep12Status.processing) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const Row(children: []),
-          text(context,
-              'Your KYC data is currently being processed by the anchor.'),
-        ],
+      statusCard = Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFEF3C7),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFFFBBF24),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            CircularProgress(
+              size: 20,
+              strokeWidth: 2,
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Your KYC data is currently being processed by the anchor.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF92400E),
+                ),
+              ),
+            ),
+          ],
+        ),
       );
     } else if (status == Sep12Status.rejected) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const Row(children: []),
-          text(context, 'Your KYC data has been rejected by the anchor.'),
-        ],
+      statusCard = Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFEE2E2),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFFFCA5A5),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.cancel,
+              color: Color(0xFFEF4444),
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Your KYC data has been rejected by the anchor.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF991B1B),
+                ),
+              ),
+            ),
+          ],
+        ),
       );
     } else if (status == Sep12Status.needsInfo) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const Row(children: []),
-          text(context, 'The Anchor needs following of your KYC data:'),
-          getKycCollectorForm(),
-        ],
+      statusCard = Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF3B82F6).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.edit_note,
+                    color: Color(0xFF3B82F6),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'KYC Information Required',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1F2937),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Please provide the following information:',
+              style: TextStyle(
+                fontSize: 14,
+                color: Color(0xFF6B7280),
+              ),
+            ),
+            const SizedBox(height: 16),
+            getKycCollectorForm(),
+          ],
+        ),
       );
     } else {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const Row(children: []),
-          text(context, 'Your KYC data status is unknown.'),
-        ],
+      statusCard = Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF3F4F6),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.help_outline,
+              color: Color(0xFF6B7280),
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Your KYC data status is unknown.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF6B7280),
+                ),
+              ),
+            ),
+          ],
+        ),
       );
     }
+    
+    return Column(
+      children: [statusCard],
+    );
   }
 
   Column getFeeColumn(BuildContext context) {
     if (_feeDetermined) {
       return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const Row(children: []),
-          if (_fee != null)
-            text(context,
-                'The Anchor will charge a fee of: $_fee ${getAssetCode()}'),
-          if (_fee == null)
-            AutoSizeText(
-              'The Anchor provides no fee info for the Asset ${getAssetCode()}',
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.left,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF59E0B).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.payments_outlined,
+                        color: Color(0xFFF59E0B),
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Transaction Fee',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1F2937),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                if (_fee != null)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFEF3C7),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Anchor Fee:',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF92400E),
+                          ),
+                        ),
+                        Text(
+                          '$_fee ${getAssetCode()}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF92400E),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                if (_fee == null)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF3F4F6),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.info_outline,
+                          color: Color(0xFF6B7280),
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'No fee information available for ${getAssetCode()}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF6B7280),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ],
       );
     } else {
-      return Util.getLoadingColumn(context, 'Loading ...', showDivider: false);
+      return Column(
+        children: [
+          Center(
+            child: LoadingWidget(
+              message: 'Calculating fees...',
+              showCard: false,
+              size: 40,
+            ),
+          ),
+        ],
+      );
     }
   }
 
   Column getSendColumn(BuildContext context, DashboardState dashboardState) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const Row(children: []),
-        text(context, 'Withdraw: $_amount ${getAssetCode()}'),
-        const SizedBox(height: 10),
-        if (_fee != null) text(context, 'Fee: $_fee ${getAssetCode()}'),
-        const SizedBox(height: 10),
-        if (_isSubmittingTransfer)
-          Util.getLoadingColumn(context, "Submitting ..."),
-        if (_submissionResult != null)
-          getSubmissionResultWidget(
-              context, dashboardState, _submissionResult!),
-        if (_submissionError != null) text(context, _submissionError!),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.summarize,
+                      color: Color(0xFF10B981),
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Transfer Summary',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1F2937),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF9FAFB),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFFE5E7EB),
+                    width: 1,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Withdrawal Amount:',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF6B7280),
+                          ),
+                        ),
+                        Text(
+                          '$_amount ${getAssetCode()}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1F2937),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_fee != null) ...[
+                      const SizedBox(height: 12),
+                      const Divider(color: Color(0xFFE5E7EB)),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Fee:',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF6B7280),
+                            ),
+                          ),
+                          Text(
+                            '$_fee ${getAssetCode()}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF6B7280),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      const Divider(color: Color(0xFFE5E7EB)),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Total:',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF1F2937),
+                            ),
+                          ),
+                          Text(
+                            '${(_amount ?? 0) + (_fee ?? 0)} ${getAssetCode()}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1F2937),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (_isSubmittingTransfer) ...[
+                const SizedBox(height: 20),
+                Center(
+                  child: LoadingWidget(
+                    message: 'Submitting transfer...',
+                    showCard: false,
+                    size: 40,
+                  ),
+                ),
+              ],
+              if (_submissionResult != null) ...[
+                const SizedBox(height: 20),
+                getSubmissionResultWidget(
+                    context, dashboardState, _submissionResult!),
+              ],
+              if (_submissionError != null) ...[
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEE2E2),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: const Color(0xFFFCA5A5),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: Color(0xFFEF4444),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _submissionError!,
+                          style: const TextStyle(
+                            color: Color(0xFF991B1B),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
       ],
     );
   }

@@ -24,14 +24,120 @@ class _Sep24TransferHistoryWidgetState
     extends State<Sep24TransferHistoryWidget> {
   @override
   Widget build(BuildContext context) {
+    if (widget.transactions.isEmpty) {
+      return Container(
+        margin: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(40),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Icon(
+              Icons.web,
+              color: Colors.grey[400],
+              size: 48,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No Transfer History',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Your SEP-24 transfer history will appear here.',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[500],
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
     return Column(
-      children: widget.transactions.map((Sep24Transaction item) {
-        return ExpansionTile(
-          subtitle: Text('${item.status}'),
-          title: Text(getTitle(item)),
-          children: getDetails(item),
-        );
-      }).toList(),
+      children: [
+        // Transaction list
+        ...widget.transactions.map((Sep24Transaction item) {
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            child: Card(
+              elevation: 2,
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Theme(
+                data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                child: ExpansionTile(
+                  tilePadding: const EdgeInsets.all(20),
+                  childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                  title: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: _getStatusColor(item.status.toString()).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          _getStatusIcon(item.status.toString()),
+                          color: _getStatusColor(item.status.toString()),
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              getTitle(item),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              item.status.toString(),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: _getStatusColor(item.status.toString()),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  children: [
+                    const Divider(height: 1),
+                    const SizedBox(height: 16),
+                    ...getDetails(item),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ],
     );
   }
 
@@ -229,30 +335,136 @@ class _Sep24TransferHistoryWidgetState
 
     //details.add(getRow('More info url: ${item.moreInfoUrl}'));
     details.add(
-      ElevatedButton(
-        onPressed: () {
-          var controller = WebViewController();
-          controller.loadRequest(Uri.parse(item.moreInfoUrl));
-          showModalBottomSheet(
-              context: NavigationService.navigatorKey.currentContext!,
-              isScrollControlled: true,
-              builder: (context) {
-                return WebViewContainer(
-                    title: "SEP-24 More info", controller: controller);
-              });
-        },
-        child: const Text('More info', style: TextStyle(color: Colors.green)),
+      Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          onPressed: () {
+            var controller = WebViewController()
+              ..setJavaScriptMode(JavaScriptMode.unrestricted)
+              ..loadRequest(Uri.parse(item.moreInfoUrl));
+            showModalBottomSheet(
+                context: NavigationService.navigatorKey.currentContext!,
+                isScrollControlled: true,
+                useSafeArea: true,
+                builder: (context) {
+                  return WebViewContainer(
+                      title: "SEP-24 More info", controller: controller);
+                });
+          },
+          icon: const Icon(Icons.open_in_new, size: 16),
+          label: const Text(
+            'View More Information',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF3B82F6),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          ),
+        ),
       ),
     );
-    details.add(const SizedBox(
-      height: 10,
-    ));
 
     return details;
   }
 
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return const Color(0xFF10B981);
+      case 'pending':
+        return const Color(0xFF3B82F6);
+      case 'error':
+      case 'failed':
+        return const Color(0xFFEF4444);
+      default:
+        return const Color(0xFFF59E0B);
+    }
+  }
+
+  IconData _getStatusIcon(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return Icons.check_circle;
+      case 'pending':
+        return Icons.schedule;
+      case 'error':
+      case 'failed':
+        return Icons.error;
+      default:
+        return Icons.info;
+    }
+  }
+
   Widget getRow(String text) {
-    return ListTile(title: Text(text));
+    // Parse the text to extract label and value
+    final parts = text.split(': ');
+    if (parts.length >= 2) {
+      final label = parts[0];
+      final value = parts.sublist(1).join(': ');
+      
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: const Color(0xFFE5E7EB)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[600],
+                letterSpacing: 0.3,
+              ),
+            ),
+            const SizedBox(height: 4),
+            SelectableText(
+              value,
+              style: const TextStyle(
+                fontSize: 13,
+                color: Color(0xFF1F2937),
+                fontWeight: FontWeight.w500,
+                height: 1.3,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+      ),
+      child: SelectableText(
+        text,
+        style: const TextStyle(
+          fontSize: 13,
+          color: Color(0xFF1F2937),
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
   }
 
   List<Widget> getRefundsDetails(Refunds refunds) {

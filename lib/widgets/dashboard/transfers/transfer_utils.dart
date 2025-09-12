@@ -47,7 +47,7 @@ class _TransferDetailsFormState extends State<TransferDetailsForm> {
   Form getTransferFieldsForm() {
     List<Widget> formFields = [];
     for (var entry in widget.sep6FieldInfo.entries) {
-      formFields.add(const SizedBox(height: 10));
+      formFields.add(const SizedBox(height: 16));
       String fieldName = entry.key;
       bool optional = false;
       if (entry.value.optional != null && entry.value.optional!
@@ -56,105 +56,165 @@ class _TransferDetailsFormState extends State<TransferDetailsForm> {
         fieldName += ' (optional)';
       }
 
-      formFields.add(AutoSizeText(
+      formFields.add(Text(
         fieldName,
-        style: Theme.of(context).textTheme.titleSmall,
-        textAlign: TextAlign.left,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: Colors.grey[800],
+        ),
       ));
+
+      formFields.add(const SizedBox(height: 8));
 
       var choices = entry.value.choices;
       if (choices != null && choices.isEmpty) {
         choices = null;
       }
       if (choices != null) {
-        formFields.add(DropdownButtonFormField(
-          key: ObjectKey(entry),
-          value: widget.collectedFields.containsKey(entry.key)
-              ? widget.collectedFields[entry.key]
-              : null,
-          hint: Text(
-            'Select one',
-            style: Theme.of(context).textTheme.bodyMedium,
+        formFields.add(Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey[300]!),
           ),
-          items: choices.map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
-          onChanged: (String? value) {
-            setState(() {
-              widget.collectedFields[entry.key] = value;
-            });
-          },
-          validator: (String? value) {
-            if (!optional && (value == null || value.isEmpty)) {
-              return 'Please select an option';
-            }
-            return null;
-          },
+          child: DropdownButtonFormField<String>(
+            key: ObjectKey(entry),
+            value: widget.collectedFields.containsKey(entry.key)
+                ? widget.collectedFields[entry.key]
+                : null,
+            hint: Text(
+              'Select one',
+              style: TextStyle(
+                color: Colors.grey[500],
+                fontSize: 16,
+              ),
+            ),
+            decoration: const InputDecoration(
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+            items: choices.map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(
+                  value,
+                  style: const TextStyle(fontSize: 16),
+                ),
+              );
+            }).toList(),
+            onChanged: (String? value) {
+              setState(() {
+                widget.collectedFields[entry.key] = value;
+              });
+            },
+            validator: (String? value) {
+              if (!optional && (value == null || value.isEmpty)) {
+                return 'Please select an option';
+              }
+              return null;
+            },
+          ),
         ));
       } else {
-        formFields.add(TextFormField(
-          key: ObjectKey(entry),
-          style: Theme.of(context).textTheme.bodyMedium,
-          validator: (String? value) {
-            if (!optional && (value == null || value.isEmpty)) {
-              widget.collectedFields[entry.key] = null;
-              return 'Please enter the ${entry.key}';
-            }
-            widget.collectedFields[entry.key] = value;
-            return null;
-          },
+        formFields.add(Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey[300]!),
+          ),
+          child: TextFormField(
+            key: ObjectKey(entry),
+            style: const TextStyle(fontSize: 16),
+            decoration: const InputDecoration(
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+            validator: (String? value) {
+              if (!optional && (value == null || value.isEmpty)) {
+                widget.collectedFields[entry.key] = null;
+                return 'Please enter the ${entry.key}';
+              }
+              widget.collectedFields[entry.key] = value;
+              return null;
+            },
+          ),
         ));
       }
       if (entry.value.description != null) {
-        formFields.add(AutoSizeText(
+        formFields.add(const SizedBox(height: 4));
+        formFields.add(Text(
           entry.value.description!,
-          style: Theme.of(context).textTheme.bodyMedium,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
+          ),
         ));
       }
     }
 
-    formFields.add(const SizedBox(height: 10));
+    formFields.add(const SizedBox(height: 20));
 
-    formFields.add(AutoSizeText(
+    formFields.add(Text(
       'Amount',
-      style: Theme.of(context).textTheme.titleSmall,
-      textAlign: TextAlign.left,
+      style: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey[800],
+      ),
     ));
 
+    formFields.add(const SizedBox(height: 8));
+
     // amount is always needed
-    formFields.add(TextFormField(
-      decoration: InputDecoration(
-        hintText: 'Enter amount',
-        hintStyle: Theme.of(context).textTheme.bodyMedium,
+    formFields.add(Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[300]!),
       ),
-      keyboardType: TextInputType.number,
-      inputFormatters: <TextInputFormatter>[
-        FilteringTextInputFormatter.allow(RegExp(r'(^\d*\.?\d*)')),
-      ],
-      validator: (String? value) {
-        widget.collectedFields[TransferDetailsForm.transferAmountKey] = null;
-        if (value == null || value.isEmpty) {
-          return 'Please enter an amount';
-        }
-        double? amount = double.tryParse(value);
-        if (amount == null) {
-          return 'Invalid amount';
-        }
-        var maxAmount = widget.maxAmount;
-        if (maxAmount != null && amount > maxAmount) {
-          return 'Amount must be lower or equal ${maxAmount.toString()}';
-        }
-        var minAmount = widget.minAmount ?? 0;
-        if (amount < minAmount) {
-          return 'Amount must be higher or equal ${minAmount.toString()}';
-        }
-        widget.collectedFields[TransferDetailsForm.transferAmountKey] =
-            amount.toString();
-        return null;
-      },
+      child: TextFormField(
+        decoration: InputDecoration(
+          hintText: 'Enter amount',
+          hintStyle: TextStyle(
+            color: Colors.grey[500],
+            fontSize: 16,
+          ),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          prefixIcon: Icon(
+            Icons.attach_money,
+            color: Colors.grey[500],
+            size: 20,
+          ),
+        ),
+        style: const TextStyle(fontSize: 16),
+        keyboardType: TextInputType.number,
+        inputFormatters: <TextInputFormatter>[
+          FilteringTextInputFormatter.allow(RegExp(r'(^\d*\.?\d*)')),
+        ],
+        validator: (String? value) {
+          widget.collectedFields[TransferDetailsForm.transferAmountKey] = null;
+          if (value == null || value.isEmpty) {
+            return 'Please enter an amount';
+          }
+          double? amount = double.tryParse(value);
+          if (amount == null) {
+            return 'Invalid amount';
+          }
+          var maxAmount = widget.maxAmount;
+          if (maxAmount != null && amount > maxAmount) {
+            return 'Amount must be lower or equal ${maxAmount.toString()}';
+          }
+          var minAmount = widget.minAmount ?? 0;
+          if (amount < minAmount) {
+            return 'Amount must be higher or equal ${minAmount.toString()}';
+          }
+          widget.collectedFields[TransferDetailsForm.transferAmountKey] =
+              amount.toString();
+          return null;
+        },
+      ),
     ));
 
     String amountDescription =
@@ -162,9 +222,13 @@ class _TransferDetailsFormState extends State<TransferDetailsForm> {
     if (widget.maxAmount != null) {
       amountDescription += ', max. ${widget.maxAmount!.toString()}';
     }
-    formFields.add(AutoSizeText(
+    formFields.add(const SizedBox(height: 4));
+    formFields.add(Text(
       amountDescription,
-      style: Theme.of(context).textTheme.bodyMedium,
+      style: TextStyle(
+        fontSize: 12,
+        color: Colors.grey[600],
+      ),
     ));
 
     return Form(
@@ -182,57 +246,126 @@ class Sep6TransferResponseView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> children = List<Widget>.empty(growable: true);
-    children.add(const Divider(color: Colors.blue));
-    if (response is Sep6Pending) {
-      children.addAll(_pendingInfo(context, response as Sep6Pending));
-    } else if (response is Sep6MissingKYC) {
-      children.addAll(_missingKycInfo(context, response as Sep6MissingKYC));
-    } else if (response is Sep6DepositSuccess) {
-      children.addAll(_depositSuccess(context, response as Sep6DepositSuccess));
-    } else if (response is Sep6WithdrawSuccess) {
-      children
-          .addAll(_withdrawSuccess(context, response as Sep6WithdrawSuccess));
-    } else {
-      children.add(_text(
-          context,
-          'We have submitted your transfer to the anchor, '
-          'but the anchor returned an unknown response.'));
-      children.add(const Divider(color: Colors.blue));
-    }
-
-    return Column(
-      key: ObjectKey(response),
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: children,
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 12),
+      child: Card(
+        elevation: 2,
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            key: ObjectKey(response),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: _buildResponseContent(context),
+          ),
+        ),
+      ),
     );
+  }
+
+  List<Widget> _buildResponseContent(BuildContext context) {
+    if (response is Sep6Pending) {
+      return _pendingInfo(context, response as Sep6Pending);
+    } else if (response is Sep6MissingKYC) {
+      return _missingKycInfo(context, response as Sep6MissingKYC);
+    } else if (response is Sep6DepositSuccess) {
+      return _depositSuccess(context, response as Sep6DepositSuccess);
+    } else if (response is Sep6WithdrawSuccess) {
+      return _withdrawSuccess(context, response as Sep6WithdrawSuccess);
+    } else {
+      return [
+        Row(
+          children: [
+            Icon(
+              Icons.help_outline,
+              color: Color(0xFFF59E0B),
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Unknown Response',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFFF59E0B),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'We have submitted your transfer to the anchor, but the anchor returned an unknown response.',
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey[600],
+          ),
+        ),
+      ];
+    }
   }
 
   List<Widget> _depositSuccess(
       BuildContext context, Sep6DepositSuccess success) {
     List<Widget> result = List<Widget>.empty(growable: true);
 
-    result.add(_text(
-        context,
-        'You may not be finished yet. We have submitted your transfer to the anchor,'
-        ' and any further details and/or instructions are listed below. '
-        'You may need to initiate a transfer to/from your bank.'));
+    // Header
+    result.add(Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF10B981).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Icon(
+            Icons.check_circle_outline,
+            color: Color(0xFF10B981),
+            size: 20,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            'Deposit Submitted',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF10B981),
+            ),
+          ),
+        ),
+      ],
+    ));
 
-    result.add(const Divider(color: Colors.blue));
+    result.add(const SizedBox(height: 12));
+    result.add(Text(
+      'Your deposit request has been submitted to the anchor. Follow any additional instructions below to complete the transfer.',
+      style: TextStyle(
+        fontSize: 14,
+        color: Colors.grey[600],
+      ),
+    ));
+
+    result.add(const SizedBox(height: 16));
 
     if (success.id != null) {
-      result.add(const SizedBox(height: 10));
-      result.add(_copyRow(context, 'Transfer id', success.id!));
+      result.add(_infoCard(context, 'Transfer ID', success.id!, copyable: true));
+      result.add(const SizedBox(height: 12));
     }
 
     if (success.how != null) {
-      result.add(const SizedBox(height: 10));
-      result.add(_text(context, 'How: ${success.how}'));
+      result.add(_infoCard(context, 'Instructions', success.how!));
+      result.add(const SizedBox(height: 12));
     }
 
     if (success.eta != null) {
-      result.add(const SizedBox(height: 10));
-      result.add(_text(context, 'Eta : ${success.eta} sec.'));
+      result.add(_infoCard(context, 'Estimated Time', '${success.eta} seconds'));
+      result.add(const SizedBox(height: 12));
     }
 
     if (success.instructions != null && success.instructions!.isNotEmpty) {
@@ -260,39 +393,72 @@ class Sep6TransferResponseView extends StatelessWidget {
       BuildContext context, Sep6WithdrawSuccess success) {
     List<Widget> result = List<Widget>.empty(growable: true);
 
-    result.add(_text(
-        context,
-        'You may not be finished yet. We have submitted your transfer to the anchor,'
-        ' and any further details and/or instructions are listed below. '
-        'You may need to initiate a stellar payment.'));
+    // Header
+    result.add(Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: const Color(0xFFEF4444).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Icon(
+            Icons.arrow_upward,
+            color: Color(0xFFEF4444),
+            size: 20,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            'Withdrawal Submitted',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFFEF4444),
+            ),
+          ),
+        ),
+      ],
+    ));
 
-    result.add(const Divider(color: Colors.blue));
+    result.add(const SizedBox(height: 12));
+    result.add(Text(
+      'Your withdrawal request has been submitted. You may need to send a Stellar payment to complete the transfer.',
+      style: TextStyle(
+        fontSize: 14,
+        color: Colors.grey[600],
+      ),
+    ));
+
+    result.add(const SizedBox(height: 16));
+
     if (success.id != null) {
-      result.add(const SizedBox(height: 10));
-      result.add(_copyRow(context, 'Transfer id', success.id!));
+      result.add(_infoCard(context, 'Transfer ID', success.id!, copyable: true));
+      result.add(const SizedBox(height: 12));
     }
 
     if (success.accountId != null) {
-      result.add(const SizedBox(height: 10));
-      result.add(_copyRow(context, 'Send your tokens to', success.accountId!));
+      result.add(_infoCard(context, 'Send Tokens To', success.accountId!, copyable: true));
+      result.add(const SizedBox(height: 12));
     }
     if (success.memo != null) {
-      result.add(const SizedBox(height: 10));
-      result.add(_copyRow(context, 'Memo', success.memo!));
+      result.add(_infoCard(context, 'Memo', success.memo!, copyable: true));
+      result.add(const SizedBox(height: 12));
     }
     if (success.memoType != null) {
-      result.add(const SizedBox(height: 10));
-      result.add(_text(context, 'Memo type : ${success.memoType}'));
+      result.add(_infoCard(context, 'Memo Type', success.memoType!));
+      result.add(const SizedBox(height: 12));
     }
 
     if (success.eta != null) {
-      result.add(const SizedBox(height: 10));
-      result.add(_text(context, 'Eta : ${success.eta} sec.'));
+      result.add(_infoCard(context, 'Estimated Time', '${success.eta} seconds'));
+      result.add(const SizedBox(height: 12));
     }
 
-    if (success.extraInfo != null) {
-      result.add(const SizedBox(height: 10));
-      result.add(_text(context, 'Extra info: ${success.extraInfo!.message}'));
+    if (success.extraInfo != null && success.extraInfo!.message != null) {
+      result.add(_infoCard(context, 'Extra Information', success.extraInfo!.message!));
+      result.add(const SizedBox(height: 12));
     }
     return result;
   }
@@ -300,40 +466,152 @@ class Sep6TransferResponseView extends StatelessWidget {
   List<Widget> _missingKycInfo(
       BuildContext context, Sep6MissingKYC missingKyc) {
     List<Widget> result = List<Widget>.empty(growable: true);
-    result.add(_text(
-        context,
-        'We have submitted your transfer to the anchor, but the anchor '
-        'needs more KYC data from you.'));
+    
+    // Header
+    result.add(Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF59E0B).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Icon(
+            Icons.info_outline,
+            color: Color(0xFFF59E0B),
+            size: 20,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            'Additional KYC Required',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFFF59E0B),
+            ),
+          ),
+        ),
+      ],
+    ));
 
-    result.add(const Divider(color: Colors.blue));
+    result.add(const SizedBox(height: 12));
+    result.add(Text(
+      'Your transfer has been submitted, but the anchor needs additional KYC information from you.',
+      style: TextStyle(
+        fontSize: 14,
+        color: Colors.grey[600],
+      ),
+    ));
 
     if (missingKyc.fields.isNotEmpty) {
-      result.add(const SizedBox(height: 10));
-      result.add(
-          _text(context, 'Required fields: ${missingKyc.fields.join(', ')}'));
+      result.add(const SizedBox(height: 16));
+      result.add(_infoCard(context, 'Required Fields', missingKyc.fields.join(', ')));
     }
     return result;
   }
 
   List<Widget> _pendingInfo(BuildContext context, Sep6Pending pending) {
     List<Widget> result = List<Widget>.empty(growable: true);
-    result.add(_text(
-        context,
-        'We have submitted your transfer to the anchor,  '
-        'and the anchor responded with the status: "pending".'));
+    
+    // Header
+    result.add(Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF3B82F6).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Icon(
+            Icons.schedule,
+            color: Color(0xFF3B82F6),
+            size: 20,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            'Transfer Pending',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF3B82F6),
+            ),
+          ),
+        ),
+      ],
+    ));
 
-    result.add(const Divider(color: Colors.blue));
+    result.add(const SizedBox(height: 12));
+    result.add(Text(
+      'Your transfer has been submitted and is currently pending with the anchor.',
+      style: TextStyle(
+        fontSize: 14,
+        color: Colors.grey[600],
+      ),
+    ));
+
+    result.add(const SizedBox(height: 16));
 
     if (pending.eta != null) {
-      result.add(const SizedBox(height: 10));
-      result.add(_text(context, 'Eta: ${pending.eta} sec.'));
+      result.add(_infoCard(context, 'Estimated Time', '${pending.eta} seconds'));
+      result.add(const SizedBox(height: 12));
     }
 
     if (pending.moreInfoUrl != null) {
-      result.add(_copyRow(context, 'More Info URL', pending.moreInfoUrl!));
+      result.add(_infoCard(context, 'More Info URL', pending.moreInfoUrl!, copyable: true));
     }
 
     return result;
+  }
+
+  Widget _infoCard(BuildContext context, String title, String value, {bool copyable = false}) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              if (copyable)
+                IconButton(
+                  icon: Icon(
+                    Icons.copy_outlined,
+                    size: 18,
+                    color: Colors.grey[600],
+                  ),
+                  onPressed: () => _copyToClipboard(value),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Row _copyRow(BuildContext context, String title, String value) {

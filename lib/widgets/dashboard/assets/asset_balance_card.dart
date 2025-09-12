@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math';
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_basic_pay/services/stellar.dart';
 import 'package:flutter_basic_pay/services/storage.dart';
@@ -41,11 +40,6 @@ class _AssetBalanceCardState extends State<AssetBalanceCard> {
   @override
   Widget build(BuildContext context) {
     final isNative = widget.asset.asset is wallet_sdk.NativeAssetId;
-    final assetCode = isNative 
-        ? 'XLM' 
-        : (widget.asset.asset as wallet_sdk.IssuedAssetId).code;
-    final balance = Util.removeTrailingZerosFormAmount(widget.asset.balance);
-    final hasBalance = double.parse(widget.asset.balance) > 0.0;
     
     return Container(
       decoration: BoxDecoration(

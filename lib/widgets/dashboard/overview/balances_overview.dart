@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_basic_pay/services/stellar.dart';
+import 'package:flutter_basic_pay/widgets/common/loading.dart';
 import 'package:flutter_basic_pay/widgets/common/util.dart';
 import 'package:flutter_basic_pay/widgets/dashboard/home_page.dart';
 import 'package:provider/provider.dart';
@@ -20,7 +21,10 @@ class BalancesOverview extends StatelessWidget {
       builder: (context, futureSnapshot) {
         if (!futureSnapshot.hasData) {
           return const Center(
-            child: CircularProgressIndicator(),
+            child: LoadingWidget(
+              message: 'Loading balances...',
+              showCard: false,
+            ),
           );
         }
         return StreamBuilder<List<AssetInfo>>(
@@ -29,7 +33,10 @@ class BalancesOverview extends StatelessWidget {
           builder: (context, snapshot) {
             if (snapshot.data == null) {
               return const Center(
-                child: CircularProgressIndicator(),
+                child: LoadingWidget(
+                  message: 'Loading balances...',
+                  showCard: false,
+                ),
               );
             }
             return BalancesOverviewBody(
@@ -181,12 +188,13 @@ class _BalancesOverviewBodyState extends State<BalancesOverviewBody> {
                             ),
                           ),
                           icon: waitForAccountFunding
-                              ? const SizedBox(
+                              ? SizedBox(
                                   height: 16,
                                   width: 16,
-                                  child: CircularProgressIndicator(
+                                  child: CircularProgress(
+                                    size: 16,
                                     strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    color: Colors.white,
                                   ),
                                 )
                               : const Icon(Icons.rocket_launch, size: 18),
