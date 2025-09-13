@@ -97,33 +97,6 @@ class _SignInCardState extends State<SignInCard> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEFF6FF),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFDDD6FE).withOpacity(0.5)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.lock_outline,
-                        color: Color(0xFF6366F1),
-                        size: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Your secret key is encrypted on your device and is never shared anywhere else. The pincode is needed to decrypt it.',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFF4F46E5),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32),
                 SignInForm(onPinEntered: _signIn),
               ],
             ),

@@ -112,32 +112,6 @@ class _SignUpCardState extends State<SignUpCard> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF0F4FF),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.info_outline,
-                        color: Color(0xFF5469D4),
-                        size: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Your PIN encrypts your secret key locally. Only you have access.',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFF5469D4),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
                 Text(
                   'Your Stellar Address',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
