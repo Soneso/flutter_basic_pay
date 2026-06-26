@@ -331,39 +331,42 @@ class _Sep24TransferHistoryWidgetState
       details.add(getRow('Msg.: ${item.message}'));
     }
 
-    //details.add(getRow('More info url: ${item.moreInfoUrl}'));
-    details.add(
-      Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        width: double.infinity,
-        child: ElevatedButton.icon(
-          onPressed: () {
-            launchInteractiveUrl(
-              context: context,
-              url: item.moreInfoUrl,
-              title: 'SEP-24 More Info',
-            );
-          },
-          icon: const Icon(Icons.open_in_new, size: 16),
-          label: const Text(
-            'View More Information',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
+    // more_info_url is optional in SEP-24; only show the button when present.
+    final moreInfoUrl = item.moreInfoUrl;
+    if (moreInfoUrl != null) {
+      details.add(
+        Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () {
+              launchInteractiveUrl(
+                context: context,
+                url: moreInfoUrl,
+                title: 'SEP-24 More Info',
+              );
+            },
+            icon: const Icon(Icons.open_in_new, size: 16),
+            label: const Text(
+              'View More Information',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF3B82F6),
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF3B82F6),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             ),
-            elevation: 0,
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
           ),
         ),
-      ),
-    );
+      );
+    }
 
     return details;
   }
